@@ -290,6 +290,7 @@ import javax.inject.Inject
         viewModelScope.launch {
             val newValor = getCurrentMoneyUseCase()
             newValor.money = item.money
+            newValor.isChecked = false
             Log.d("miApp", "ACTUALIZANDO : $newValor")
             updateCurrentMoneyUseCase(newValor)
             _dineroActual.value = getCurrentMoneyUseCase().money

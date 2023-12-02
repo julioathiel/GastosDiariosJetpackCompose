@@ -10,9 +10,9 @@ class MyApp:Application(){
     @Inject
     lateinit var databaseCleaner: DataBaseCleaner
 
-//    override fun onCreate() {
-//        super.onCreate()
-//        // Inyectar y utilizar la instancia de DatabaseCleaner para limpiar la base de datos
-//        databaseCleaner.clearDataBase()
-//    }
+    override fun onCreate() {
+        super.onCreate()
+        // Inyectar y utilizar la instancia de DatabaseCleaner para limpiar la base de datos
+        databaseCleaner.clearDataBase()
+    }
 }

@@ -8,11 +8,11 @@ import java.text.DateFormat
 import java.util.Date
 
 data class MovimientosModel(
-    val id:Int = System.currentTimeMillis().hashCode() ,
+    val id:Int = System.currentTimeMillis().hashCode(),
     val iconResourceName: String,
     val title: String,
-    val subTitle: String,
-    val cash: String,
+    var subTitle: String,
+    var cash: String,
     val select:Boolean,
     val date: String = DateFormat.getDateInstance().format(Date())
 )

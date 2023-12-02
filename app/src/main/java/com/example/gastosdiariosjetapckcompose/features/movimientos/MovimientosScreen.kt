@@ -1,5 +1,6 @@
 package com.example.gastosdiariosjetapckcompose.features.movimientos
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -14,15 +15,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.OutlinedButton
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
+import androidx.compose.material.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -80,7 +84,8 @@ fun MovimientosScreen(
                 CircularProgressIndicator(
                     Modifier
                         .size(30.dp)
-                        .align(Alignment.Center))
+                        .align(Alignment.Center)
+                )
             }
         }
 
@@ -109,8 +114,7 @@ fun MovimientosScreen(
                 ) {
                     MovimientosList(
                         listTransacciones = (uiState as MovimientosUiState.Success).movimientos,
-                        movimientosViewModel,
-                        homeViewModel = homeViewModel
+                        movimientosViewModel
                     )
                 }
             }
@@ -123,8 +127,7 @@ fun MovimientosScreen(
 @Composable
 fun MovimientosList(
     listTransacciones: List<MovimientosModel>,
-    movimientosViewModel: MovimientosViewModel,
-    homeViewModel: HomeViewModel
+    movimientosViewModel: MovimientosViewModel
 ) {
     // Invertir el orden de la lista asi lo  que se grega va quedando arriba
     val transaccionesRevertidas = listTransacciones.reversed()
@@ -137,7 +140,7 @@ fun MovimientosList(
         state = listState
     ) {
         items(transaccionesRevertidas, key = { it.id }) { transaccion ->
-            ItemCardMovimientos(listTransacciones, transaccion, movimientosViewModel, homeViewModel = homeViewModel)
+            ItemCardMovimientos(listTransacciones, transaccion, movimientosViewModel)
         }
     }
     LaunchedEffect(listTransacciones.size) {
@@ -150,8 +153,7 @@ fun MovimientosList(
 fun ItemCardMovimientos(
     listTransacciones: List<MovimientosModel>,
     transaccion: MovimientosModel,
-    movimientosViewModel: MovimientosViewModel,
-    homeViewModel: HomeViewModel
+    movimientosViewModel: MovimientosViewModel
 ) {
     val showConfirmationDialog = remember { mutableStateOf(false) }
     val showConfirmationEditar = remember { mutableStateOf(false) }
@@ -226,8 +228,7 @@ fun ItemCardMovimientos(
                 showConfirmationEliminar,
                 movimientosViewModel,
                 listTransacciones,
-                transaccion,
-                homeViewModel = homeViewModel
+                transaccion
             )
         }
 
@@ -243,19 +244,18 @@ fun DialogOpcion(
     movimientosViewModel: MovimientosViewModel,
     listTransacciones: List<MovimientosModel>,
     transaccion: MovimientosModel,
-    homeViewModel: HomeViewModel
 ) {
     val sharedLogic = SharedLogic()
-    val spacer = Spacer(modifier = Modifier.padding(16.dp))
-    var showDialogTransaction: Boolean = false
+
     Dialog(onDismissRequest = { onDissmis() }) {
+        Spacer(modifier = Modifier.size(16.dp))
         Card(shape = MaterialTheme.shapes.small) {
             Column(
                 Modifier
                     .fillMaxWidth()
                     .background(Color.White)
             ) {
-                spacer
+                Spacer(modifier = Modifier.size(16.dp))
                 Text(
                     text = "Elige una opcion",
                     fontSize = 18.sp,
@@ -263,26 +263,26 @@ fun DialogOpcion(
                     color = Color.Black,
                     modifier = Modifier.align(Alignment.CenterHorizontally)
                 )
-                spacer
+                Spacer(modifier = Modifier.size(30.dp))
                 Row(Modifier.fillMaxWidth(), Arrangement.Center) {
-
-                    OutlinedButton(onClick = {
+                    BotonOpcion(title = "Editar") {
                         showConfirmationEditar.value = true
-                    }) {
-                        Text(text = "Editar")
                     }
-                    OutlinedButton(onClick = {
+                    Spacer(modifier = Modifier.size(30.dp))
+                    BotonOpcion(title = "Eliminar") {
                         showConfirmationEliminar.value = true
-                    }) {
-                        Text(text = "Eliminar")
                     }
 
                     if (showConfirmationEditar.value) {
                         sharedLogic.AddTransactionDialog(
+                            transaccion,
                             showDialogTransaccion = showConfirmationEditar.value,
-                            onDissmis = { showConfirmationEditar.value = false },
+                            onDissmis = {
+                                showConfirmationEditar.value = false
+                                onDissmis()
+                            },
                             movimientosViewModel = movimientosViewModel,
-                            homeViewModel = homeViewModel
+                            listTransacciones
                         )
                     }
                     if (showConfirmationEliminar.value) {
@@ -299,8 +299,25 @@ fun DialogOpcion(
                         )
                     }
                 }
+                Spacer(modifier = Modifier.size(16.dp))
             }
         }
+    }
+}
+
+@Composable
+fun BotonOpcion(title: String, onEjecutarOpcion: () -> Unit) {
+    OutlinedButton(
+        onClick = { onEjecutarOpcion() },
+        modifier = Modifier.width(130.dp),
+        shape = RoundedCornerShape(16.dp),
+        border = BorderStroke(width = 1.dp, color = Color.Transparent),
+        colors = ButtonDefaults.outlinedButtonColors(
+            containerColor = Color(0xFF8247C5),
+            contentColor = Color.White
+        )
+    ) {
+        Text(text = title)
     }
 }
 
@@ -320,12 +337,12 @@ fun ConfirmationDialog(
                     onConfirm()
                     onDismiss()
                 }) {
-                    Text(text = "Eliminar")
+                    Text(text = "Si, Eliminar", color = Color.White)
                 }
             },
             dismissButton = {
                 Button(onClick = onDismiss) {
-                    Text(text = "Cancelar")
+                    Text(text = "Cancelar", color = Color.White)
                 }
             }
         )

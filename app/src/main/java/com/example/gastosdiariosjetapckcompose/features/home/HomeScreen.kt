@@ -4,7 +4,6 @@ package com.example.gastosdiariosjetapckcompose.features.home
 
 
 import android.app.DatePickerDialog
-import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -69,8 +68,6 @@ import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.gastosdiariosjetapckcompose.R
-import com.example.gastosdiariosjetapckcompose.SharedLogic
-import com.example.gastosdiariosjetapckcompose.data.di.module.DataBaseCleaner
 import com.example.gastosdiariosjetapckcompose.domain.model.CardInfoModel
 import com.example.gastosdiariosjetapckcompose.domain.model.Category
 import com.example.gastosdiariosjetapckcompose.domain.model.categoriesGastos
@@ -82,7 +79,6 @@ import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.Calendar
 import java.util.Date
-import javax.inject.Inject
 
 @Composable
 fun HomeScreen(
@@ -263,10 +259,17 @@ fun BodyHeader(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(text = "Tu dinero actual", color = Color.White)
-        Text(text = "Ir a movimientos", color = Color(0xFFFFCA28),
-            modifier = Modifier.clickable {
-                navController.navigate(route = Routes.MovimientosScreen.route)
-            })
+        Row {
+            Text(text = "Ir a movimientos", color = Color(0xFFFFCA28),
+                modifier = Modifier.clickable {
+                    navController.navigate(route = Routes.MovimientosScreen.route)
+                })
+            Image(
+                painter = painterResource(id = R.drawable.ic_navigate_next),
+                contentDescription = "icono de siguiente",
+                colorFilter = ColorFilter.tint(Color(0xFFFFCA28))
+            )
+        }
     }
     Column(modifier = modifier) {
         Spacer(modifier = Modifier.padding(top = 8.dp))
@@ -322,7 +325,7 @@ fun AddTransactionDialog(
                     }
                     Spacer(modifier = Modifier.padding(Spacer))
                     //DropDown para seleccionar la categoria
-                    selectedCategory = DropDownWitchIcon(isChecked, Modifier.fillMaxWidth())
+                    selectedCategory = DropDownIcon(isChecked, Modifier.fillMaxWidth())
                     Spacer(modifier = Modifier.padding(Spacer))
                     //Description
                     TextFieldDescription(description = description) { newDescription ->
@@ -354,15 +357,17 @@ fun AddTransactionDialog(
                             }
                         }, modifier = Modifier
                             .fillMaxWidth()
-                            .padding(Spacer),
+                            .height(48.dp)
+                            .padding(horizontal = 16.dp),
                         enabled = cantidadIngresada.isNotEmpty(),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF8247C5)
-                        )
+                        ),
+                        shape = RoundedCornerShape(15.dp)
                     ) {
-                        Text(text = "Guardar")
+                        Text(text = "Guardar",fontSize = 14.sp)
                     }
-
+                    Spacer(modifier =Modifier.size(Spacer))
                 }
             }
         }
@@ -506,7 +511,7 @@ fun ButtonToggleGroupSelect(
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun DropDownWitchIcon(isChecked: Boolean, modifier: Modifier): Category {
+fun DropDownIcon(isChecked: Boolean, modifier: Modifier): Category {
     val categories: List<Category> =
         //se usa sortedBy para mostrar la lista alfabeticamente por el nombre
         if (isChecked) categoriesIngresos.sortedBy { it.name } else categoriesGastos.sortedBy { it.name }
