@@ -6,9 +6,10 @@ import androidx.compose.material.icons.filled.PersonPin
 import androidx.compose.ui.graphics.vector.ImageVector
 import java.text.DateFormat
 import java.util.Date
+import java.util.UUID
 
 data class MovimientosModel(
-    val id:Int = System.currentTimeMillis().hashCode(),
+    val id: Int = 0,
     val iconResourceName: String,
     val title: String,
     var subTitle: String,

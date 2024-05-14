@@ -4,6 +4,7 @@ import com.example.gastosdiariosjetapckcompose.data.di.dao.MovimientosDao
 import com.example.gastosdiariosjetapckcompose.data.di.entity.MovimientosEntity
 import com.example.gastosdiariosjetapckcompose.domain.model.MovimientosModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -25,12 +26,16 @@ class MovimientosRepository @Inject constructor(private val movimientosDao: Movi
         }
     }
 
-    suspend fun updateMovimientosRepository(movimientosModel: MovimientosModel){
+    suspend fun updateMovimientosRepository(movimientosModel: MovimientosModel) {
         movimientosDao.updateMovimientos(movimientosModel.toData())
     }
 
-    suspend fun deleteMovimientosRepository(movimientosModel: MovimientosModel){
-       movimientosDao.deleteMovimientos(movimientosModel.toData())
+    suspend fun deleteMovimientosRepository(movimientosModel: MovimientosModel) {
+        movimientosDao.deleteMovimientos(movimientosModel.toData())
+    }
+
+    suspend fun isDatabaseAllExpensesEmpty(): Boolean {
+        return movimientosDao.getMovimientos().first().isEmpty()
     }
 }
 

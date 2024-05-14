@@ -1,4 +1,4 @@
-package com.example.gastosdiariosjetapckcompose.features.movimientos
+package com.example.gastosdiariosjetapckcompose.domain.uiState
 
 import com.example.gastosdiariosjetapckcompose.domain.model.MovimientosModel
 

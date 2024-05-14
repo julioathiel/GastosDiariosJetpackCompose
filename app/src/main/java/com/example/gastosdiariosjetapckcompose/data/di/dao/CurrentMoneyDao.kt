@@ -1,6 +1,7 @@
 package com.example.gastosdiariosjetapckcompose.data.di.dao
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -23,4 +24,7 @@ interface CurrentMoneyDao {
     @Update
     suspend fun updateMoney(money: CurrentMoneyEntity)
     //se utiliza para actualizar el registro existente de dinero actual en la base de datos
+
+    @Delete
+    suspend fun deleteMoney(money:CurrentMoneyEntity)
 }

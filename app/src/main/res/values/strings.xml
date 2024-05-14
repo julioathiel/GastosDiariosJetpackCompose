@@ -1,3 +1,38 @@
 <resources>
     <string name="app_name">GastosDiariosJetapckCompose</string>
+
+
+    <string name="recordatorio_titulo">Recordatorio diario</string>
+    <string name="recordatorio_subTitulo">Repita conmigo: lo prometo…</string>
+    <string name="recordatorio_body">Sabemos que adquirir el hábito de acompañar sus gastos a diario es complicado, y podemos ayudarlo con eso. ¿Cuándo le gustaria recibir nuestro recordatorio?</string>
+
+    <string name="reseteoConfirmado">La aplicación se ha reiniciado y los datos se han eliminado correctamente.</string>
+    <string name="reiniciarAplicacion">Reiniciar aplicación</string>
+    <string name="reinicioCompletado">Reinicio completado</string>
+     //texfield
+    <string name="descripcion">Descripción</string>
+
+    //modelBottomSheet
+    <string name="selecciona_un_icono">Selecciona un icono</string>
+    <string name="nuevo_titulo">Nuevo titulo</string>
+
+
+    //bodyHeader
+    <string name="tu_dinero_actual">Tu dinero actual</string>
+    <string name="ir_a_movimientos">Ir a movimientos</string>
+    <string name="por_d_a">%1$s por día</string>
+    //card dias restantes
+    <string name="dias_restantes">Dias restantes</string>
+    //boton para eligir fecha
+    <string name="editar">Editar</string>
+
+    //titulo para el card de registros totales
+    <string name="gastos">Gastos</string>
+    <string name="body_vacio">Parece que aún no has añadido nada a tu lista. ¿Por qué no comienzas ahora mismo?</string>
+    <string name="sin_resultados">Sin resultados</string>
+    //toolbar
+    <string name="toolbar_configuracion">Configuracion</string>
+    <string name="toolbar_cambio_fecha">Cambio de fechas</string>
+    <string name="toolbar_registro_gastos">Registro Movimientos</string>
+
 </resources>

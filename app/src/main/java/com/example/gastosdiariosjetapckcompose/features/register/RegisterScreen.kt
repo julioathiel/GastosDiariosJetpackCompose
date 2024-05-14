@@ -1,5 +1,6 @@
 package com.example.gastosdiariosjetapckcompose.features.register
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,10 +25,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.gastosdiariosjetapckcompose.navigation.Routes
 
 
 @Composable
 fun RegisterScreen(registerViewModel: RegisterViewModel, navController:NavController) {
+    BackHandler {
+        //al presion el boton fisico de retoceso, se dirige a la pantalla de configuracion
+        navController.navigate(Routes.ConfigurationScreen.route)
+    }
+
     val emailRegister: String by registerViewModel.registerEmail.observeAsState(initial = "")
     //controlando estado del botton desde el registerviewModel
     val isRegisterEnable:Boolean by registerViewModel.isRegisterEnable.observeAsState(initial = false)
@@ -87,10 +94,9 @@ fun RegisterEmail(email: String, onTextChanged: (String) -> Unit) {
             placeholder = { Text(text = "Email") },
             maxLines = 1,
             singleLine = true,
-            colors = TextFieldDefaults.textFieldColors(
+            colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color(0xFF8247C5),
-                unfocusedIndicatorColor = Color.Transparent,
-                containerColor = Color.Gray
+                unfocusedIndicatorColor = Color.Transparent
             ),
             supportingText = { Text(text = "Revisa que el formato sea el correcto.")}
         )

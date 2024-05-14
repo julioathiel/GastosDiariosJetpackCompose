@@ -9,11 +9,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,15 +29,20 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 
 @Composable
-fun ForgotPasswordScreen(navController: NavController, forgotPasswordViewModel: ForgotPasswordViewModel) {
+fun ForgotPasswordScreen(
+    navController: NavController,
+    forgotPasswordViewModel: ForgotPasswordViewModel
+) {
     val emailForgot: String by forgotPasswordViewModel.forgotEmail.observeAsState(initial = "")
     //controlando estado del botton desde el registerviewModel
-    val isForgotEnable:Boolean by forgotPasswordViewModel.isForgotEnabled.observeAsState(initial = false)
+    val isForgotEnable: Boolean by forgotPasswordViewModel.isForgotEnabled.observeAsState(initial = false)
 
     //  var password by remember { mutableStateOf("") }
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .background(Color(0xFF101014))) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFF101014))
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -43,15 +50,16 @@ fun ForgotPasswordScreen(navController: NavController, forgotPasswordViewModel: 
         ) {
             TitleText("Ingresa tu e-mail para cambiarla")
             Spacer(modifier = Modifier.padding(20.dp))
-            ForgotEmail(emailForgot){
-               forgotPasswordViewModel.onForgotChanged(emailForgot = it)
+            ForgotEmail(emailForgot) {
+                forgotPasswordViewModel.onForgotChanged(emailForgot = it)
             }
 
         }
         ButtonConfirm(
             Modifier
                 .align(Alignment.BottomCenter)
-                .padding(16.dp), isForgotEnable, navController)
+                .padding(16.dp), isForgotEnable, navController
+        )
     }
 }
 
@@ -67,7 +75,6 @@ fun TitleText(s: String) {
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ForgotEmail(email: String, onTextChanged: (String) -> Unit) {
     OutlinedTextField(
@@ -78,12 +85,11 @@ fun ForgotEmail(email: String, onTextChanged: (String) -> Unit) {
         placeholder = { Text(text = "Email") },
         maxLines = 1,
         singleLine = true,
-        colors = TextFieldDefaults.textFieldColors(
+        colors = TextFieldDefaults.colors(
             focusedIndicatorColor = Color(0xFF8247C5),
-            unfocusedIndicatorColor = Color.Transparent,
-            containerColor = Color.Gray
+            unfocusedIndicatorColor = Color.Transparent
         ),
-        supportingText = { Text(text = "Revisa que el formato sea el correcto.")}
+        supportingText = { Text(text = "Revisa que el formato sea el correcto.") }
     )
 }
 
@@ -91,7 +97,7 @@ fun ForgotEmail(email: String, onTextChanged: (String) -> Unit) {
 fun ButtonConfirm(modifier: Modifier, isRegisterEnable: Boolean, navController: NavController) {
     Button(
         onClick = { },
-        enabled =isRegisterEnable ,
+        enabled = isRegisterEnable,
         modifier = modifier
             .padding(bottom = 10.dp)
             .fillMaxWidth()

@@ -24,6 +24,14 @@ class CurrentMoneyRepository @Inject constructor(private val currentMoneyDao: Cu
     suspend fun updateCurrentMoney(money: CurrentMoneyModel) {
         currentMoneyDao.updateMoney(money.toData())
     }
+
+    suspend fun deleteCurrentMoneyRepository(item: CurrentMoneyModel) {
+        currentMoneyDao.deleteMoney(item.toData())
+    }
+
+    suspend fun isDatabaseMoneyEmpty(): Boolean {
+       return currentMoneyDao.getMoney() == null
+    }
 }
 
 fun CurrentMoneyModel.toData(): CurrentMoneyEntity {

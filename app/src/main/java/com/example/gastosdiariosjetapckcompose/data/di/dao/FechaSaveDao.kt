@@ -1,6 +1,7 @@
 package com.example.gastosdiariosjetapckcompose.data.di.dao
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
@@ -16,4 +17,7 @@ interface FechaSaveDao{
 
     @Update
     suspend fun updateFecha(item:FechaSaveEntity)
+
+    @Delete
+    suspend fun deleteFecha(item:FechaSaveEntity)
 }

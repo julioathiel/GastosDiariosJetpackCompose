@@ -1,19 +1,23 @@
 package com.example.gastosdiariosjetapckcompose.features.movimientos
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.gastosdiariosjetapckcompose.SharedLogic
+import com.example.gastosdiariosjetapckcompose.GlobalVariables.sharedLogic
 import com.example.gastosdiariosjetapckcompose.domain.model.CurrentMoneyModel
 import com.example.gastosdiariosjetapckcompose.domain.model.MovimientosModel
+import com.example.gastosdiariosjetapckcompose.domain.uiState.MovimientosUiState
+import com.example.gastosdiariosjetapckcompose.domain.usecase.GastosPorCategoria.DeleteGastosPorCategoriaUseCase
+import com.example.gastosdiariosjetapckcompose.domain.usecase.GastosPorCategoria.GetGastosPorCategoriaUseCase
 import com.example.gastosdiariosjetapckcompose.domain.usecase.money.GetCurrentMoneyUseCase
 import com.example.gastosdiariosjetapckcompose.domain.usecase.money.UpdateCurrentMoneyUseCase
 import com.example.gastosdiariosjetapckcompose.domain.usecase.movimientos.DeleteMovimientosUsecase
 import com.example.gastosdiariosjetapckcompose.domain.usecase.movimientos.GetMovimientosUsecase
 import com.example.gastosdiariosjetapckcompose.domain.usecase.movimientos.UpdateMovimientosUsecase
-import com.example.gastosdiariosjetapckcompose.features.movimientos.MovimientosUiState.Success
+import com.example.gastosdiariosjetapckcompose.domain.usecase.totalesRegistro.DeleteTotalIngresosUseCase
+import com.example.gastosdiariosjetapckcompose.domain.usecase.totalesRegistro.GetTotalIngresosUseCase
+import com.example.gastosdiariosjetapckcompose.domain.usecase.totalesRegistro.UpdateTotalIngresosUseCase
+import com.example.gastosdiariosjetapckcompose.domain.uiState.MovimientosUiState.Success
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -23,18 +27,25 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.text.NumberFormat
 import javax.inject.Inject
 
 @HiltViewModel
 class MovimientosViewModel @Inject constructor(
-    private val updateCurrentMoneyUsecase: UpdateCurrentMoneyUseCase,
-    private val updateMovimientosUsecase: UpdateMovimientosUsecase,
     private val getCurrentMoneyUseCase: GetCurrentMoneyUseCase,
-    private val getMovimientosUsecase: GetMovimientosUsecase,
-    private val deleteMovimientosUsecase: DeleteMovimientosUsecase
-) : ViewModel() {
+    private val updateCurrentMoneyUsecase: UpdateCurrentMoneyUseCase,
 
-    val sharedLogic = SharedLogic()
+    private val getMovimientosUsecase: GetMovimientosUsecase,
+    private val updateMovimientosUsecase: UpdateMovimientosUsecase,
+    private val deleteMovimientosUsecase: DeleteMovimientosUsecase,
+
+    private val getTotalIngresosUseCase: GetTotalIngresosUseCase,
+    private val updateTotalIngresosUseCase: UpdateTotalIngresosUseCase,
+    private val deleteTotalIngresosUseCase: DeleteTotalIngresosUseCase,
+
+    private val getGastosPorCategoriaUseCase: GetGastosPorCategoriaUseCase,
+    private val deleteGastosPorCategoriaUseCase: DeleteGastosPorCategoriaUseCase
+) : ViewModel() {
 
     val uiState: StateFlow<MovimientosUiState> = getMovimientosUsecase().map(::Success)
         .catch { MovimientosUiState.Error(it) }
@@ -132,7 +143,7 @@ class MovimientosViewModel @Inject constructor(
                     ) { it ->
                         dineroActualizado = it
                         //recupera el total
-                        Log.d("miApp","dineroActualizado = $dineroActualizado")
+                        Log.d("miApp", "dineroActualizado = $dineroActualizado")
                         calculadoraItem(nuevoValor, tipoTransaccion, dineroActualizado)
                     }
                 } else {
@@ -144,7 +155,7 @@ class MovimientosViewModel @Inject constructor(
                     ) { it ->
                         dineroActualizado = it
                         //recupera el total
-                        Log.d("miApp","dineroActualizado = $dineroActualizado")
+                        Log.d("miApp", "dineroActualizado = $dineroActualizado")
                         calculadoraItem(nuevoValor, tipoTransaccion, dineroActualizado)
                     }
                 }
@@ -152,14 +163,6 @@ class MovimientosViewModel @Inject constructor(
                 movimientosModel.cash = nuevoValor
                 movimientosModel.subTitle = description
                 updateBaseDatos(movimientosModel)
-                //calculadoraItem(nuevoValor, item.isChecked, dineroActualizado)
-
-                // Log y cálculo del límite por día
-                val logMessage =
-                    if (item.isChecked) "Insertando" else "Actualizando item"
-                // Log.d("miApp", "$logMessage: $nuevoDinero")
-//                _limitePorDia.value = calcularLimitePorDia()
-
             } catch (e: NumberFormatException) {
                 Log.e("miApp", "Error al convertir el valor a Double: $nuevoValor")
                 // Manejar el error según sea necesario
@@ -172,29 +175,29 @@ class MovimientosViewModel @Inject constructor(
         callback: (Double) -> Unit
     ) {
         viewModelScope.launch {
-                val dineroGuardado = getCurrentMoneyUseCase().money
+            val dineroGuardado = getCurrentMoneyUseCase().money
             Log.d("miApp", "dineroGuardado: $dineroGuardado")
-             val   newValor = dineroGuardado + item.money
+            val newValor = dineroGuardado + item.money
             Log.d("miApp", "newValor: $newValor")
-                updateCurrentMoneyUsecase(
-                    CurrentMoneyModel(
-                        money = maxOf(newValor, 0.00),
-                        isChecked = false
-                    )
+            updateCurrentMoneyUsecase(
+                CurrentMoneyModel(
+                    money = maxOf(newValor, 0.00),
+                    isChecked = false
                 )
+            )
             callback(newValor) // Llamar al callback con el nuevo valor
         }
     }
 
 
     private fun calculadoraItem(nuevoValor: String, checked: Boolean, dineroActualizado: Double) {
-        Log.d("miApp","dineroActualizado de calculadoraItem = $dineroActualizado")
+        Log.d("miApp", "dineroActualizado de calculadoraItem = $dineroActualizado")
         viewModelScope.launch {
             // Calcula el nuevo dinero según la opción elegida por el usuario
-            val nuevoDinero = if(checked){
+            val nuevoDinero = if (checked) {
                 agregarDinero(nuevoValor.toDouble(), dineroActualizado ?: 0.0)
-            }else{
-                maxOf(restarDinero(dineroActualizado,nuevoValor.toDouble()), 0.0)
+            } else {
+                maxOf(restarDinero(dineroActualizado, nuevoValor.toDouble()), 0.0)
             }
             Log.d("miApp", "calculadoraItem- nuevoDinero : $nuevoDinero")
             val newValor = getCurrentMoneyUseCase()
@@ -206,15 +209,15 @@ class MovimientosViewModel @Inject constructor(
         }
     }
 
-    private fun restarDinero(dineroActualizado: Double,nuevoValor: Double): Double {
-        Log.d("miApp","dineroActualizado en restarDinero = $dineroActualizado")
-        Log.d("miApp","nuevoValor en restarDinero = $nuevoValor")
+    private fun restarDinero(dineroActualizado: Double, nuevoValor: Double): Double {
+        Log.d("miApp", "dineroActualizado en restarDinero = $dineroActualizado")
+        Log.d("miApp", "nuevoValor en restarDinero = $nuevoValor")
         val resultado =
             BigDecimal(dineroActualizado - nuevoValor).setScale(
                 2,
                 RoundingMode.HALF_EVEN
             )
-        Log.d("miApp","restandoDinero: $resultado")
+        Log.d("miApp", "restandoDinero: $resultado")
         return resultado.toDouble()
     }
 
@@ -246,15 +249,18 @@ class MovimientosViewModel @Inject constructor(
                 }
             }
         }
-//    fun calcularLimitePorDia(): Double {
-//        val dineroActual = _dineroActual.value
-//        val limitePorDia = if (_diasRestantes.value != null && dineroActual != null && _diasRestantes.value != 0) {
-//            dineroActual / _diasRestantes.value!!.toDouble()
-//        } else {
-//            0.0
-//        }
-//        return limitePorDia
-//    }
+    }
+
+    fun formattedCurrency(cash: Double): String {
+        // val currencyFormat = NumberFormat.getCurrencyInstance(Locale.getDefault())
+        val currencyFormat = NumberFormat.getCurrencyInstance(java.util.Locale("es", "AR"))
+        // Formatea la cantidad de dinero proporcionada
+        val formattedAmount = currencyFormat.format(cash)
+        // currencyFormat.currency?.symbol
+        //devuelve el simbolo de moneda correspondiente al pais del usuario
+        // Elimina el símbolo de la moneda (en este caso, "$")
+        val currencySymbol = currencyFormat.currency?.symbol ?: "$"
+        return formattedAmount.replace(currencySymbol, "").trim()
     }
 }
 

@@ -2,4 +2,23 @@
 <resources>
 
     <style name="Theme.GastosDiariosJetapckCompose" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="CustomDatePickerDialog" parent="Theme.AppCompat.Light.Dialog">
+        <!--redondeo del dialogo-->
+        <item name="android:windowBackground">@drawable/redondeo_datepicker_dialog</item>
+        <!--header background-->
+        <item name="colorAccent">?android:attr/colorBackground</item>
+        <!-- color año -->
+        <item name="android:textColorSecondaryInverse">?android:attr/colorForeground</item>
+        <!--header textcolor  sat,Apr 27 y  dia seleccionado-->
+        <item name="android:textColorPrimaryInverse">?android:attr/colorForeground</item>
+        <!--dia seleccionado-->
+        <item name="android:colorControlActivated">@color/purple_200</item>
+        <!--dias desactivados y a seleccionar y mes actual-->
+<!--        <item name="android:textColorPrimary">#FF0000</item>-->
+        <!--dias de la semana -->
+        <!--  <item name="android:textColorSecondary">#ff0066</item>  -->
+        <!-- botones de cancel & ok-->
+        <item name="android:textColor">?android:attr/colorForeground</item>
+    </style>
 </resources>

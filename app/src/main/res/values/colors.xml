@@ -7,6 +7,25 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    //mis colores
-    <color name="fondo">#FF101014</color>
+    //mis colores pantalla negra
+    <color name="background">#121212</color>
+    <color name="bodyCard">#0DFFFFFF</color>
+    <color name="backgroundLista">#292929</color>
+    <color name="bodySombraTituloCard">#1FFFFFFF</color>
+    <color name="tituloBlanco">#DEFFFFFF</color>
+    <color name="subTituloBlanco">#99FFFFFF</color>
+    <color name="verdeDinero">#066213</color>
+    <color name="fondoVerdeDinero">#E6F8EA</color>
+    <color name="myVioleta">#6650A3</color>
+    <color name="botonBar">#1A1A1A</color>
+    <color name="rojoDinero">#FF4081</color>
+    //mis colores pantalla clara
+    <color name="grayUno">#F2F2F7</color>
+    <color name="grayDos">#D2D2D7</color>
+    <color name="grayTres">#C7C7CC</color>
+    <color name="grayCuatro">#8E8E93</color>
+    <color name="blackTexto">#FF000000</color>
+<!--    <color name="blue">#007BFE</color>-->
+    <color name="fondoCelesteblue">#ECF2FE</color>
+    <color name="blue">#0B57CF</color>
 </resources>

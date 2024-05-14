@@ -8,14 +8,12 @@ import javax.inject.Inject
 
 class FechaSaveRepository @Inject constructor(private val fechaSaveDao: FechaSaveDao) {
 
-    suspend fun getFechaElegida(): FechaSaveModel {
+
+
+    suspend fun getFechaElegida(): FechaSaveModel? {
         val it = fechaSaveDao.getFecha()
-        return if(it != null){
+        return it?.let {
             FechaSaveModel(it.id, it.fechaSave, it.isSelected)
-        }else{
-            // Manejando el caso en el que it es nulo
-            // (primera vez que el usuario agrega algo a la base de datos)
-            FechaSaveModel(id = 1, fechaSave = LocalDate.now().toString(), isSelected = true)
         }
     }
 
@@ -25,6 +23,16 @@ class FechaSaveRepository @Inject constructor(private val fechaSaveDao: FechaSav
     suspend fun updateFechaElegida(item:FechaSaveModel){
         fechaSaveDao.updateFecha(item.toData())
     }
+
+    suspend fun deleteFechaElegida(item: FechaSaveModel) {
+        fechaSaveDao.deleteFecha(item.toData())
+    }
+
+    suspend fun isDatabaseFechaGuardadaEmpty(): Boolean {
+        return fechaSaveDao.getFecha() == null
+        //si es null devolvera true ya que no hay nada
+    }
+
 }
 fun FechaSaveModel.toData():FechaSaveEntity{
     return FechaSaveEntity(this.id,this.fechaSave,this.isSelected)

@@ -4,9 +4,13 @@ import android.content.Context
 
 class DataBaseCleaner(private val context: Context) {
     fun clearDataBase(){
-        val databaseFile = context.getDatabasePath("GastosdiariosDatabase")
-        if (databaseFile.exists()) {
-            databaseFile.delete()
+        val databaseNames = listOf("GastosdiariosDatabase")
+
+        databaseNames.forEach { dbName ->
+            val databaseFile = context.getDatabasePath(dbName)
+            if (databaseFile.exists()) {
+                databaseFile.delete()
+            }
         }
     }
 }

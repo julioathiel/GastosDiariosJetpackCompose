@@ -4,6 +4,13 @@ package com.example.gastosdiariosjetapckcompose.features.home
 
 
 import android.app.DatePickerDialog
+import android.net.Uri
+import android.util.Log
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -17,9 +24,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredWidthIn
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.BottomNavigation
@@ -43,11 +51,13 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -57,52 +67,87 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.zIndex
+import androidx.core.app.ActivityCompat.finishAffinity
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
+import com.example.gastosdiariosjetapckcompose.ClaseEnum
+import com.example.gastosdiariosjetapckcompose.CurrencyAmountInputVisualTransformation
+import com.example.gastosdiariosjetapckcompose.GlobalVariables.sharedLogic
 import com.example.gastosdiariosjetapckcompose.R
 import com.example.gastosdiariosjetapckcompose.domain.model.CardInfoModel
-import com.example.gastosdiariosjetapckcompose.domain.model.Category
+import com.example.gastosdiariosjetapckcompose.domain.model.CategoriesModel
+import com.example.gastosdiariosjetapckcompose.domain.model.categoriaDefault
 import com.example.gastosdiariosjetapckcompose.domain.model.categoriesGastos
 import com.example.gastosdiariosjetapckcompose.domain.model.categoriesIngresos
-import com.example.gastosdiariosjetapckcompose.domain.model.listCardInfo
-import com.example.gastosdiariosjetapckcompose.features.movimientos.MovimientosViewModel
+import com.example.gastosdiariosjetapckcompose.features.configuration.ConfigurationViewModel
 import com.example.gastosdiariosjetapckcompose.navigation.Routes
 import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.Calendar
 import java.util.Date
+import kotlin.system.exitProcess
 
 @Composable
 fun HomeScreen(
     navController: NavHostController,
     homeViewModel: HomeViewModel,
-    movimientosViewModel: MovimientosViewModel
+    configuracion: ConfigurationViewModel
 ) {
+    BackHandler{ exitProcess(0)
+    }
+
     val showDialogTransaction: Boolean by homeViewModel.showDialogTransaction.observeAsState(initial = false)
     val isShowSnackbar = remember { SnackbarHostState() }
+    // Observa el LiveData y redibuja la pantalla cuando cambia
+    val isReinicioExitoso by configuracion.appResetExitoso.observeAsState()
+
+    LaunchedEffect(Unit){//para cuando se elimia o edita en la pantalla de movimientos
+        homeViewModel.mostrarDineroTotal()
+        //limite por dia borrado
+        homeViewModel.mostrarLimitePorDiaAlUsuario()
+        homeViewModel.mostrandoDineroTotalProgress()
+    }
 
     LaunchedEffect(Unit) {
-        //al vovler a la pantalla, estos se
-        // actualizan segun lo que paso en la pantalla anterior
-        homeViewModel.actualizarVistaDineroTotal()
-        homeViewModel.actualizarVistaLimitePorDia()
+        // Observa el reinicio de la aplicación y actualiza los valores relevantes
+        if (isReinicioExitoso == true) {
+            //dineroActual borrado
+            homeViewModel.mostrarDineroTotal()
+            //limite por dia borrado
+            homeViewModel.mostrarLimitePorDiaAlUsuario()
+            //totalDinero borrado
+            homeViewModel.mostrandoDineroTotalProgress()
+            //totalDinero gastado borrado
+            homeViewModel.mostrandoDineroTotalProgressGastos()
+            //diasrestantes borrado
+            homeViewModel.mostrarDiasrestantesBorradaAlUSuario()
+            //fecha con barra mostrada al usuario borrada
+            homeViewModel.mostrarFechaBorradaAlUSuario()
+        }
     }
 
     Scaffold(
-        bottomBar = { MyBotonNavigation() },
+        bottomBar = { MyBotonNavigation(navController) },
         scaffoldState = rememberScaffoldState(),
         floatingActionButton = { MyFAB(homeViewModel, isShowSnackbar) },
         floatingActionButtonPosition = FabPosition.Center,
         isFloatingActionButtonDocked = true,
-        backgroundColor = Color.Black,
+        backgroundColor = colorResource(id = R.color.grayUno),
         snackbarHost = {
             SnackbarHost(hostState = isShowSnackbar)
         }
@@ -112,17 +157,24 @@ fun HomeScreen(
                 .fillMaxWidth()
                 .padding(padding),
         ) {
-
-            Header(usuario = "Julio", Modifier.padding(16.dp))
-            BodyHeader(Modifier.padding(16.dp), navController, homeViewModel)
+           // Header(usuario = "Julio", homeViewModel)
+            Spacer(modifier = Modifier.padding(vertical = 30.dp))
+            BodyHeader(navController, homeViewModel)
             Spacer(modifier = Modifier.padding(vertical = 16.dp))
             CountDate(Modifier.fillMaxWidth(), homeViewModel)
-            Spacer(modifier = Modifier.padding(vertical = 16.dp))
-            ItemCardView(navController)
+            Spacer(modifier = Modifier.padding(vertical = 4.dp))
+            Text(
+                text = stringResource(R.string.gastos),
+                color = Color.Black,
+                fontSize = 18.sp,
+                fontFamily = FontFamily(Font(R.font.lato_bold)),
+                modifier = Modifier.padding(start = 16.dp, bottom = 2.dp)
+            )
+            CardBotonRegistro(navController, homeViewModel)
+
             AddTransactionDialog(
                 showDialogTransaccion = showDialogTransaction,
                 onDissmis = { homeViewModel.onDialogClose() },
-                movimientosViewModel,
                 homeViewModel
             )
         }
@@ -131,23 +183,112 @@ fun HomeScreen(
 
 
 @Composable
-fun Header(usuario: String, modifier: Modifier) {
+fun Header(usuario: String, homeViewModel: HomeViewModel) {
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
 
-    Row(modifier = modifier.fillMaxWidth()) {
-        Image(
-            painter = painterResource(id = R.drawable.flash),
-            contentDescription = "avatar", contentScale = ContentScale.Crop, modifier = Modifier
-                .clip(
-                    CircleShape
-                )
-                .size(45.dp)
-        )
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        uri?.let {
+            selectedImageUri = it
+            // homeViewModel.guardarRutaImagen(ImagenSeleccionadaModel(uri = it.toString()))
+        }
+    }
+
+    Row(modifier = Modifier
+        .padding(16.dp)
+        .fillMaxWidth()
+        .clickable { galleryLauncher.launch("image/*") }
+    ) {
+
+        selectedImageUri?.let { uri ->
+            Image(
+                painter = rememberAsyncImagePainter(uri),
+                contentDescription = "Imagen seleccionada",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .size(45.dp)
+            )
+        } ?: run {
+            Image(
+                painter = painterResource(id = R.drawable.ic_persona_circle),
+                contentDescription = "imagen por defecto",
+                modifier = Modifier
+                    .clip(CircleShape)
+                    .size(45.dp),
+                colorFilter = ColorFilter.tint(Color.LightGray)
+            )
+        }
+
         Spacer(modifier = Modifier.padding(4.dp))
         Column(Modifier.fillMaxWidth()) {
             Text(text = "Hola $usuario", color = Color.Gray)
             //obteniendo fecha asi   3 oct.2023
             val date = DateFormat.getDateInstance().format(Date())
-            Text(text = date.toString(), fontSize = 12.sp, color = Color.White)
+            Text(text = date.toString(), fontSize = 12.sp, color = Color.Black)
+        }
+    }
+}
+
+@Composable
+fun BodyHeader(
+    navController: NavController,
+    homeViewModel: HomeViewModel
+) {
+
+    val limitePorDiaObserve by homeViewModel.limitePorDia.observeAsState()
+    val limitePorDia = sharedLogic.formattedCurrency(limitePorDiaObserve!!)
+
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = stringResource(R.string.tu_dinero_actual), color = Color.Black,
+            fontFamily = FontFamily(Font(R.font.lato_bold))
+        )
+
+        Button(
+            onClick = { navController.navigate(route = Routes.MovimientosScreen.route) },
+          //  border = BorderStroke(0.dp, colorResource(id = R.color.blue)), // Borde transparente
+            colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.fondoCelesteblue)),// Fondo transparente
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = stringResource(R.string.ir_a_movimientos), color = colorResource(id = R.color.blue),
+                    fontFamily = FontFamily(Font(R.font.lato_bold))
+                )
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_navigate_next),
+                    contentDescription = null,
+                    tint = colorResource(id = R.color.blue)
+                )
+            }
+        }
+    }
+    Column(modifier = Modifier.padding(start = 16.dp)) {
+        //muestra el dinero actual al usuario
+        FormattedCurrencyCash(homeViewModel)
+        Box(
+            modifier = Modifier
+                .background(
+                    color = colorResource(id = R.color.fondoCelesteblue),
+                    shape = RoundedCornerShape(16.dp)
+                )
+
+        ) {
+            Text(
+                text = stringResource(R.string.por_d_a, limitePorDia),
+                color = colorResource(id = R.color.blue),
+                modifier = Modifier.padding(
+                    horizontal = 10.dp
+                ),
+                fontFamily = FontFamily(Font(R.font.lato_bold))
+            )
         }
     }
 }
@@ -157,12 +298,14 @@ fun CountDate(modifier: Modifier, homeViewModel: HomeViewModel) {
     //observando el estado
     val diasRestantes by homeViewModel.diasRestantes.observeAsState()
     //fechaelegida
-    val fechaElegida = homeViewModel.fechaElegida.observeAsState().value
+    val fechaElegida = homeViewModel.fechaElegidaBarra.observeAsState().value ?: ""
 
     Card(
         modifier = modifier
             .padding(horizontal = 16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF21252B))
+        colors = CardDefaults.cardColors(
+            containerColor = colorResource(id = R.color.white)
+        )
     ) {
         Row(
             modifier = Modifier
@@ -174,30 +317,45 @@ fun CountDate(modifier: Modifier, homeViewModel: HomeViewModel) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+                //Titulo
                 Text(
-                    text = "Dias restantes",
-                    color = Color.White,
-                    fontSize = 14.sp
+                    text = stringResource(R.string.dias_restantes),
+                    color = colorResource(id = R.color.black),
+                    fontSize = 12.sp,
+                    fontFamily = FontFamily(Font(R.font.lato_bold))
                 )
+                //muestra cuantos dias faltan desde la fecha elegida a la fecha actual
                 Text(
                     text = diasRestantes.toString(),
-                    color = Color.White,
+                    color = colorResource(id = R.color.black),
                     fontSize = 25.sp,
-                    fontWeight = FontWeight.Bold,
+                    fontFamily = FontFamily(Font(R.font.lato_bold)),
                     modifier = Modifier.padding(8.dp)
                 )
-                Card() {
-                    Box(modifier = Modifier.background(Color(0xFF2C3138))) {
-                        Text(
-                            text = fechaElegida.toString(),
-                            color = Color.Gray,
-                            fontSize = 14.sp,
-                            modifier = Modifier
-                                .padding(start = 4.dp, end = 4.dp)
-                                .background(Color(0xFF2C3138))
+
+                Box(
+                    modifier = Modifier
+                        .background(
+                            color = colorResource(id = R.color.fondoCelesteblue),
+                            shape = RoundedCornerShape(16.dp)
                         )
-                    }
+                        // Ocultar el Box cuando fechaElegida es una cadena vacía
+                        .requiredWidthIn(
+                            min = 0.dp,
+                            max = if (fechaElegida.isEmpty()) 0.dp else Dp.Infinity
+                        )
+                ) {
+                    // muestra la fecha elegida opr el usuario
+                    Text(
+                        text = fechaElegida.toString(),
+                        color = colorResource(id = R.color.blue),
+                        fontSize = 14.sp,
+                        modifier = Modifier
+                            .padding(start = 10.dp, end = 10.dp),
+                        fontFamily = FontFamily(Font(R.font.lato_bold))
+                    )
                 }
+
                 Spacer(modifier = Modifier.size(4.dp))
             }
             MyDatePicker(homeViewModel)
@@ -207,84 +365,53 @@ fun CountDate(modifier: Modifier, homeViewModel: HomeViewModel) {
 
 @Composable
 fun MyDatePicker(homeViewModel: HomeViewModel) {
-    //obteniendo la fecha
+    val fechaMaxima by homeViewModel.selectedOptionFechaMaxima.collectAsState()
+    var selectedDate: String? by remember { mutableStateOf(null) }
     val calendar = Calendar.getInstance()
-    val year: Int = calendar.get(Calendar.YEAR)
-    val month: Int = calendar.get(Calendar.MONTH)
-    val day: Int = calendar.get(Calendar.DAY_OF_MONTH)
+
+    //obteniendo fecha actual
+    val currentYear: Int = calendar.get(Calendar.YEAR)
+    val currentMonth: Int = calendar.get(Calendar.MONTH)
+    val currentDay: Int = calendar.get(Calendar.DAY_OF_MONTH)
 
     val myDatePicker = DatePickerDialog(
-        LocalContext.current,
+        LocalContext.current, R.style.CustomDatePickerDialog,
         { _, year: Int, month: Int, day: Int ->
             //actualiza la fecha  #### - ## - ##  para saber la diferencia de dias
-            homeViewModel.setDateTransformer(year, month, day)
-            homeViewModel.setDateTransformerconBarra(day, month, year)
-            //calcula el limite de dinero a gastar por dia, pero no lo actualiza en el momento
-            homeViewModel.calcularLimitePorDia()
-        }, year, month, day
+            val esFechaActualSeleccionada =
+                (year == currentYear && month == currentMonth && day == currentDay)
+            if (esFechaActualSeleccionada) {
+                // No realizar ninguna acción si se selecciona la fecha actual
+            } else {
+                //Actualizar la fecha
+                selectedDate = "${String.format("%02d", day)}/${
+                    String.format("%02d", month.plus(1))
+                }/${year}"
+                homeViewModel.enviandoFechaElegida(selectedDate!!)
+            }
+        }, currentYear, currentMonth, currentDay
     )
-    //manejando el minimo y maximo de dias
-    val limiteMaximoDias = 30
+
     //no se puede selecionar dias anteriores a la fecha actual
     myDatePicker.datePicker.minDate = calendar.timeInMillis
-    calendar.set(year, month, day + limiteMaximoDias) //añade dias a la fecha actual
+    calendar.set(currentYear, currentMonth, currentDay + fechaMaxima)
     //el maximo de dias a mostrar seran del limitemaximoDias
     myDatePicker.datePicker.maxDate = calendar.timeInMillis
+//deshabilitar la fecha actual para que el usuario no pueda seleccionarla
 
-    Button(modifier = Modifier
-        .height(48.dp),
+
+    Button(
+        modifier = Modifier
+            .height(48.dp),
         shape = RoundedCornerShape(15.dp),
-        onClick = {
-            // Llama al DatePicker aquí
-            myDatePicker.show()
-        }
+        onClick = { myDatePicker.show() },
+        colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.grayUno))
     ) {
-        Text(text = "Select date", fontSize = 14.sp)
-    }
-
-}
-
-@Composable
-fun BodyHeader(
-    modifier: Modifier, navController: NavController,
-    homeViewModel: HomeViewModel
-) {
-    val observadorLimitePorDia: Double by homeViewModel.limitePorDia.observeAsState(0.0)
-    val limitePorDia = homeViewModel.formattedCurrency(observadorLimitePorDia)
-
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp, top = 20.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(text = "Tu dinero actual", color = Color.White)
-        Row {
-            Text(text = "Ir a movimientos", color = Color(0xFFFFCA28),
-                modifier = Modifier.clickable {
-                    navController.navigate(route = Routes.MovimientosScreen.route)
-                })
-            Image(
-                painter = painterResource(id = R.drawable.ic_navigate_next),
-                contentDescription = "icono de siguiente",
-                colorFilter = ColorFilter.tint(Color(0xFFFFCA28))
-            )
-        }
-    }
-    Column(modifier = modifier) {
-        Spacer(modifier = Modifier.padding(top = 8.dp))
-
-        ViewDinero(homeViewModel = homeViewModel)
-
-        Card(Modifier.padding(top = 8.dp)) {
-            Text(
-                text = "$limitePorDia por dia",
-                color = Color(0xFFFFCA28),
-                modifier = Modifier
-                    .background(color = Color(0xFF202020))
-                    .padding(start = 4.dp, end = 4.dp)
-            )
-        }
+        Text(
+            text = stringResource(R.string.editar), fontSize = 14.sp,
+            color = colorResource(id = R.color.blue),
+            fontFamily = FontFamily(Font(R.font.lato_bold))
+        )
     }
 }
 
@@ -292,54 +419,64 @@ fun BodyHeader(
 @Composable
 fun AddTransactionDialog(
     showDialogTransaccion: Boolean, onDissmis: () -> Unit,
-    movimientosViewModel: MovimientosViewModel,
     homeViewModel: HomeViewModel
 ) {
-    val isChecked: Boolean by homeViewModel.isChecked.observeAsState(initial = homeViewModel.dineroActual.value == 0.0)
+    val isChecked by homeViewModel.isChecked
+    val enabledBotonGastos by homeViewModel.enabledBotonGastos
+    val tipoBoton by homeViewModel.botonIngresosActivado.observeAsState()
     var cantidadIngresada by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    var selectedCategory: Category
+    var selectedCategory: CategoriesModel
     val Spacer = 16.dp
 
     if (showDialogTransaccion) {
         //onDismissRequest = { onDissmis() } funcion para que se descarte el dialogo y desaparezca
         Dialog(onDismissRequest = { onDissmis() }) {
-            Card(shape = MaterialTheme.shapes.small) {
+            Card(shape = RoundedCornerShape(30.dp)) {
                 Column(
                     Modifier
                         .fillMaxWidth()
-                        .background(Color.White)
+                        .background(Color.White), horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Spacer(modifier = Modifier.padding(Spacer))
-                    Text(
-                        text = "Añade el monto",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.Black,
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                    )
 
                     TextFielDinero(cantidadIngresada) { nuevoValor ->
                         cantidadIngresada = nuevoValor
-                        //  homeViewModel.setCantidadIngresada(nuevoValor = cantidadIngresada)
                     }
                     Spacer(modifier = Modifier.padding(Spacer))
                     //DropDown para seleccionar la categoria
-                    selectedCategory = DropDownIcon(isChecked, Modifier.fillMaxWidth())
+                    selectedCategory =
+                        menuDesplegable(isChecked, Modifier.fillMaxWidth(), homeViewModel)
                     Spacer(modifier = Modifier.padding(Spacer))
+                    Text(
+                        text = stringResource(R.string.descripcion),
+                        fontSize = 16.sp,
+                        color = Color.Black,
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier
+                            .align(Alignment.Start)
+                            .padding(start = 16.dp)
+                    )
                     //Description
                     TextFieldDescription(description = description) { newDescription ->
                         description = newDescription
                     }
                     Spacer(modifier = Modifier.size(30.dp))
 
-                    ButtonToggleGroup(homeViewModel, isChecked) { homeViewModel.setIsChecked(it) }
+                    sharedLogic.BotonGastosIngresos(enabledBotonGastos, tipoBoton!!) { tipoClase ->
+                        if (tipoClase == ClaseEnum.INGRESOS) {
+                            homeViewModel.setIsChecked(true)
+                        } else {
+                            homeViewModel.setIsChecked(false)
+                        }
+                    }
+
 
                     Spacer(modifier = Modifier.size(Spacer))
 
                     Button(
                         onClick = {
-                            if (homeViewModel.fechaElegida.value == "Selected date") {
+                            if (homeViewModel.fechaElegidaBarra.value == null) {
                                 homeViewModel.onDialogClose()
                             } else {
                                 //mandar tarea
@@ -352,6 +489,15 @@ fun AddTransactionDialog(
                                     selectedCategory.icon,
                                     isChecked
                                 )
+                                //si la seleccion del usuario es gastos entonces se crea el registro de gastos individuales
+                                if (!isChecked) {
+                                    //creando categoria individual
+                                    homeViewModel.crearNuevaCategoriaDeGastos(
+                                        selectedCategory.name,
+                                        selectedCategory.icon,
+                                        cantidadIngresada
+                                    )
+                                }
                                 cantidadIngresada = ""
                                 description = ""
                             }
@@ -359,36 +505,59 @@ fun AddTransactionDialog(
                             .fillMaxWidth()
                             .height(48.dp)
                             .padding(horizontal = 16.dp),
-                        enabled = cantidadIngresada.isNotEmpty(),
+                        enabled = cantidadIngresada.isNotEmpty() && selectedCategory.name != "Elige una categoria",
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF8247C5)
                         ),
                         shape = RoundedCornerShape(15.dp)
                     ) {
-                        Text(text = "Guardar",fontSize = 14.sp)
+                        Text(text = "Guardar", fontSize = 14.sp)
                     }
-                    Spacer(modifier =Modifier.size(Spacer))
+                    Spacer(modifier = Modifier.size(Spacer))
                 }
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TextFielDinero(cantidadIngresada: String, onTextChanged: (String) -> Unit) {
+    val maxLength = 10
+
     TextField(
-        value = cantidadIngresada,
-        onValueChange = { onTextChanged(it) },
+        value = cantidadIngresada.take(maxLength),
+        onValueChange = { it ->
+            if (it.length <= maxLength) {
+                onTextChanged(it)
+            }
+        },
         singleLine = true,
         maxLines = 1,
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        colors = TextFieldDefaults.textFieldColors(
-            textColor = Color.Black
+            .padding(horizontal = 16.dp)
+            .fillMaxWidth(),
+        placeholder = {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                Text(
+                    "$0.00",
+                    color = colorResource(id = R.color.grayTres),
+                    fontSize = 40.sp
+                )
+            }
+
+        },
+        visualTransformation = CurrencyAmountInputVisualTransformation(
+            fixedCursorAtTheEnd = true
         ),
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+        colors = TextFieldDefaults.colors(
+            focusedTextColor = Color.Black,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            unfocusedContainerColor = Color.Transparent,
+            focusedContainerColor = Color.Transparent
+        ),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+        textStyle = TextStyle(textAlign = TextAlign.Center, fontSize = 40.sp)
     )
 }
 
@@ -398,125 +567,43 @@ fun TextFieldDescription(description: String, onTextChanged: (String) -> Unit) {
     TextField(
         value = description,
         onValueChange = { onTextChanged(it) },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+        modifier = Modifier.padding(horizontal = 16.dp),
         singleLine = true,
         maxLines = 1,
-        label = { Text(text = "Descripcion (Opcional)", color = Color.LightGray) },
-        colors = TextFieldDefaults.textFieldColors(
-            containerColor = Color.Transparent,
-            textColor = Color.Black,
+        colors = TextFieldDefaults.colors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
+            unfocusedContainerColor = colorResource(id = R.color.grayUno)
         ),
         //para mostrar la primer letra de la palabra en mayuscula
         keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words)
     )
 }
 
-@Composable
-fun ButtonToggleGroup(
-    homeViewModel: HomeViewModel, isSelected: Boolean, onOptionSelect: (Boolean) -> Unit
-) {
-    ButtonToggleGroupSelect(
-        homeViewModel = homeViewModel, isChecked = isSelected, onToggle = onOptionSelect
-    )
-    // Llama a onOptionSelect con isSelected para indicar si está seleccionado
-    onOptionSelect(isSelected)
-}
-
-@Composable
-fun ButtonToggleGroupSelect(
-    homeViewModel: HomeViewModel,
-    isChecked: Boolean,
-    onToggle: (Boolean) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Row(modifier = modifier.padding(16.dp)) {
-        val options = listOf("Gasto", "Ingreso")
-        val isDineroActualZero = homeViewModel.dineroActual.value!! == 0.0
-        options.forEachIndexed { index, option ->
-            val selected = isChecked == (index == 1)
-            if (isDineroActualZero && index == 1) {
-                // Si el saldo es 0.0, seleccionar automáticamente "Ingreso"
-                onToggle(true)
-            }
-            val shape = when (index) { // 6
-                0 -> RoundedCornerShape(
-                    topStart = 4.dp,
-                    bottomStart = 4.dp,
-                    topEnd = 0.dp,
-                    bottomEnd = 0.dp
-                )
-
-                options.size - 1 -> RoundedCornerShape(
-                    topStart = 0.dp, bottomStart = 0.dp,
-                    topEnd = 4.dp,
-                    bottomEnd = 4.dp
-                )
-
-                else -> CutCornerShape(0.dp)
-            }
-            val zIndex = if (selected) 1f else 0f
-            val buttonModifier = when (index) { // 7
-                0 -> Modifier.zIndex(zIndex)
-                else -> {
-                    val offset = -1 * index
-                    Modifier
-                        .offset(x = offset.dp)
-                        .zIndex(zIndex)
-                }
-            }
-            OutlinedButton(
-                onClick = {
-                    onToggle(index == 1)
-                },
-                border = BorderStroke(width = 1.dp, color = Color.Transparent),
-                shape = shape,
-                colors = ButtonDefaults.outlinedButtonColors(
-                    containerColor = (if (selected) {
-                        if (option == "Gasto") {
-                            // Fondo rojo si "Gasto" está seleccionado pero no habilitado
-                            Color(0xFFED5150)
-                        } else {
-                            // Fondo verde si "Ingreso" está seleccionado
-                            Color(0xFF66BB6A)
-                        }
-                    } else Color.Transparent) as Color, // Si no está seleccionado, el color de fondo será transparente
-                    contentColor = if (selected) {
-                        if (option == "Gasto") {
-                            // Texto en blanco si "Gasto" está seleccionado pero no habilitado
-                            Color.White
-                        } else {
-                            // Texto en blanco si "Ingreso" está seleccionado
-                            Color.White
-                        }
-                    } else {
-                        Color.LightGray // Texto en gris si no está seleccionado
-                    }
-                ),
-                modifier = buttonModifier.weight(1f),
-                enabled = if (homeViewModel.dineroActual.value!! == 0.0) {
-                    option == "Ingreso"
-                } else {
-                    true
-                }
-            ) {
-                Text(option)
-            }
-        }
-    }
-}
-
 @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun DropDownIcon(isChecked: Boolean, modifier: Modifier): Category {
-    val categories: List<Category> =
-        //se usa sortedBy para mostrar la lista alfabeticamente por el nombre
-        if (isChecked) categoriesIngresos.sortedBy { it.name } else categoriesGastos.sortedBy { it.name }
+fun menuDesplegable(
+    isChecked: Boolean,
+    modifier: Modifier,
+    homeViewModel: HomeViewModel
+): CategoriesModel {
+    val categories: List<CategoriesModel> by remember(isChecked) {
+        mutableStateOf(
+            if (isChecked) {
+                categoriaDefault + categoriesIngresos.sortedBy { it.name }
+            } else {
+                categoriaDefault + categoriesGastos.sortedBy { it.name }
+            }
+        )
+    }
+
     var expanded by remember { mutableStateOf(false) }
     var selectedItem by remember { mutableStateOf(categories.first()) }
+
+    LaunchedEffect(selectedItem.icon) {
+        // Realizar acciones secundarias al cambiar el icono seleccionado
+    }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -524,7 +611,6 @@ fun DropDownIcon(isChecked: Boolean, modifier: Modifier): Category {
             .padding(horizontal = 16.dp),
         Alignment.Center
     ) {
-
         ExposedDropdownMenuBox(
             expanded = expanded,
             onExpandedChange = { expanded = !expanded },
@@ -538,30 +624,46 @@ fun DropDownIcon(isChecked: Boolean, modifier: Modifier): Category {
                         painter = painterResource(id = selectedItem.icon),
                         contentDescription = null
                     )
+
                 },
                 readOnly = true,
                 trailingIcon = {
                     ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
                 },
+                colors = TextFieldDefaults.colors(
+                    unfocusedIndicatorColor = Color.Transparent,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedContainerColor = colorResource(id = R.color.grayUno),
+                    focusedContainerColor = colorResource(id = R.color.grayUno)
+                ),
                 modifier = Modifier
                     .fillMaxWidth()
                     .menuAnchor()
             )
 
             ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-                categories.forEach { itemCategory ->
-                    DropdownMenuItem(onClick = {
-                        //de esta manera podemos usar lo seleccionado en otro lado, usamos la variable selecrted item
-                        selectedItem = itemCategory
-                        expanded = false
-                    }) {
-                        Row(modifier = modifier) {
-                            Image(
-                                painter = painterResource(id = itemCategory.icon),
-                                contentDescription = null
-                            )
-                            Spacer(modifier = Modifier.padding(16.dp))
-                            Text(text = itemCategory.name)
+                Column {
+                    categories.forEach { itemCategory ->
+                        DropdownMenuItem(onClick = {
+                            selectedItem = itemCategory
+                            expanded = false
+                        }) {
+                            Row(
+                                modifier = modifier,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Image(
+                                    painter = painterResource(id = itemCategory.icon),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Spacer(Modifier.width(16.dp))
+                                Text(
+                                    text = itemCategory.name,
+                                    modifier = Modifier
+                                        .padding(vertical = 16.dp)
+                                )
+                            }
                         }
                     }
                 }
@@ -572,99 +674,225 @@ fun DropDownIcon(isChecked: Boolean, modifier: Modifier): Category {
 }
 
 @Composable
-fun ViewDinero(homeViewModel: HomeViewModel) {
-    FormattedCurrencyCash(homeViewModel)
-}
-
-@Composable
 fun FormattedCurrencyCash(homeViewModel: HomeViewModel) {
     val mostrandoDinero by homeViewModel.dineroActual.observeAsState(0.00)
-
-    var integerPart = homeViewModel.formattedCurrency(mostrandoDinero)//400.523,69
-    integerPart = integerPart.replace("$", "")
-    //la variable temporal guardara el valor restandole los ultimos 2
-    //numeros, segun el tamaño que se ponga
-    val temporal = integerPart.subSequence(0, integerPart.length - 3)
-    val decimalPart = integerPart.toString().substringAfter(",")
-    ObservadorDinero(temporal, decimalPart)
+    Log.d("quee","didneroActual$mostrandoDinero")
+    val (integerPart, decimalPart) = sharedLogic.convertidorDeTexto(mostrandoDinero)
+    Log.d("quee","integerPart $integerPart")
+    Log.d("quee","decimalPart $decimalPart")
+    ObservadorDinero(integerPart, decimalPart)
 }
-
+//667747.98
 @Composable
 fun ObservadorDinero(temporal: CharSequence, decimalPart: String) {
     Row(verticalAlignment = Alignment.Bottom) {
         val size = 40
         Text(
+            text = "$", color = Color.Black,
+            fontSize = (size / 2).sp,
+            modifier = Modifier.offset(y = (-10).dp),
+            fontFamily = FontFamily(Font(R.font.lato_bold))
+        )
+
+        Text(
             text = temporal.toString(),
             fontSize = size.sp,
-            color = Color.White,
-            fontWeight = FontWeight.Medium
+            color = Color.Black,
+            fontFamily = FontFamily(Font(R.font.lato_bold)),
+            modifier = Modifier.offset(x = (-10).dp)
         )
+        Log.d("quee","decimalPart $decimalPart")
         Text(
             text = decimalPart, fontSize = (size / 2).sp,
             //texto que modifica los decimales en la posicion hacia arriba y se ven pequeños
-            modifier = Modifier.offset(y = (-20).dp),
-            color = Color.White,
-            fontWeight = FontWeight.Bold
+            modifier = Modifier.offset(y = (-20).dp, x = (-10).dp),
+            color = Color.Black,
+            fontFamily = FontFamily(Font(R.font.lato_bold))
         )
     }
 }
 
-@Composable
-fun MyBotonNavigation() {
-    var index by remember { mutableStateOf(0) }
-
-    BottomNavigation(backgroundColor = Color(0xFF21252B), contentColor = Color.White) {
-        BottomNavigationItem(selected = index == 0, onClick = { index = 0 }, icon = {
-            Image(painter = painterResource(id = R.drawable.ic_home), contentDescription = "home")
-        })
-
-        BottomNavigationItem(selected = index == 1, onClick = { index = 1 }, icon = {})
-
-        BottomNavigationItem(selected = index == 2, onClick = { index = 2 }, icon = {
-            Image(painter = painterResource(id = R.drawable.ic_home), contentDescription = "home")
-        })
-    }
-}
 
 @Composable
-fun MyFAB(homeViewModel: HomeViewModel, isShowSnackbar: SnackbarHostState) {
+fun MyFAB(
+    homeViewModel: HomeViewModel,
+    isShowSnackbar: SnackbarHostState
+) {
     val scope = rememberCoroutineScope()
-    FloatingActionButton(
-        //se aprieta boton que inicia la variable en true
-        onClick = {
 
-            if (homeViewModel.fechaElegida.value == "Elige una fecha") {
+    FloatingActionButton(
+        onClick = {
+            if (homeViewModel.diasRestantes.value == 0) {
                 scope.launch {
-                    isShowSnackbar.showSnackbar(
-                        message = "Selecciona la fecha primero",
-                        actionLabel = null,
-                        duration = SnackbarDuration.Short
+                    showSnackbar(
+                        isShowSnackbar,
+                        message = "Selecciona la fecha primero"
                     )
                 }
-            } else homeViewModel.onShowDialogClickTransaction()
-        },
-        containerColor = Color(0xFF7E57C2),
-        contentColor = Color.Black
+            } else {
+                homeViewModel.onShowDialogClickTransaction()
+            }
+        }
     ) {
         Icon(
             imageVector = Icons.Filled.Add,
-            contentDescription = "add", tint = Color.White
+            contentDescription = "add"
         )
     }
 }
 
 @Composable
-fun ItemCardView(navController: NavController) {
+fun MyBotonNavigation(navController: NavController) {
+    var index by remember { mutableStateOf(0) }
 
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+    BottomNavigation(
+        backgroundColor = colorResource(id = R.color.white),
+        contentColor = Color.White
+    ) {
+        BottomNavigationItem(
+            selected = index == 0,
+            onClick = {
+                if (index != 0) {
+                    index = 0
+                }
+            },
+            icon = {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_home),
+                    contentDescription = "home",
+                    colorFilter = if (index == 0) ColorFilter.tint(colorResource(id = R.color.blue))
+                    else ColorFilter.tint(colorResource(id = R.color.grayCuatro))
+                )
+            }
+        )
+        Spacer(modifier = Modifier.width(150.dp)) // Añade un espacio entre los botones
+        // Este espacio se dejará vacío
 
-        listCardInfo.forEachIndexed { index, it ->
-            ItemCard(cardInfo = it, modifier = Modifier.weight(1f), navController, index)
+        BottomNavigationItem(
+            selected = index == 1,
+            onClick = {
+                if (index != 1) {
+                    index = 1
+                    navController.navigate(Routes.ConfigurationScreen.route)
+                }
+            },
+            icon = {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_menu),
+                    contentDescription = "home",
+                    colorFilter = if (index == 1) ColorFilter.tint(colorResource(id = R.color.blue))
+                    else ColorFilter.tint(colorResource(id = R.color.grayCuatro))
+                )
+            }
+        )
+    }
+}
+
+suspend fun showSnackbar(
+    snackbarHostState: SnackbarHostState,
+    message: String
+) {
+    snackbarHostState.showSnackbar(
+        message = message,
+        actionLabel = null,
+        duration = SnackbarDuration.Short
+    )
+}
+
+@Composable
+fun CardBotonRegistro(navController: NavController, homeViewModel: HomeViewModel) {
+    val totalIngresosProgress by homeViewModel.mostrandoDineroTotalIngresos.observeAsState()
+    val totalGastosProgress by homeViewModel.mostrandoDineroTotalGastos.observeAsState()
+
+    val progresoRelativo =
+        sharedLogic.calcularProgresoRelativo(totalIngresosProgress, totalGastosProgress)
+    val porcentaje = sharedLogic.formateandoPorcentaje(progresoRelativo)
+
+    Card(
+        modifier = Modifier
+            .padding(horizontal = 16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = colorResource(id = R.color.white)
+        ),
+        shape = RoundedCornerShape(30.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Button(
+                onClick = { navController.navigate(Routes.RegistroTransaccionesScreen.route) },
+                modifier = Modifier.fillMaxWidth(),
+                border = BorderStroke(0.dp, Color.Transparent), // Borde transparente
+                colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.grayUno)),
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(text = "Ver mas", color = colorResource(id = R.color.blue))
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_navigate_next),
+                        contentDescription = null,
+                        tint = colorResource(id = R.color.blue)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.size(8.dp))
+            Text(
+                text = "$porcentaje%",
+                color = colorResource(id = R.color.black),
+                fontSize = 12.sp,
+                fontFamily = FontFamily(Font(R.font.lato_bold))
+            )
+
+            AnimatedProgressBar(
+                progress = progresoRelativo.toFloat(),
+                modifier = Modifier.fillMaxWidth()
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            HorizontalDivider()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = sharedLogic.formattedCurrency(totalGastosProgress),
+                    color = colorResource(id = R.color.rojoDinero),
+                    fontSize = 16.sp,
+                    fontFamily = FontFamily(Font(R.font.lato_bold))
+                )
+                VerticalDivider()
+                Text(
+                    text = sharedLogic.formattedCurrency(totalIngresosProgress),
+                    color = colorResource(id = R.color.verdeDinero),
+                    fontSize = 16.sp,
+                    fontFamily = FontFamily(Font(R.font.lato_bold))
+                )
+            }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+
+@Composable
+fun AnimatedProgressBar(
+    progress: Float,
+    modifier: Modifier = Modifier
+) {
+    val animatedProgress by animateFloatAsState(
+        targetValue = progress,
+        animationSpec = tween(durationMillis = 1000), label = ""
+    )
+
+    LinearProgressIndicator(
+        progress = { animatedProgress },
+        modifier = modifier,
+    )
+}
+
 @Composable
 fun ItemCard(
     cardInfo: CardInfoModel,
@@ -675,16 +903,13 @@ fun ItemCard(
     Card(
         onClick = {
             when (index) {
-                0 -> navController.navigate(Routes.TaskScreen.route)
-                1 -> navController.navigate(Routes.TaskScreen.route)
-                2 -> navController.navigate(Routes.TaskScreen.route)
-                3 -> {}
+                0 -> navController.navigate(Routes.RegistroTransaccionesScreen.route)
                 else -> {}
             }
         }, modifier = modifier
             .height(120.dp)
             .padding(horizontal = 5.dp), colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF21252B)
+            containerColor = colorResource(id = R.color.bodyCard)
         )
     ) {
         Spacer(modifier = Modifier.size(16.dp))
@@ -701,13 +926,9 @@ fun ItemCard(
             Spacer(modifier = Modifier.size(16.dp))
             Text(
                 cardInfo.title,
-                color = Color.LightGray,
+                color = colorResource(id = R.color.tituloBlanco),
                 fontWeight = FontWeight.Light
             )
         }
     }
-
-
 }
-
-

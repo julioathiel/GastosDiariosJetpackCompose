@@ -6,8 +6,8 @@ import java.text.DateFormat
 import java.util.Date
 @Entity
 data class MovimientosEntity (
-        @PrimaryKey
-        val id:Int,
+        @PrimaryKey (autoGenerate = true)
+        val id:Int = 0,
         val iconResourceName: String,
         val title: String,
         val subTitle: String,
