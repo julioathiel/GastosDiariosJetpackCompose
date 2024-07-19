@@ -1,12 +1,18 @@
 <resources>
     <string name="app_name">GastosDiariosJetapckCompose</string>
 
+//globales
+    <string name="eliminar">Eliminar</string>
+    <string name="editar">Editar</string>
+    <string name="guardar">Guardar</string>
+    <string name="confirmar">Confirmar</string>
+
+    <string name="_0_00">$0.00</string>
 
     <string name="recordatorio_titulo">Recordatorio diario</string>
-    <string name="recordatorio_subTitulo">Repita conmigo: lo prometo…</string>
     <string name="recordatorio_body">Sabemos que adquirir el hábito de acompañar sus gastos a diario es complicado, y podemos ayudarlo con eso. ¿Cuándo le gustaria recibir nuestro recordatorio?</string>
 
-    <string name="reseteoConfirmado">La aplicación se ha reiniciado y los datos se han eliminado correctamente.</string>
+    <string name="reseteoConfirmado">Reinicio exitoso</string>
     <string name="reiniciarAplicacion">Reiniciar aplicación</string>
     <string name="reinicioCompletado">Reinicio completado</string>
      //texfield
@@ -20,11 +26,11 @@
     //bodyHeader
     <string name="tu_dinero_actual">Tu dinero actual</string>
     <string name="ir_a_movimientos">Ir a movimientos</string>
-    <string name="por_d_a">%1$s por día</string>
+    <string name="por_dia">%1$s por día</string>
     //card dias restantes
     <string name="dias_restantes">Dias restantes</string>
     //boton para eligir fecha
-    <string name="editar">Editar</string>
+
 
     //titulo para el card de registros totales
     <string name="gastos">Gastos</string>
@@ -35,4 +41,20 @@
     <string name="toolbar_cambio_fecha">Cambio de fechas</string>
     <string name="toolbar_registro_gastos">Registro Movimientos</string>
 
+    //pantalla de elegir dias
+    <string name="primer_mes">31 días</string>
+    <string name="dos_meses">60 días</string>
+    <string name="tres_meses">90 días</string>
+
+    <string name="_31_d_as_para_cobros_mensuales">31 días para cobros mensuales.\n</string>
+    <string name="_60_d_as_para_cobros_cada_dos_meses">60 días para cobros cada dos meses.\n</string>
+    <string name="_90_d_as_para_cobros_cada_3_meses">90 días para cobros cada 3 meses.</string>
+    <string name="elige_una_opcion">Elige una opcion</string>
+
+    <string name="elige_una_categoria">Elige una categoria</string>
+    <string name="lo_mas_gastado_este_mes">Lo más gastado este mes</string>
+    <string name="resetear">Resetear</string>
+    <string name="no_hay_transacciones_disponibles">No hay transacciones disponibles</string>
+
+<string name="share_app">https://www.google.com.ar/?hl=e</string>
 </resources>

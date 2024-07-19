@@ -14,17 +14,18 @@
     <color name="bodySombraTituloCard">#1FFFFFFF</color>
     <color name="tituloBlanco">#DEFFFFFF</color>
     <color name="subTituloBlanco">#99FFFFFF</color>
-    <color name="verdeDinero">#066213</color>
-    <color name="fondoVerdeDinero">#E6F8EA</color>
+    <color name="verdeDinero">#1DAB60</color>
+    <color name="fondoVerdeDinero">#D8FDD2</color>
     <color name="myVioleta">#6650A3</color>
     <color name="botonBar">#1A1A1A</color>
-    <color name="rojoDinero">#FF4081</color>
+    <color name="rojoDinero">#B3261E</color>
     //mis colores pantalla clara
     <color name="grayUno">#F2F2F7</color>
     <color name="grayDos">#D2D2D7</color>
     <color name="grayTres">#C7C7CC</color>
     <color name="grayCuatro">#8E8E93</color>
     <color name="blackTexto">#FF000000</color>
+    <color name="nuevoGris">#F6F5F3</color>
 <!--    <color name="blue">#007BFE</color>-->
     <color name="fondoCelesteblue">#ECF2FE</color>
     <color name="blue">#0B57CF</color>

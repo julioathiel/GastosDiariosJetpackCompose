@@ -18,6 +18,12 @@ class UpdateGastosPorCategoriaUseCase @Inject constructor(private val gastosPorC
     }
 }
 
+class UpdateItemGastosPorCategoriaUseCase @Inject constructor(private val gastosPorCategoriaRepository: GastosPorCategoriaRepository){
+    suspend operator fun invoke(item: GastosPorCategoriaModel){
+        gastosPorCategoriaRepository.updateGastosPorCategoriaRepository(item)
+    }
+}
+
 class GetGastosPorCategoriaUseCase @Inject constructor(private val gastosPorCategoriaRepository: GastosPorCategoriaRepository) {
     operator fun invoke(): Flow<List<GastosPorCategoriaModel>> {
         return gastosPorCategoriaRepository.categoriaUnica

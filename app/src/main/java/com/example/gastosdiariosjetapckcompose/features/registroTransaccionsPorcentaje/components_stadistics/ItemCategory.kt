@@ -1,42 +1,48 @@
-package com.example.gastosdiariosjetapckcompose.features.registroTransaccionsPorcentaje
+package com.example.gastosdiariosjetapckcompose.features.registroTransaccionsPorcentaje.components_stadistics
 
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.Icon
+import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.example.gastosdiariosjetapckcompose.R
-import com.example.gastosdiariosjetapckcompose.SharedLogic
-import com.example.gastosdiariosjetapckcompose.domain.model.GastosPorCategoriaModel
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
+import androidx.core.content.res.TypedArrayUtils.getDrawable
+import androidx.core.content.res.TypedArrayUtils.getResourceId
+import coil.compose.rememberAsyncImagePainter
 import com.example.gastosdiariosjetapckcompose.GlobalVariables.sharedLogic
+import com.example.gastosdiariosjetapckcompose.R
+import com.example.gastosdiariosjetapckcompose.domain.model.GastosPorCategoriaModel
+import com.example.gastosdiariosjetapckcompose.domain.uiState.RegistroTransaccionesUiState
+import com.example.gastosdiariosjetapckcompose.features.registroTransaccionsPorcentaje.RegistroTransaccionesViewModel
 
 
 @Composable
@@ -59,12 +65,10 @@ fun ItemCategory(
         else -> null
     }
     val dineroGastadoTotal = movimientoCategoria?.totalGastado
-
-    val progressMaximoTotal: Double =
-        progresstotal// Obtén el valor máximo para el ProgressBar, por ejemplo, del uiState
-    val progressTotalGastosActual: Double =
-        dineroGastadoTotal!!.toDouble()// Obtén el valor actual de los gastos para el ProgressBar, por ejemplo, del uiState
-
+    // Obtén el valor máximo para el ProgressBar, por ejemplo, del uiState
+    val progressMaximoTotal: Double = progresstotal
+    // Obtén el valor actual de los gastos para el ProgressBar, por ejemplo, del uiState
+    val progressTotalGastosActual: Double = dineroGastadoTotal!!.toDouble()
 
     val progresoRelativo =
         sharedLogic.calcularProgresoRelativo(progressMaximoTotal, progressTotalGastosActual)
@@ -80,22 +84,22 @@ fun ItemCategory(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .background(colorResource(id = R.color.white))
             .padding(horizontal = 16.dp, vertical = 20.dp)
     ) {
         // icono de la categoria
         Box(
             Modifier
-                .clip(shape = CircleShape).size(48.dp)
-                .background(color = colorResource(id = R.color.grayUno)),
+                .clip(shape = CircleShape)
+                .size(48.dp)
+                .background(color = MaterialTheme.colorScheme.secondaryContainer),
             contentAlignment = Alignment.Center
-        ){
+        ) {
             Image(
                 painter = painterResource(id = iconResourceId),
                 contentDescription = "",
                 alignment = Alignment.Center,
-                colorFilter = ColorFilter.tint(color = colorResource(id = R.color.black)),
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(24.dp),
+                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)
             )
         }
 
@@ -105,7 +109,6 @@ fun ItemCategory(
             //nombre de la categoria
             Text(
                 text = transaccion.title,
-                color = colorResource(id = R.color.black),
                 fontFamily = FontFamily(Font(R.font.lato_bold)),
                 fontSize = 16.sp
             )
@@ -114,13 +117,11 @@ fun ItemCategory(
 
                 Text(
                     text = totalGastado,
-                    color = colorResource(id = R.color.rojoDinero),
-                    fontSize = 14.sp,
-                    fontFamily = FontFamily(Font(R.font.lato_bold))
+                    style = MaterialTheme.typography.bodySmall
                 )
+                Log.d("porcentaje", porcentaje)
                 Text(
                     text = "$porcentaje%",
-                    color = colorResource(id = R.color.blue),
                     fontSize = 14.sp,
                     textAlign = TextAlign.End,
                     modifier = Modifier.fillMaxWidth(),
@@ -150,3 +151,4 @@ fun AnimatedProgressBarRegistro(
         modifier = modifier,
     )
 }
+

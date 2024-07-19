@@ -8,16 +8,16 @@ import androidx.room.Update
 import com.example.gastosdiariosjetapckcompose.data.di.entity.FechaSaveEntity
 
 @Dao
-interface FechaSaveDao{
+interface FechaSaveDao {
     @Query("Select * from FechaSaveEntity")
-   suspend fun getFecha():FechaSaveEntity
+    suspend fun getFecha(): FechaSaveEntity
 
     @Insert
-    suspend fun insertFecha(item:FechaSaveEntity)
+    suspend fun insertFecha(item: FechaSaveEntity)
 
     @Update
-    suspend fun updateFecha(item:FechaSaveEntity)
+    suspend fun updateFecha(item: FechaSaveEntity)
 
     @Delete
-    suspend fun deleteFecha(item:FechaSaveEntity)
+    suspend fun deleteFecha(item: FechaSaveEntity)
 }

@@ -10,6 +10,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.example.gastosdiariosjetapckcompose.Constants.MY_CHANNEL_ID
 import com.example.gastosdiariosjetapckcompose.MainActivity
+import com.example.gastosdiariosjetapckcompose.R
 import com.example.gastosdiariosjetapckcompose.navigation.Routes
 
 class NotificacionProgramada : BroadcastReceiver() {
@@ -38,8 +39,8 @@ class NotificacionProgramada : BroadcastReceiver() {
             PendingIntent.getActivity(context, 0, intent, flag)
 
         val notificacion = NotificationCompat.Builder(context, MY_CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("Notificacion programada")
+            .setSmallIcon(R.drawable.ic_ahorro)
+            .setContentTitle("Gastos Diarios")
             .setContentText("No olvides agregar las transacciones para llevar un buen control")
             .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
             .setContentIntent(pendingIntent)

@@ -19,7 +19,6 @@ import com.example.gastosdiariosjetapckcompose.domain.model.ImagenSeleccionadaMo
 import com.example.gastosdiariosjetapckcompose.domain.model.MovimientosModel
 import com.example.gastosdiariosjetapckcompose.domain.model.TotalGastosModel
 import com.example.gastosdiariosjetapckcompose.domain.model.TotalIngresosModel
-import com.example.gastosdiariosjetapckcompose.domain.model.UsuarioCreaCatGastoModel
 import com.example.gastosdiariosjetapckcompose.domain.model.categoriesGastos
 import com.example.gastosdiariosjetapckcompose.domain.model.categoriesIngresos
 import com.example.gastosdiariosjetapckcompose.domain.usecase.GastosPorNameCatCaseUse
@@ -43,21 +42,22 @@ import com.example.gastosdiariosjetapckcompose.domain.usecase.totalesRegistro.Up
 import com.example.gastosdiariosjetapckcompose.domain.usecase.totalesRegistro.UpdateTotalIngresosUseCase
 import com.example.gastosdiariosjetapckcompose.features.core.DataStorePreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.math.BigDecimal
 import java.math.RoundingMode
+import java.text.DateFormatSymbols
+import java.text.ParseException
+import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.time.temporal.ChronoUnit
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 @HiltViewModel
@@ -90,7 +90,7 @@ class HomeViewModel @Inject constructor(
     private val dataStorePreferences: DataStorePreferences,
     //obteniendo lista creada por el usuario
     private val getUserCatGastoUsecase: GetUserCatGastoUsecase,
-    private val getUserCatIngresoUsecase: GetUserCatIngresoUsecase
+    private val getUserCatIngresoUsecase: GetUserCatIngresoUsecase,
 ) : ViewModel() {
 
     private val _selectedImageUri = MutableLiveData<String>()
@@ -128,63 +128,55 @@ class HomeViewModel @Inject constructor(
     private val _showDialogTransaction = MutableLiveData<Boolean>()
     val showDialogTransaction: LiveData<Boolean> = _showDialogTransaction
 
-    private val _showDialogFecha = mutableStateOf(false)
-    val showDialogFecha: State<Boolean> = _showDialogFecha
-
-    //variable para solo mostrar los dias restantes
-    private val _diasRestantes = MutableLiveData<Int>(0)
-    val diasRestantes: LiveData<Int> = _diasRestantes
+    private val _showNuevoMes = mutableStateOf(false)
+    val showNuevoMes: State<Boolean> = _showNuevoMes
 
     private val _fechaElegidaConGuion = MutableLiveData<String?>()
 
-    private val _fechaElegidaBarra = MutableLiveData<String?>()
-    val fechaElegidaBarra: LiveData<String?> = _fechaElegidaBarra
+//    private val _fechaElegidaBarra = MutableLiveData<String?>()
+//    val fechaElegidaBarra: LiveData<String?> = _fechaElegidaBarra
+
+    private val _fechaElegidaBarra = MutableStateFlow("")
+    val fechaElegidaBarra: StateFlow<String?> = _fechaElegidaBarra
+
 
     private val _selectedOptionFechaMaxima = MutableStateFlow<Int>(0)
     val selectedOptionFechaMaxima: StateFlow<Int> = _selectedOptionFechaMaxima
 
-    private val _limitePorDia = MutableLiveData(0.0)
-    val limitePorDia: LiveData<Double> = _limitePorDia
-
     private val _botonActivado = MutableLiveData<Int>()
-    val botonIngresosActivado:LiveData<Int> = _botonActivado
+    val botonIngresosActivado: LiveData<Int> = _botonActivado
 
     private val _enabledBotonGastos = mutableStateOf<Boolean>(false)
-    val enabledBotonGastos:State<Boolean> = _enabledBotonGastos
+    val enabledBotonGastos: State<Boolean> = _enabledBotonGastos
 
     init {
         viewModelScope.launch {
-            val fechaActual = LocalDate.now()
-            val dineroDisponible = getCurrentMoneyUseCase().money
-            _dineroActual.value = dineroDisponible
-
-            _fechaElegidaBarra.value = mostrarFechaConBarraGuardada()
-            _fechaElegidaBarra.value?.let { mostrarDiasRestantes(it) }
-            _limitePorDia.value = calcularLimitePorDia(dineroDisponible)
-
-            val totalIngresos = getTotalIngresosUseCase()?.totalIngresos
-            _mostrandoDineroTotalIngresos.value = totalIngresos ?: 0.0
-            val totalGastos = getTotalGastosUseCase()?.totalGastos
-            _mostrandoDineroTotalGastos.value = totalGastos ?: 0.0
-
-            listCatGastosNueva()//actualizando la lista de categoria del menu desplegable
-            listCatIngresosNueva()//actualizando la lista de categoria del menu desplegable
-
             //obteniendo fecha guardada maxima por el usuario
             dataStorePreferences.getFechaMaximoMes().collect { mesMaximo ->
                 _selectedOptionFechaMaxima.value = mesMaximo.numeroGuardado.toInt()
-                Log.d("fechaMaxima", "viewModelHome = ${_selectedOptionFechaMaxima.value}")
             }
+        }
+        val fechaActual = LocalDate.now()
+        listCatGastosNueva()//actualizando la lista de categoria del menu desplegable
+        listCatIngresosNueva()//actualizando la lista de categoria del menu desplegable
+        calculando(fechaActual)
+    }
 
-            _mostrandoDineroTotalIngresos.value = getTotalIngresosUseCase()?.totalIngresos
+    private fun calculando(fechaActual: LocalDate) {
+        viewModelScope.launch(Dispatchers.Main) {
+            try {
+                val dineroDisponible = withContext(Dispatchers.IO) {
+                    getCurrentMoneyUseCase().money
+                }
+                val fechaConBarra = withContext(Dispatchers.IO) {
+                    getFechaUsecase()?.fechaSave
+                }
+                _dineroActual.value = dineroDisponible
 
-            Log.d("limitePordia", "${_limitePorDia.value}")
-            // Verificar si fechaGuardada es nula antes de intentar analizarla
-            if (_fechaElegidaBarra.value != null) {
-                Log.d("fechaElegida", "${_fechaElegidaBarra.value}")
-                try {
-                    //parseando fecha a LocalDate
-                    val localDate = convertirFechaAGuion(_fechaElegidaBarra.value!!)
+                // Verificar si fechaGuardada es nula antes de intentar analizarla
+                if (fechaConBarra != null) {
+                    //  parseando fecha a LocalDate
+                    val localDate = convertirFechaAGuion(fechaConBarra)
                     val fechaParseadaAGuion = LocalDate.parse(localDate)
 
                     // ej: 2023-12-12
@@ -198,22 +190,25 @@ class HomeViewModel @Inject constructor(
                             updateIngresoTotal(TotalIngresosModel(totalIngresos = dineroDisponible))
                             //actualizando el liveData con el nuevo valor maximo del progress
                             _mostrandoDineroTotalIngresos.value = dineroDisponible
-                            Log.d("fechaIgualDiaSeleccion", "${_fechaElegidaBarra.value}")
-                            initMostrandoAlUsuario(_fechaElegidaBarra.value!!, dineroDisponible)
+                            Log.d("fechaIgualDiaSeleccion", "${fechaConBarra}")
+                            initMostrandoAlUsuario()
                         } else {
-                            //si el usuario no tiene dinero al llegar la fecha entonces se reinician los datos del progress
+                            //si el usuario no tiene dinero al llegar la fecha
+                            // entonces se reinician los datos del progress
                             reseteandoProgress()
                         }
                     } else {
                         //si aun no es la fecha elegida por el usuario se mostrara esto
+                        Log.d("miApp", "fecha NO es igual a fecha actual")
                         Log.d("miApp", "Ingresando a los datos")
-                        initMostrandoAlUsuario(_fechaElegidaBarra.value!!, dineroDisponible)
+                        initMostrandoAlUsuario()
                     }
-                } catch (ex: DateTimeParseException) {
-                    manejarErrorDeFecha()
+                } else {
+                    // Si fechaGuardada es nula y dias restantes tambien se asigna un valor predeterminado
+                    manejarFechayDiasRestantesNulos()
                 }
-            } else {
-                // Si fechaGuardada es nula y dias restantes tambien se asigna un valor predeterminado
+            } catch (e: Exception) {
+                e.printStackTrace()
                 manejarFechayDiasRestantesNulos()
             }
         }
@@ -226,110 +221,120 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun mostrarDineroActual() {
-        // Lógica relacionada con el dinero
-        viewModelScope.launch {
-            _dineroActual.value = getCurrentMoneyUseCase().money
-        }
-    }
-
     fun mostrandoDineroTotalProgress() {
-        //totalDinero borrado
-        viewModelScope.launch {
-            _mostrandoDineroTotalIngresos.value = getTotalIngresosUseCase()?.totalIngresos
-            Log.d("totalDinero", "maximo = ${_mostrandoDineroTotalIngresos.value}")
-        }
-    }
-
-    // Método para obtener y actualizar la fecha guardada
-    suspend fun mostrarFechaConBarraGuardada(): String? {
-        return viewModelScope.async {
-            val fechaConBarra = getFechaUsecase()?.fechaSave
-            Log.d("initFechaGuardada", "$fechaConBarra")
-            fechaConBarra
-        }.await()
-    }
-
-    fun mostrarFechaBorradaAlUSuario() {
-        //fecha con barra mostrada al usuario borrada
-        viewModelScope.launch {
-            val item = getFechaUsecase()?.fechaSave
-            if (item == null) {
-                _fechaElegidaBarra.value = ""
-            }
-        }
-    }
-
-    fun mostrarDiasrestantesBorradaAlUSuario() {
-        //dias restantes borrado
-        viewModelScope.launch {
-            val item = getFechaUsecase()?.fechaSave?.toInt()
-            if (item == null) {
-                _diasRestantes.value = 0
+        viewModelScope.launch(Dispatchers.Main) {
+            try {
+                val dato = withContext(Dispatchers.IO) {
+                    getTotalIngresosUseCase()?.totalIngresos
+                }
+                _mostrandoDineroTotalIngresos.postValue(dato ?: 0.0)
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }
 
     fun mostrandoDineroTotalProgressGastos() {
-        //totalDinero gastado borrado
-        viewModelScope.launch {
-            _mostrandoDineroTotalGastos.value = getTotalGastosUseCase()?.totalGastos
+        viewModelScope.launch(Dispatchers.Main) {
+            try {
+                val dato = withContext(Dispatchers.IO) {
+                    getTotalGastosUseCase()?.totalGastos
+                }
+                _mostrandoDineroTotalGastos.postValue(dato ?: 0.0)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
     private fun actualizarFechaUnMesMas(fechaActual: LocalDate, fechaParseada: LocalDate) {
+
         viewModelScope.launch {
             //se agrega un mes a la fecha guardada
-            var nuevoMes = agregandoUnMes(fechaActual, fechaParseada)
-            nuevoMes = convertidorFechaABarra(nuevoMes)
+            val nuevoMes = agregandoUnMes(fechaActual, fechaParseada)
+            val fechaConBarra = convertidorFechaABarra(nuevoMes)
+            _showNuevoMes.value = true
             //se actualiza en la base de datos la nueva fecha
-            actualizandoFecha(FechaSaveModel(fechaSave = nuevoMes, isSelected = false))
+            actualizandoFecha(FechaSaveModel(fechaSave = fechaConBarra, isSelected = false))
         }
     }
 
-    private fun initMostrandoAlUsuario(getFechaConBarra: String, dineroActual: Double) {
+    fun initMostrandoAlUsuario() {
+        mostrarDineroTotal()
         mostrarImagenPerfil()
-        mostrarDineroActual()
-        _limitePorDia.value = calcularLimitePorDia(dineroActual)
-        mostrarFecha(getFechaConBarra)
-        mostrarDiasRestantes(getFechaConBarra)
         mostrandoDineroTotalProgress()
         mostrandoDineroTotalProgressGastos()
-        mostrarLimitePorDiaAlUsuario()
+        viewModelScope.launch(Dispatchers.Main) {
+            try {
+                val datoDinero = withContext(Dispatchers.IO) {
+                    getCurrentMoneyUseCase().money
+                }
+                val datoFecha = withContext(Dispatchers.IO) {
+                    getFechaUsecase()?.fechaSave
+                }
+
+                if (datoFecha != null) {
+                    mostrandoAlUsuario(datoFecha)//muestra fecha y dias restantes
+                    sharedLogic._limitePorDia.value = sharedLogic.calcularLimitePorDia(datoDinero)
+                } else {
+                    // Si datoFecha es null, no se realiza ninguna acción adicional
+                    sharedLogic._diasRestantes.value = 0
+                    sharedLogic._limitePorDia.value = 0.0
+                    _fechaElegidaBarra.value = ""
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Log.e("mostrarDineroTotal", "Error al obtener el dinero total: ${e.message}")
+            }
+        }
     }
 
     fun mostrarDineroTotal() {
-        //dineroActual borrado
-        viewModelScope.launch {
-            _dineroActual.value = getCurrentMoneyUseCase().money
+        viewModelScope.launch(Dispatchers.Main) {
+            try {
+                val datos = withContext(Dispatchers.IO) {
+                    getCurrentMoneyUseCase().money
+                }
+                _dineroActual.value = datos
+            } catch (e: Exception) {
+                e.printStackTrace()
+                Log.e("mostrarDineroTotal", "Error al obtener el dinero total: ${e.message}")
+            }
+
         }
     }
+
+//    fun mostrarDineroTotal() {
+//        viewModelScope.launch(Dispatchers.Main) {
+//            try {
+//                val datos = dataBaseUtility.obtenerDineroTotal(getCurrentMoneyUseCase)
+//                _dineroActual.value = datos
+//            } catch (e: Exception) {
+//                e.printStackTrace()
+//                Log.e("mostrarDineroTotal", "Error al obtener el dinero total: ${e.message}")
+//            }
+//        }
+//    }
 
 
     private fun mostrandoAlUsuario(fechaConBarra: String) {
         mostrarFecha(fechaConBarra)
-        //_diasRestantes.value = diasRestantes(fechaSave)
         mostrarDiasRestantes(fechaConBarra)
-        //_limitePorDia.value = calcularLimitePorDia()
-        _limitePorDia.value = _dineroActual.value?.let { calcularLimitePorDia(it) }
+        sharedLogic._limitePorDia.value =
+            _dineroActual.value?.let { sharedLogic.calcularLimitePorDia(it) } ?: 0.0
     }
 
     private fun mostrarFecha(fechaConBarra: String) {
-        _fechaElegidaBarra.value = fechaConBarra
-        Log.d("mostrarFecha", "${_fechaElegidaBarra.value}")
+        //fechaConBarra tiene el formato 05/07/2024
+        _fechaElegidaBarra.value = convertirFechaPersonalizada(fechaConBarra)
     }
 
     private fun mostrarDiasRestantes(fechaConBarra: String) {
+        Log.d("diasRestantesAntes", "$fechaConBarra")
         val fechaConGuion = convertirFechaAGuion(fechaConBarra)
-        Log.d("fechaConGuion", "$fechaConGuion")
         //se manejan con dias con guion por eso hay que parsearlo antes de enviar
-        _diasRestantes.value = diasRestantes(fechaConGuion)//retorna fechaConGuion
-        Log.d("diasRestantes", "${_diasRestantes.value}")
-    }
-
-    private fun manejarErrorDeFecha() {
-        // Manejar el caso en el que la fecha seleccionada no se pudo parsear correctamente
-        Log.d("MiApp", "Error al parsear la fecha")
+        sharedLogic._diasRestantes.value = diasRestantes(fechaConGuion)
+        Log.d("diasRestantes", "${sharedLogic._diasRestantes.value}")
     }
 
     private fun convertidorFechaABarra(fechaGuion: String): String {
@@ -341,9 +346,8 @@ class HomeViewModel @Inject constructor(
 
     private fun manejarFechayDiasRestantesNulos() {
         // Si fechaGuardada es nula, maneja ese caso aquí
-        _fechaElegidaBarra.value = "Selecciona Fecha"
-        _diasRestantes.value = 0
-        Log.d("MiApp", "fechaElegidaBarra es nulo")
+        _fechaElegidaBarra.value = ""
+        sharedLogic._diasRestantes.value = 0
     }
 
     private fun insertUpdateFecha(fechaConBarra: String) {
@@ -352,7 +356,10 @@ class HomeViewModel @Inject constructor(
             try {
                 if (getFechaUsecase() == null) {
                     //si es true se ingresa por primera vez
-                    insertandoFecha(FechaSaveModel(fechaSave = fechaConBarra, isSelected = false))
+                    insertandoFecha(
+                        FechaSaveModel(fechaSave = fechaConBarra, isSelected = false),
+                        fechaConBarra
+                    )
                     Log.d("insertFecha", "insertandoFecha = $fechaConBarra")
                 } else {
                     //si es false se actualiza en la base de datos y por las dudas se sigue manteniendo que es false
@@ -360,22 +367,20 @@ class HomeViewModel @Inject constructor(
                     Log.d("actualizandoFecha", "actualizandoFecha = $fechaConBarra")
                 }
             } catch (e: DateTimeParseException) {
-                // Manejar la excepción en caso de que ocurra un error al analizar la fecha
                 Log.e("miApp", "Error al analizar la fecha: $fechaConBarra", e)
-                // Aquí puedes realizar alguna acción adicional, como mostrar un mensaje de error al usuario
             }
         }
     }
 
-    private fun insertandoFecha(item: FechaSaveModel) {
+    private fun insertandoFecha(item: FechaSaveModel, fechaConBarra: String) {
         viewModelScope.launch {
             insertFechaUsecase(item)//insertando en la base de datos
             _fechaElegidaBarra.value = item.fechaSave
-            mostrandoAlUsuario(_fechaElegidaBarra.value.toString())
-            mostrarFecha(_fechaElegidaBarra.value.toString())
-            //_diasRestantes.value = diasRestantes(fechaSave)
-            mostrarDiasRestantes(_fechaElegidaBarra.value.toString())
-            _limitePorDia.value = _dineroActual.value?.let { calcularLimitePorDia(it) }
+            mostrandoAlUsuario(fechaConBarra)
+
+            // mostrarDiasRestantes(_fechaElegidaBarra.value.toString())
+            sharedLogic._limitePorDia.value =
+                _dineroActual.value?.let { sharedLogic.calcularLimitePorDia(it) } ?: 0.0
         }
     }
 
@@ -397,19 +402,65 @@ class HomeViewModel @Inject constructor(
     }
 
     fun enviandoFechaElegida(date: String) {
-        //date tiene valor: dia/mes/año ej 10/04/2024
-        _fechaElegidaBarra.value = date //muestra 01/04/2024
-        val fechaConGuion = convertirFechaAGuion(date)//devuelve 2024-04-01
-        _fechaElegidaConGuion.value = fechaConGuion
-        insertUpdateFecha(fechaConBarra = date)
-        Log.d("enviandoFechaElegida", fechaConGuion)
+        // date me pasa ej 17/7/2024 pasarla a 17/07/2024
+        val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        try {
+            val formattedDate =
+                sdf.parse(date) // Parseas la fecha en formato String a un objeto Date
+            val formattedDateString =
+                sdf.format(formattedDate!!) // Formateas la fecha a String según el patrón
+            val fechaConGuion = convertirFechaAGuion(formattedDateString)//devuelve 2024-04-01
+            _fechaElegidaConGuion.value = fechaConGuion
+            insertUpdateFecha(fechaConBarra = formattedDateString)
+        } catch (e: ParseException) {
+            Log.e("Error", "Error al formatear la fecha: ${e.message}")
+        }
     }
 
-    fun convertirFechaAGuion(date: String): String {
-        // date sería "30/04/2024"
-        val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-        val localDate = LocalDate.parse(date, formatter)
-        return localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+    fun convertirFechaPersonalizada(date: String): String {
+        val partesFecha = date.split("/") // Dividir la fecha en partes: [dia, mes, año]
+        if (partesFecha.size == 3) {
+            val dia = partesFecha[0]
+            val mes = obtenerNombreMes(partesFecha[1].toInt()) // Obtener el nombre del mes
+            val anio = partesFecha[2]
+            return "$dia $mes.$anio" // Formato personalizado: 27 jun.2024
+        } else {
+            Log.e("convertirFechaPersonalizada", "Fecha en formato incorrecto: $date")
+            return "Formato incorrecto"
+        }
+    }
+
+
+    fun obtenerNombreMes(mes: Int): String {
+        return DateFormatSymbols().months[mes - 1].substring(0, 3).lowercase(Locale.ROOT)
+            .replaceFirstChar {
+                if (it.isLowerCase())
+                    it.titlecase(Locale.ROOT)
+                else it.toString()
+            } // Obtener el nombre del mes en formato corto y capitalizado
+    }
+
+
+    private fun convertirFechaAGuion(date: String): String {
+        // Verificar si la fecha ya está en el formato con guion
+        try {
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+            val localDate = LocalDate.parse(date, formatter)
+            Log.d("convertirFechaAGuion", "Fecha ya está en formato con guion: $date")
+            return date
+        } catch (e: DateTimeParseException) {
+            // Si no está en el formato yyyy-MM-dd, intentar convertir desde dd/MM/yyyy
+            try {
+                val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
+                val localDate = LocalDate.parse(date, formatter)
+                val fechaConGuion = localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                Log.d("convertirFechaAGuion", "Fecha con guion: $fechaConGuion")
+                return fechaConGuion
+            } catch (e: DateTimeParseException) {
+                Log.e("convertirFechaAGuion", "Error al convertir la fecha: $date", e)
+                return ""
+            }
+        }
     }
 
 
@@ -419,11 +470,8 @@ class HomeViewModel @Inject constructor(
         }
         val fechaActual: LocalDate = LocalDate.now()
         val fLocalDate = LocalDate.parse(getFechaGuion)
-        var dia: Long = ChronoUnit.DAYS.between(fechaActual, fLocalDate)
-        dia += 1
+        val dia: Long = ChronoUnit.DAYS.between(fechaActual, fLocalDate)
         return dia.toInt()
-        Log.d("diasRestantes", "diasrestantes: $dia")
-
     }
 
     fun calculadora(nuevoValor: String) {
@@ -490,52 +538,14 @@ class HomeViewModel @Inject constructor(
 
                 }
             }
-            _limitePorDia.value = calcularLimitePorDia(nuevoDinero)
+            sharedLogic._limitePorDia.value = sharedLogic.calcularLimitePorDia(nuevoDinero)
         }
     }
-
-    private fun calcularLimitePorDia(dineroActual: Double): Double {
-        val limitePorDia =
-            if (_diasRestantes.value != null && dineroActual != null && _diasRestantes.value != 0) {
-                dineroActual / _diasRestantes.value!!.toDouble()
-            } else {
-                0.0
-            }
-        Log.d("funLimitePorDia", "fun limite: ${_limitePorDia.value}")
-        Log.d("funLimitePorDia", "fun dineroActual: $dineroActual")
-        return limitePorDia
-    }
-
-    fun mostrarLimitePorDiaAlUsuario() {
-        //limite por dia borrado
-        viewModelScope.launch {
-            _limitePorDia.value = getCurrentMoneyUseCase().money
-        }
-    }
-
-
-//    private fun calcularLimitePorDia(): Double {
-//        viewModelScope.launch {
-//           val dineroActual =  getCurrentMoneyUseCase().money
-//            val limitePorDia =
-//                if (_diasRestantes.value != null && dineroActual != null && _diasRestantes.value != 0) {
-//                    dineroActual / _diasRestantes.value!!.toDouble()
-//                } else {
-//                    0.0
-//                }
-//            //muestra al usuario directamente
-//            _limitePorDia.value = limitePorDia
-//            Log.d("funLimitePorDia", "calcularLimitePorDia: ${_limitePorDia.value}")
-//            Log.d("funLimitePorDia", "dineroActual: $dineroActual")
-//        }
-//        return limitePorDia
-//    }
 
     private fun insertBaseDatos(item: CurrentMoneyModel) {
         // Agregar el valor a la base de datos
         viewModelScope.launch {
             val newValor = CurrentMoneyModel(money = item.money, isChecked = false)
-            Log.d("miApp", "INSERTANDO : $newValor")
             addCurrentMoneyUseCase(newValor)
             _dineroActual.value = getCurrentMoneyUseCase().money
 
@@ -547,7 +557,6 @@ class HomeViewModel @Inject constructor(
             val primerIngreso = TotalIngresosModel(totalIngresos = item.totalIngresos)
             insertTotalIngresosUseCase(primerIngreso)
             _mostrandoDineroTotalIngresos.value = getTotalIngresosUseCase()?.totalIngresos
-            Log.d("miApp", "primerIngresoTotal ${_mostrandoDineroTotalIngresos.value}")
         }
     }
 
@@ -556,7 +565,6 @@ class HomeViewModel @Inject constructor(
             val primerGasto = TotalGastosModel(totalGastos = item.totalGastos)
             insertTotalGastosUseCase(primerGasto)
             _mostrandoDineroTotalGastos.value = getTotalGastosUseCase()?.totalGastos
-            Log.d("miApp", "primerGastoTotal ${_mostrandoDineroTotalGastos.value}")
         }
     }
 
@@ -567,7 +575,6 @@ class HomeViewModel @Inject constructor(
             newValor.isChecked = false
             updateCurrentMoneyUseCase(newValor)
             _dineroActual.value = getCurrentMoneyUseCase().money
-            Log.d("miApp", "ACTUALIZANDO : ${_dineroActual.value}")
         }
     }
 
@@ -661,11 +668,11 @@ class HomeViewModel @Inject constructor(
     //metodo que devuelve un true para que abra el dialogo de transaccion
     fun onShowDialogClickTransaction() {
         _showDialogTransaction.value = true
-        if(_dineroActual.value == 0.0){
+        if (_dineroActual.value == 0.0) {
             _botonActivado.value = 1 // el boton ingreso esta activado
             _isChecked.value = true //elmenu de ingresos esta activado
             _enabledBotonGastos.value = false //elboton de gastos esta desactivado
-        }else{
+        } else {
             _botonActivado.value = 0
             _isChecked.value = false
             _enabledBotonGastos.value = true
@@ -676,6 +683,7 @@ class HomeViewModel @Inject constructor(
         _showDialogTransaction.value = false
         _cantidadIngresada.value = ""
         _description.value = ""
+        // En el lugar donde cierras el diálogo
     }
 
     //obtiene el nuevo valor de la plata que agregamos
@@ -698,14 +706,20 @@ class HomeViewModel @Inject constructor(
         categoryIcon: Int,
         isChecked: Boolean
     ) {
+        val day = SimpleDateFormat("dd", Locale.getDefault()).format(Date()).toInt()
+        val formattedDay = String.format(Locale.getDefault(), "%02d", day)
+        val dateFormat = SimpleDateFormat("$formattedDay MMM yyyy", Locale.getDefault())
+        val fechaFormateada = dateFormat.format(Date())
 
+        Log.d("fechaFormateada", fechaFormateada)
         viewModelScope.launch {
             val transaccion = MovimientosModel(
                 iconResourceName = categoryIcon.toString(),
                 title = categoryName,
                 subTitle = description,
                 cash = cantidad,
-                select = isChecked
+                select = isChecked,
+                date = fechaFormateada
             )
             addMovimientosUseCase(transaccion)
         }
@@ -758,5 +772,9 @@ class HomeViewModel @Inject constructor(
             val prueba = getUriImagenSeleccionadaUseCase()
             Log.d("miApp", "mostrandoImagen = ${prueba.id}, ${prueba.uri}, ${prueba.isChecked}")
         }
+    }
+
+    fun setShowNuevoMes(showNuevoMes: Boolean) {
+        _showNuevoMes.value = showNuevoMes
     }
 }

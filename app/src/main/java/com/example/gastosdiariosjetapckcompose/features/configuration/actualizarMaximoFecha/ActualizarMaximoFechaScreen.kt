@@ -10,31 +10,27 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -53,8 +49,8 @@ fun ActualizarMaximoFechaScreen(
     Scaffold(
         scaffoldState = scafoldState,
         topBar = { Toolbar() },
-        content = { myPadding ->
-            Content(myPadding, actualizarMaximoFechaViewModel, scafoldState)
+        content = { padding ->
+            Content(padding, actualizarMaximoFechaViewModel, scafoldState)
         }
     )
 }
@@ -62,28 +58,24 @@ fun ActualizarMaximoFechaScreen(
 
 @Composable
 fun Content(
-    myPadding: PaddingValues,
+    maxWhitd: PaddingValues,
     actualizarMaximoFechaViewModel: ActualizarMaximoFechaViewModel,
     scafoldState: ScaffoldState
 ) {
     val selectedOptionState by actualizarMaximoFechaViewModel.selectedOption.observeAsState()
     val selectedSwitchOption = actualizarMaximoFechaViewModel.selectedSwitchOption.value
-
-
     val scope = rememberCoroutineScope()
+
     Column(
         Modifier
             .fillMaxSize()
-            .background(Color.White)
-            .padding(horizontal = 24.dp)
+            .background(MaterialTheme.colorScheme.background)
+            .padding(horizontal = 16.dp)
     ) {
-        Spacer(modifier = Modifier.size(24.dp))
-        Spacer(modifier = Modifier.size(16.dp))
-
+        Spacer(modifier = Modifier.padding(30.dp))
         Text(
-            text = "Elige una opcion",
-            fontFamily = FontFamily(Font(R.font.lato_bold)),
-            fontSize = 24.sp
+            text = stringResource(R.string.elige_una_opcion),
+            style = MaterialTheme.typography.headlineMedium
         )
         Spacer(modifier = Modifier.size(24.dp))
         Text(
@@ -95,10 +87,10 @@ fun Content(
                     )
                 ) {
                 }
-                withStyle(style = SpanStyle(fontSize = 16.sp)) {
-                    append("Never miss a product drop.\n")
-                    append("Set up your default Notify Me product\n")
-                    append("release reminders.")
+                withStyle(style = SpanStyle(fontSize = 14.sp,color = colorResource(id = R.color.grayCuatro))) {
+                    append(stringResource(R.string._31_d_as_para_cobros_mensuales))
+                    append(stringResource(R.string._60_d_as_para_cobros_cada_dos_meses))
+                    append(stringResource(R.string._90_d_as_para_cobros_cada_3_meses))
                 }
             }
         )
@@ -107,7 +99,7 @@ fun Content(
         Spacer(modifier = Modifier.size(20.dp))
 
         SwitchWithText(
-            "31 dias",
+            stringResource(R.string.primer_mes),
             31,
             selectedOptionState,
             selectedSwitchOption,
@@ -115,7 +107,7 @@ fun Content(
         )
 
         SwitchWithText(
-            "60 dias",
+            stringResource(R.string.dos_meses),
             60,
             selectedOptionState,
             selectedSwitchOption,
@@ -123,28 +115,16 @@ fun Content(
         )
 
         SwitchWithText(
-            "90 dias",
+            stringResource(R.string.tres_meses),
             90,
             selectedOptionState,
             selectedSwitchOption,
             actualizarMaximoFechaViewModel
         )
 
-        Spacer(modifier = Modifier.size(30.dp))
-        Text(
-            text = "You can manage your app notification",
-            fontFamily = FontFamily.SansSerif,
-            color = Color.Gray,
-            fontSize = 16.sp
-        )
-        Text(
-            text = "permissions in your Phone settings.",
-            fontFamily = FontFamily.SansSerif,
-            color = Color.Gray,
-            fontSize = 16.sp,
-            modifier = Modifier.weight(1f)
-        )
-        Spacer(modifier = Modifier.size(30.dp))
+        Spacer(modifier = Modifier
+            .size(30.dp)
+            .weight(1f))
         Button(
             onClick = {
                 selectedOptionState?.let {
@@ -157,17 +137,11 @@ fun Content(
                     scafoldState.snackbarHostState.showSnackbar("Opción guardada correctamente")
                 }
             },
-            // Resto de la configuración del botón
-            colors = ButtonDefaults.buttonColors(containerColor = colorResource(id = R.color.blue)),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(51.dp)
-                .padding(horizontal = 24.dp)
         ) {
-            Text(
-                text = "Confirm",
-                color = Color.White
-            )
+            Text(text = stringResource(R.string.confirmar))
         }
         Spacer(modifier = Modifier.size(30.dp))
     }
@@ -201,9 +175,7 @@ fun SwitchWithText(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = switchText, modifier = Modifier.weight(1f),
-            fontFamily = FontFamily(Font(R.font.lato_bold)),
-            fontSize = 16.sp
+            text = switchText, modifier = Modifier.weight(1f)
         )
         Switch(
             checked = selectedOption == switchNumber && selectedSwitchOption,
@@ -225,13 +197,5 @@ fun SwitchWithText(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Toolbar() {
-    TopAppBar(
-        title = {
-            Text(
-                text = stringResource(R.string.toolbar_cambio_fecha),
-                color = colorResource(id = R.color.black)
-            )
-        },
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White)
-    )
+    TopAppBar(title = { Text(text = stringResource(R.string.toolbar_cambio_fecha)) })
 }

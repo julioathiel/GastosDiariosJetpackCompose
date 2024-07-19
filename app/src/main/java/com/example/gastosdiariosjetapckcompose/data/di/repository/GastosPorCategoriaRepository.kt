@@ -32,6 +32,10 @@ class GastosPorCategoriaRepository @Inject constructor(private val gastosPorCate
         gastosPorCategoriaDao.actualizarTotalGastadoPorCategoria(nombreCategoria, cantidadIngresada)
     }
 
+    suspend fun updateGastosPorCategoriaRepository(item:GastosPorCategoriaModel){
+        gastosPorCategoriaDao.updateGastosPorCategoria(item.toData())
+    }
+
 
     suspend fun deleteGastosPorCategoriaRepository(item: GastosPorCategoriaModel) {
         gastosPorCategoriaDao.deleteGastosPorCategoria(item.toData())

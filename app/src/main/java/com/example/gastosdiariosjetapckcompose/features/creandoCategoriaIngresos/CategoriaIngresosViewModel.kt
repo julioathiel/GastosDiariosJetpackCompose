@@ -23,8 +23,10 @@ import com.example.gastosdiariosjetapckcompose.domain.uiState.CatIngresosUiState
 import com.example.gastosdiariosjetapckcompose.domain.uiState.ResultUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -52,9 +54,21 @@ class CategoriaIngresosViewModel @Inject constructor(
     private val _isActivated = mutableStateOf(false)
     val isActivated: State<Boolean> = _isActivated
 
+    private val _idDelElemento = MutableLiveData<Int>()
+    val idDelElemento: LiveData<Int> = _idDelElemento
 
-    private val _selectedCategoryIngresos = mutableStateOf<CategoryCrear?>(null)
-    val selectedCategoryIngresos: State<CategoryCrear?> = _selectedCategoryIngresos
+    private val _tituloBottomSheet = MutableStateFlow("")
+    val tituloBottomSheet: StateFlow<String> = _tituloBottomSheet.asStateFlow()
+
+
+    private val _selectedCategoryIngresos = MutableStateFlow<CategoryCrear?>(null)
+    val selectedCategoryIngresos: StateFlow<CategoryCrear?> = _selectedCategoryIngresos.asStateFlow()
+
+    private val _isEditarSeleccion = mutableStateOf(false)
+    val isEditarSeleccion: State<Boolean> = _isEditarSeleccion
+
+    private val _onDismiss = mutableStateOf(false)
+    val onDismiss: State<Boolean> = _onDismiss
 
     fun isActivatedTrue() {
         _isActivated.value = true
@@ -63,13 +77,22 @@ class CategoriaIngresosViewModel @Inject constructor(
     fun isActivatedFalse() {
         _isActivated.value = false
     }
+    fun onDismissSet(value: Boolean) {
+        _onDismiss.value = value
+    }
+    fun iconoSelecionadoIngresos(iconoSeleccionado: CategoryCrear) {
+        _selectedCategoryIngresos.value = iconoSeleccionado
+    }
 
-    fun crearNuevaCategoriaDeIngresos(titulo: String, icon: Int) {
+    fun actualizarTituloIngresos(it: String) {
+        _tituloBottomSheet.value = it
+    }
+    fun crearNuevaCategoriaDeIngresos(itemModel:UsuarioCreaCatIngresosModel) {
         viewModelScope.launch {
             insertUserCatIngresoUsecase(
                 UsuarioCreaCatIngresosModel(
-                    nombreCategoria = titulo,
-                    categoriaIcon = icon.toString()
+                    nombreCategoria = itemModel.nombreCategoria,
+                    categoriaIcon = itemModel.categoriaIcon
                 )
             )
             isActivatedTrue()
@@ -77,8 +100,14 @@ class CategoriaIngresosViewModel @Inject constructor(
     }
 
 
-    fun editarItemSelected(nombreCategoria: String, categoriaIcon: String) {
-
+    fun editarItemSelected(itemModel: UsuarioCreaCatIngresosModel, iconoSeleccionado: Int) {
+        viewModelScope.launch {
+            _idDelElemento.value = itemModel.id // para compartirlo con la otra funcion
+            _tituloBottomSheet.value = itemModel.nombreCategoria
+            _selectedCategoryIngresos.value = CategoryCrear(name = "", iconoSeleccionado)
+            _isEditarSeleccion.value = true //activa para actualizar al momento de guardar
+            _onDismiss.value = true //abre el bottomSheet
+        }
     }
 
     fun eliminarItemSelected(
@@ -109,5 +138,36 @@ class CategoriaIngresosViewModel @Inject constructor(
                 categoriesIngresos.removeAll { it == porElUsuario }
             }
         }
+    }
+
+    fun actualizandoItemIngresos(itemModel: UsuarioCreaCatIngresosModel) {
+        viewModelScope.launch {
+            getUserCatIngresoUsecase().map { lista ->
+                val movimientoActualizado:UsuarioCreaCatIngresosModel? = lista.map { itemViejo ->
+                    if (itemViejo.id == _idDelElemento.value) {
+                        //cambiandoles los valores a los items
+                        itemViejo.nombreCategoria = itemModel.nombreCategoria
+                        itemViejo.categoriaIcon = itemModel.categoriaIcon
+                    }
+                    itemViejo  // Devolver el movimiento actualizado o sin cambios
+                }.find { it.id == _idDelElemento.value } // Encontrar el movimiento actualizado
+                movimientoActualizado // Devolver el movimiento actualizado
+
+            }.collect { movimientoActualizado ->
+                if (movimientoActualizado != null) {
+                    // Si se encontró y actualizó el movimiento, se pasa a la función de actualización individual
+                    updateUserCatIngresoUsecase(movimientoActualizado)
+                    limpiandoCampoBottomSheetIngresos()
+                } else {
+                    // Manejar el caso en el que no se encuentre el elemento a actualizar
+                    // Puede ser útil lanzar una excepción o manejarlo de alguna otra manera
+                }
+            }
+        }
+    }
+    private fun limpiandoCampoBottomSheetIngresos() {
+        _tituloBottomSheet.value = "" //limpia textField
+        _selectedCategoryIngresos.value = null //limpia seleccion
+        _isEditarSeleccion.value = false //desactiva para no editar
     }
 }

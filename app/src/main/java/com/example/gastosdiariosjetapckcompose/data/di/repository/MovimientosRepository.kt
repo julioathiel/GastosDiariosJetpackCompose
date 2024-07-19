@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class MovimientosRepository @Inject constructor(private val movimientosDao: MovimientosDao) {
+
     suspend fun insertMovimientosRepository(item: MovimientosModel) {
         movimientosDao.insertMovimientos(item.toData())
     }

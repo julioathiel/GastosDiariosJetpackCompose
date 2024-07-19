@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -48,6 +47,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -67,9 +67,9 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavHostController
-import com.example.gastosdiariosjetapckcompose.ClaseEnum
 import com.example.gastosdiariosjetapckcompose.GlobalVariables.sharedLogic
 import com.example.gastosdiariosjetapckcompose.R
+import com.example.gastosdiariosjetapckcompose.domain.enums.IngresosGastosEnum
 import com.example.gastosdiariosjetapckcompose.domain.model.CategoryCrear
 import com.example.gastosdiariosjetapckcompose.domain.model.UsuarioCreaCatIngresosModel
 import com.example.gastosdiariosjetapckcompose.domain.model.categorieGastosNuevos
@@ -83,10 +83,8 @@ import com.example.gastosdiariosjetapckcompose.navigation.Routes
 fun CategoriaIngresosScreen(
     navController: NavHostController, categoriaIngresosViewModel: CategoriaIngresosViewModel
 ) {
-    var titulo by remember { mutableStateOf("") }
-    var onDismiss by remember { mutableStateOf(false) }
+    val onDismiss by categoriaIngresosViewModel.onDismiss
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var selectedCategory by remember { mutableStateOf<CategoryCrear?>(null) }
 
     BackHandler {
         navController.navigate(Routes.ConfigurationScreen.route)
@@ -98,7 +96,8 @@ fun CategoriaIngresosScreen(
         sheetContent = {
             if (onDismiss) {
                 ModalBottomSheet(
-                    onDismissRequest = { onDismiss = false }, sheetState = sheetState,
+                    onDismissRequest = { categoriaIngresosViewModel.onDismissSet(false) },
+                    sheetState = sheetState,
                     content = {
                         Column(
                             modifier = Modifier
@@ -107,10 +106,7 @@ fun CategoriaIngresosScreen(
                         ) {
                             // Llama a ContentBottomSheet desde aquí
                             ContentBottomSheet(
-                                initialTitulo = titulo,
-                                initialSelectedCategory = selectedCategory,
-                                categories = categorieGastosNuevos,
-                                onDismiss = { onDismiss = false },
+                                onDismiss = { categoriaIngresosViewModel.onDismissSet(false) },
                                 categoriaIngresosViewModel
                             )
                         }
@@ -135,17 +131,7 @@ fun CategoriaIngresosScreen(
         when (uiState) {
             is CatIngresosUiState.Error -> {}
             CatIngresosUiState.Loading -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(color = colorResource(id = R.color.white))
-                ) {
-                    CircularProgressIndicator(
-                        Modifier
-                            .size(30.dp)
-                            .align(Alignment.Center)
-                    )
-                }
+                sharedLogic.LoaderCircularProgressPantalla()
             }
 
             is CatIngresosUiState.Success -> {
@@ -159,30 +145,25 @@ fun CategoriaIngresosScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         BotonGastosIngresos { tipoClase ->
-                            if (tipoClase == ClaseEnum.GASTOS) {
+                            if (tipoClase == IngresosGastosEnum.GASTOS) {
                                 navController.navigate(Routes.CategoriaGastosScreen.route)
                             } else {
                                 //
                             }
                         }
-                        VacioIngresos { onDismiss = it }
+                        VacioIngresos(categoriaIngresosViewModel)
                     }
 
                 } else {
                     categoriaIngresosViewModel.isActivatedTrue()
-                    Box(
-                        Modifier
-                            .fillMaxSize()
-                            .background(colorResource(id = R.color.grayUno))
-                    ) {
-
+                    Box(Modifier.fillMaxSize()) {
                         Column(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
 
                             BotonGastosIngresos { tipoClase ->
-                                if (tipoClase == ClaseEnum.GASTOS) {
+                                if (tipoClase == IngresosGastosEnum.GASTOS) {
                                     navController.navigate(Routes.CategoriaGastosScreen.route)
                                 } else {
                                     //
@@ -194,7 +175,7 @@ fun CategoriaIngresosScreen(
                             )
                         }
                         FloatingActionButton(
-                            onClick = { onDismiss = true },
+                            onClick = { categoriaIngresosViewModel.onDismissSet(true) },
                             modifier = Modifier
                                 .align(alignment = Alignment.BottomEnd)
                                 .padding(20.dp)
@@ -218,8 +199,8 @@ fun ListaNuevaCategoriaGasto(
             .fillMaxWidth()
             .padding(top = 2.dp)
     ) {
-        items(listNueva, key = { it.id }) { transaccion ->
-            ItemIngresos(listNueva, transaccion, categoriaIngresosViewModel)
+        items(listNueva, key = { it.id }) { nuevoItem ->
+            ItemIngresos(itemModel = nuevoItem, categoriaIngresosViewModel)
         }
     }
 }
@@ -227,8 +208,7 @@ fun ListaNuevaCategoriaGasto(
 
 @Composable
 fun ItemIngresos(
-    listNueva: List<UsuarioCreaCatIngresosModel>,
-    transaccion: UsuarioCreaCatIngresosModel,
+    itemModel: UsuarioCreaCatIngresosModel,
     categoriaIngresosViewModel: CategoriaIngresosViewModel
 ) {
     // Estado para controlar la visibilidad del menú
@@ -242,13 +222,13 @@ fun ItemIngresos(
             .height(48.dp), verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            painter = painterResource(id = transaccion.categoriaIcon.toInt()),
+            painter = painterResource(id = itemModel.categoriaIcon.toInt()),
             contentDescription = null,
             tint = colorResource(id = R.color.black),
             modifier = Modifier.padding(start = 16.dp, end = 32.dp)
         )
         Text(
-            text = transaccion.nombreCategoria,
+            text = itemModel.nombreCategoria,
             color = colorResource(id = R.color.black),
             fontSize = 16.sp,
             style = MaterialTheme.typography.titleMedium,
@@ -263,52 +243,31 @@ fun ItemIngresos(
         }
 
     }
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .wrapContentSize(Alignment.TopEnd)) {
-        DropdownMenu(
-            expanded = showMenu,
-            onDismissRequest = { showMenu = false }
-        ) {
-            DropdownMenuItem(
-                text = { Text(text = "Editar") },
-                onClick = {
-                    categoriaIngresosViewModel.editarItemSelected(
-                        transaccion.nombreCategoria,
-                        transaccion.categoriaIcon
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_edit),
-                        contentDescription = null
-                    )
-                },
-
+    if (showMenu) {
+        sharedLogic.EditDeleteAlertDialog(
+            onDismiss = { showMenu = false },
+            onEditClick = {
+                categoriaIngresosViewModel.editarItemSelected(
+                    UsuarioCreaCatIngresosModel(
+                        id = itemModel.id,
+                        nombreCategoria = itemModel.nombreCategoria,
+                        categoriaIcon = itemModel.categoriaIcon
+                    ),
+                    iconoSeleccionado = itemModel.categoriaIcon.toInt()
                 )
-            DropdownMenuItem(text = { Text(text = "Eliminar") },
-                onClick = { categoriaIngresosViewModel.eliminarItemSelected(transaccion) },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_delete),
-                        contentDescription = null
-                    )
-                }
-            )
-        }
+            }, onDeleteClick = { categoriaIngresosViewModel.eliminarItemSelected(itemModel) })
     }
 }
 
 @Composable
 fun ContentBottomSheet(
-    initialTitulo: String,
-    initialSelectedCategory: CategoryCrear?,
-    categories: List<CategoryCrear>,
     onDismiss: () -> Unit,
     categoriaIngresosViewModel: CategoriaIngresosViewModel
 ) {
-    var titulo by remember { mutableStateOf(initialTitulo) }
-    var selectedCategory by remember { mutableStateOf(initialSelectedCategory) }
+    val titulo by categoriaIngresosViewModel.tituloBottomSheet.collectAsState("")
+    val categoriaSeleccionada by categoriaIngresosViewModel.selectedCategoryIngresos.collectAsState()
+    val isEditarSeleccion by categoriaIngresosViewModel.isEditarSeleccion
+
 
     Column(Modifier.fillMaxWidth()) {
         Text(
@@ -319,29 +278,29 @@ fun ContentBottomSheet(
         HorizontalDivider()
 
         CategoryListIngresos(
-            categories = categories,
-            selectedCategory = selectedCategory
-        ) { nuevaCategoria ->
-            selectedCategory = nuevaCategoria
+            iconoSeleccionado = categoriaSeleccionada,
+        ) { icono ->
+            categoriaIngresosViewModel.iconoSelecionadoIngresos(icono)
         }
 
         HorizontalDivider()
         Spacer(modifier = Modifier.padding(10.dp))
-        Text(text = stringResource(id = R.string.nuevo_titulo), style = MaterialTheme.typography.labelMedium)
+        Text(
+            text = stringResource(id = R.string.nuevo_titulo),
+            style = MaterialTheme.typography.labelMedium
+        )
         TextField(
             value = titulo,
-            onValueChange = { titulo = it },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+            onValueChange = { categoriaIngresosViewModel.actualizarTituloIngresos(it) },
+            modifier = Modifier.fillMaxWidth(),
             singleLine = true,
             maxLines = 1,
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
-                unfocusedContainerColor = colorResource(id = R.color.grayDos),
-                focusedContainerColor = colorResource(id = R.color.grayDos)
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
             )
         )
         Spacer(modifier = Modifier.padding(10.dp))
@@ -349,29 +308,37 @@ fun ContentBottomSheet(
         Spacer(modifier = Modifier.padding(10.dp))
         Button(
             onClick = {
-                categoriaIngresosViewModel.crearNuevaCategoriaDeIngresos(
-                    titulo,
-                    selectedCategory!!.icon
-                )
-                categoriaIngresosViewModel.isActivatedTrue()
+                if (isEditarSeleccion) {
+                    categoriaIngresosViewModel.actualizandoItemIngresos(
+                        UsuarioCreaCatIngresosModel(
+                            nombreCategoria = titulo,
+                            categoriaIcon = categoriaSeleccionada!!.icon.toString()
+                        )
+                    )
+                } else {
+                    //para crear un item de gastos nuevo
+                    categoriaIngresosViewModel.crearNuevaCategoriaDeIngresos(
+                        UsuarioCreaCatIngresosModel(
+                            nombreCategoria = titulo,
+                            categoriaIcon = categoriaSeleccionada!!.icon.toString()
+                        )
+                    )
+                }
                 onDismiss() // Cierra el bottom sheet después de guardar
             },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
-            colors = ButtonDefaults.buttonColors(containerColor= colorResource(id = R.color.blue)),
-            enabled = !(titulo.isEmpty() || selectedCategory == null)
+            enabled = !(titulo.isEmpty() || categoriaSeleccionada == null)
         ) {
-            Text(text = "Guardar")
+            Text(text = stringResource(id = R.string.guardar))
         }
-        Spacer(modifier = Modifier.padding(bottom = 40.dp))
     }
 }
 
 @Composable
 fun CategoryListIngresos(
-    categories: List<CategoryCrear>,
-    selectedCategory: CategoryCrear?,
+    iconoSeleccionado: CategoryCrear?,
     onCategorySelected: (CategoryCrear) -> Unit
 ) {
     LazyVerticalGrid(
@@ -380,10 +347,10 @@ fun CategoryListIngresos(
         modifier = Modifier
             .heightIn(max = 280.dp) // Ajusta la altura máxima para mostrar solo 5 elementos
     ) {
-        items(categories) { category ->
+        items(categorieGastosNuevos) { category ->
             CategoryItemIngresos(
                 category = category,
-                isSelected = category == selectedCategory,
+                isSelected = category == iconoSeleccionado,
                 onCategorySelected = onCategorySelected
             )
         }
@@ -396,7 +363,9 @@ fun CategoryItemIngresos(
     isSelected: Boolean,
     onCategorySelected: (CategoryCrear) -> Unit
 ) {
-    val iconColor = if (isSelected) Color(0xFFCE93D8) else Color.Black
+    val iconColor =
+        if (isSelected) MaterialTheme.colorScheme.inversePrimary
+        else MaterialTheme.colorScheme.onSurfaceVariant
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -416,12 +385,12 @@ fun CategoryItemIngresos(
 
 
 @Composable
-fun VacioIngresos(onDismiss: (Boolean) -> Unit) {
+fun VacioIngresos(categoriaIngresosViewModel: CategoriaIngresosViewModel) {
     Box {
         sharedLogic.IsEmpty()
 
         FloatingActionButton(
-            onClick = { onDismiss(true) },
+            onClick = { categoriaIngresosViewModel.onDismissSet(true) },
             modifier = Modifier
                 .align(alignment = Alignment.BottomEnd)
                 .padding(20.dp)
@@ -431,16 +400,16 @@ fun VacioIngresos(onDismiss: (Boolean) -> Unit) {
 }
 
 @Composable
-fun BotonGastosIngresos(onTipoSeleccionado: (ClaseEnum) -> Unit) {
+fun BotonGastosIngresos(onTipoSeleccionado: (IngresosGastosEnum) -> Unit) {
     var selectedIndex by remember { mutableStateOf(1) }
-    val options = listOf(ClaseEnum.GASTOS, ClaseEnum.INGRESOS)
+    val options = listOf(IngresosGastosEnum.GASTOS, IngresosGastosEnum.INGRESOS)
     SingleChoiceSegmentedButtonRow {
         options.forEachIndexed { index, label ->
             val isSelected = index == selectedIndex
             val color = if (isSelected) {
                 when (label) {
-                    ClaseEnum.GASTOS -> Color(0xFFFFEBEE)
-                    ClaseEnum.INGRESOS -> colorResource(id = R.color.fondoVerdeDinero)
+                    IngresosGastosEnum.GASTOS -> Color(0xFFFFEBEE)
+                    IngresosGastosEnum.INGRESOS -> colorResource(id = R.color.fondoVerdeDinero)
                     else -> Color.Transparent
                 }
             } else {
@@ -449,8 +418,8 @@ fun BotonGastosIngresos(onTipoSeleccionado: (ClaseEnum) -> Unit) {
 
             val colorText = if (isSelected) {
                 when (label) {
-                    ClaseEnum.GASTOS -> Color(0xFFE57373)
-                    ClaseEnum.INGRESOS -> colorResource(id = R.color.verdeDinero)
+                    IngresosGastosEnum.GASTOS -> MaterialTheme.colorScheme.error
+                    IngresosGastosEnum.INGRESOS -> colorResource(id = R.color.verdeDinero)
                     else -> Color.Transparent
                 }
             } else {
@@ -463,12 +432,15 @@ fun BotonGastosIngresos(onTipoSeleccionado: (ClaseEnum) -> Unit) {
                     onTipoSeleccionado(options[index])
                 },
                 selected = index == selectedIndex,
-                colors = SegmentedButtonDefaults.colors(activeContainerColor = color),
+                colors = SegmentedButtonDefaults.colors(
+                    activeContainerColor = color,
+                    inactiveContainerColor = Color.Transparent
+                ),
                 border = BorderStroke(color = colorText, width = 1.dp),
             ) {
                 Text(
                     label.toString(),
-                    color = if (isSelected) colorText else Color.Black
+                    color = if (isSelected) colorText else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -481,20 +453,12 @@ fun Toolbar(categoriaGastosViewModel: CategoriaIngresosViewModel) {
     val activado = categoriaGastosViewModel.isActivated.value
     var isBorrarTodo by remember { mutableStateOf(false) }
     TopAppBar(
-        title = {
-            Text(
-                text = "Catagorias nuevas",
-                color = colorResource(id = R.color.black),
-                modifier = Modifier.padding(8.dp)
-            )
-        },
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = colorResource(id = R.color.white)),
+        title = { Text(text = "Catagorias nuevas") },
         actions = {
             if (activado) {
                 IconButton(onClick = { isBorrarTodo = true }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_option),
-                        tint = Color.Black,
                         contentDescription = null
                     )
                 }
@@ -502,15 +466,16 @@ fun Toolbar(categoriaGastosViewModel: CategoriaIngresosViewModel) {
                     expanded = isBorrarTodo,
                     onDismissRequest = { isBorrarTodo = !isBorrarTodo }) {
                     DropdownMenuItem(
-                        text = { Text("Borrar todo") },
+                        text = { Text("Eliminar todo") },
                         onClick = { categoriaGastosViewModel.borrandoLista() },
-                        trailingIcon = {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_delete),
-                                tint = Color.Black,
-                                contentDescription = null
-                            )
-                        })
+//                        trailingIcon = {
+//                            Icon(
+//                                painter = painterResource(id = R.drawable.ic_delete),
+//                                tint = Color.Black,
+//                                contentDescription = null
+//                            )
+//                        }
+                    )
 
                 }
             }

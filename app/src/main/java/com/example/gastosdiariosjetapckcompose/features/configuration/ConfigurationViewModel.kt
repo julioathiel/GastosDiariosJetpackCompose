@@ -8,14 +8,20 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.gastosdiariosjetapckcompose.bar_graph_custom.BarGraphConfig
 import com.example.gastosdiariosjetapckcompose.data.di.module.DataBaseCleaner
+import com.example.gastosdiariosjetapckcompose.domain.model.BarDataModel
 import com.example.gastosdiariosjetapckcompose.domain.model.CurrentMoneyModel
 import com.example.gastosdiariosjetapckcompose.domain.model.GastosPorCategoriaModel
 import com.example.gastosdiariosjetapckcompose.domain.model.MovimientosModel
+import com.example.gastosdiariosjetapckcompose.domain.model.OpcionEliminarModel
 import com.example.gastosdiariosjetapckcompose.domain.model.TotalGastosModel
 import com.example.gastosdiariosjetapckcompose.domain.usecase.GastosPorCategoria.CheckDatabaseGastosPorCategoriaEmptyUseCase
 import com.example.gastosdiariosjetapckcompose.domain.usecase.GastosPorCategoria.DeleteGastosPorCategoriaUseCase
 import com.example.gastosdiariosjetapckcompose.domain.usecase.GastosPorCategoria.GetGastosPorCategoriaUseCase
+import com.example.gastosdiariosjetapckcompose.domain.usecase.bar_graph.ClearAllBarDataGraphUseCase
+import com.example.gastosdiariosjetapckcompose.domain.usecase.bar_graph.DeleteBarGraphUseCase
+import com.example.gastosdiariosjetapckcompose.domain.usecase.bar_graph.GetAllBarGraphUseCase
 import com.example.gastosdiariosjetapckcompose.domain.usecase.fechaElegida.CheckDatabaseFechaGuardadaEmptyUseCase
 import com.example.gastosdiariosjetapckcompose.domain.usecase.fechaElegida.DeleteFechaUsecase
 import com.example.gastosdiariosjetapckcompose.domain.usecase.fechaElegida.GetFechaUsecase
@@ -31,10 +37,14 @@ import com.example.gastosdiariosjetapckcompose.domain.usecase.totalesRegistro.De
 import com.example.gastosdiariosjetapckcompose.domain.usecase.totalesRegistro.DeleteTotalIngresosUseCase
 import com.example.gastosdiariosjetapckcompose.domain.usecase.totalesRegistro.GetTotalGastosUseCase
 import com.example.gastosdiariosjetapckcompose.domain.usecase.totalesRegistro.GetTotalIngresosUseCase
+import com.example.gastosdiariosjetapckcompose.features.core.DataStorePreferences
+import com.example.gastosdiariosjetapckcompose.features.viewPagerScreen.ViewPagerViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -43,6 +53,7 @@ import javax.inject.Inject
 class ConfigurationViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private var databaseCleaner: DataBaseCleaner,
+    private val dataStorePreferences: DataStorePreferences,
 
     private var getMovimientosUsecase: GetMovimientosUsecase,
     private var deleteMovimientosUsecase: DeleteMovimientosUsecase,
@@ -67,7 +78,9 @@ class ConfigurationViewModel @Inject constructor(
     private val checkDatabaseTotalIngresosEmptyUseCase: CheckDatabaseTotalIngresosEmptyUseCase,
     private val checkDatabaseFechaGuardadaEmptyUseCase: CheckDatabaseFechaGuardadaEmptyUseCase,
     private val checkDatabaseAllExpensesEmptyUseCase: CheckDatabaseAllExpensesEmptyUseCase,
-    private val checkDatabaseGastosPorCategoriaEmptyUseCase: CheckDatabaseGastosPorCategoriaEmptyUseCase
+    private val checkDatabaseGastosPorCategoriaEmptyUseCase: CheckDatabaseGastosPorCategoriaEmptyUseCase,
+
+    private val clearAllBarDataGraphUseCase: ClearAllBarDataGraphUseCase
 ) : ViewModel() {
     // LiveData para observar cuando la aplicación ha sido reseteada con éxito
     private val _appResetExitoso = MutableLiveData(false)
@@ -75,6 +88,9 @@ class ConfigurationViewModel @Inject constructor(
 
     private val _showDialog = mutableStateOf(false)
     val showDialog: State<Boolean> = _showDialog
+
+    private val _showShareApp = mutableStateOf(false)
+    val showShareApp :State<Boolean> = _showShareApp
 
 
     private val _resetComplete = mutableStateOf(false)
@@ -85,13 +101,23 @@ class ConfigurationViewModel @Inject constructor(
 
     private val _showCongratulationsDialog = mutableStateOf(false)
     val showCongratulationsDialog: State<Boolean> = _showCongratulationsDialog
+    fun setBooleanPagerFalse(){
+        viewModelScope.launch {
+            dataStorePreferences.setViewPagerShow(false)
+        }
+    }
+
+    fun setShowShare(value:Boolean){
+        _showShareApp.value = value
+    }
 
     fun setResetComplete(item: Boolean) {
         _resetComplete.value = item
+        dismissDialog()
     }
 
-    fun showResetDialog() {
-        _showDialog.value = true
+    fun setShowResetDialog(value:Boolean) {
+        _showDialog.value = value
     }
 
     fun dismissDialog() {
@@ -121,13 +147,13 @@ class ConfigurationViewModel @Inject constructor(
         }
     }
 
-    private fun deleteDinreoActual() {
+     fun deleteDinreoActual() {
         viewModelScope.launch {
             deleteCurrentMoneyUseCase(CurrentMoneyModel(money = 0.0, isChecked = true))
         }
     }
 
-    private fun deleteListGastosPorCategoriasUnicas() {
+     fun deleteListGastosPorCategoriasUnicas() {
         viewModelScope.launch {
             val listCatUnica: Flow<List<GastosPorCategoriaModel>> = getGastosPorCategoriaUseCase()
             val list = listCatUnica.first()
@@ -137,7 +163,7 @@ class ConfigurationViewModel @Inject constructor(
         }
     }
 
-    private fun deleteTodosLosMovimientos() {
+     fun deleteTodosLosMovimientos() {
         viewModelScope.launch {
             val transaccionesFlow: Flow<List<MovimientosModel>> = getMovimientosUsecase()
             val transacciones =
@@ -149,7 +175,7 @@ class ConfigurationViewModel @Inject constructor(
         }
     }
 
-    private fun deleteFecha() {
+     fun deleteFecha() {
         viewModelScope.launch {
             // Obtener el objeto FechaSaveModel actualmente guardado
             val fechaSaveModel = getFechaUsecase()
@@ -160,7 +186,7 @@ class ConfigurationViewModel @Inject constructor(
         }
     }
 
-    private fun deleteIngresosTotal() {
+    fun deleteIngresosTotal() {
         viewModelScope.launch {
             val item = getTotalIngresosUseCase()
             if (item != null) {
@@ -169,7 +195,7 @@ class ConfigurationViewModel @Inject constructor(
         }
     }
 
-    private fun deletGastosTotal() {
+     fun deletGastosTotal() {
         viewModelScope.launch {
             val item = getTotalGastosUseCase()
             if (item != null) {
@@ -188,9 +214,19 @@ class ConfigurationViewModel @Inject constructor(
             checkDatabaseGastosPorCategoriaEmptyUseCase()
 
             _resetComplete.value = true
-
         }
     }
+
+    private fun deleteGraphBar(){
+        viewModelScope.launch(Dispatchers.Main) {
+            clearAllBarDataGraphUseCase()
+        }
+    }
+    // Opciones de eliminación adicionales que son opcionales para el usuario
+    val opcionesEliminar = listOf(
+        OpcionEliminarModel("Eliminar datos del grafico",::deleteGraphBar),
+    )
+
 }
 
 

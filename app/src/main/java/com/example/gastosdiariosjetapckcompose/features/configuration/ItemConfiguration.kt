@@ -22,10 +22,11 @@ enum class ItemConfiguration(
     val title: String,
     val descripcion:String
 ) {
-    CATEGORIASNUEVAS( R.drawable.ic_folder,"Categorias nuevas","Aqui encontras las cetegorias que tu crees"),
-    DIVISA(R.drawable.ic_sueldo,"Divisa", "Cambia formato de moneda"),
+    CATEGORIASNUEVAS( R.drawable.ic_folder,"Categorias nuevas","Aqui encontras las categorias que tu crees"),
     UPDATEDATE(R.drawable.ic_date_range,"Actualizar maximo fecha", "Para alcanzar tus objetivos"),
     RECORDATORIOS(R.drawable.ic_notifications,"Recordatorios","Modificar la alarma"),
     RESET(R.drawable.ic_refresh,"Resetear aplicacion","Elimina tood de la app"),
+    TUTORIAL(R.drawable.ic_play,"Tutorial","Ver tutorial de como usar la app."),
+    COMPARTIR(R.drawable.ic_share,"Compartir app","comparte la app"),
     ACERCADE(R.drawable.ic_info,"Acerca de...","Un breve repaso"),
 }

@@ -6,14 +6,17 @@ sealed class Routes(val route: String) {
     // extendera de la misma clase Routes y le ponemos la ruta o ID para poder
     // navegar entre pantallas
     object LoginScreen : Routes("LoginScreen")
+    object ViewPagerScreen : Routes("ViewPagerScreen")
     object HomeScreen : Routes("HomeScreen")
     object RegisterScreen : Routes("RegisterScreen")
     object ForgotPasswordScreen : Routes("ForgotPasswordScreen")
     object MovimientosScreen : Routes("MovimientosScreen")
     object ConfigurationScreen : Routes("ConfigurationScreen")
     object RegistroTransaccionesScreen : Routes("RegistroTransaccionesScreen")
-    object  RecordatorioScreen :Routes("RecordatorioScreen")
-    object CategoriaGastosScreen:Routes("CategoriaGastosScreen")
-    object CategoriaIngresosScreen:Routes("CategoriaIngresosScreen")
-    object ActualizarMaximoFechaScreen:Routes("ActualizarMaximoFechaScreen")
+    object RecordatorioScreen : Routes("RecordatorioScreen")
+    object CategoriaGastosScreen : Routes("CategoriaGastosScreen")
+    object CategoriaIngresosScreen : Routes("CategoriaIngresosScreen")
+    object ActualizarMaximoFechaScreen : Routes("ActualizarMaximoFechaScreen")
+    object LoadingScreen : Routes("LoadingScreen")
+    object AcercaDe : Routes("AcercaDe")
 }

@@ -1,4 +1,4 @@
-package com.example.gastosdiariosjetapckcompose.features.registroTransaccionsPorcentaje
+package com.example.gastosdiariosjetapckcompose.domain.uiState
 
 import com.example.gastosdiariosjetapckcompose.domain.model.GastosPorCategoriaModel
 
@@ -6,5 +6,6 @@ import com.example.gastosdiariosjetapckcompose.domain.model.GastosPorCategoriaMo
 sealed interface RegistroTransaccionesUiState{
     object Loading: RegistroTransaccionesUiState
     data class Error(val throwable: Throwable): RegistroTransaccionesUiState
-    data class  Success(val listGastosPorCat:List<GastosPorCategoriaModel>): RegistroTransaccionesUiState
+    data class  Success(val listGastosPorCat:List<GastosPorCategoriaModel>):
+        RegistroTransaccionesUiState
 }

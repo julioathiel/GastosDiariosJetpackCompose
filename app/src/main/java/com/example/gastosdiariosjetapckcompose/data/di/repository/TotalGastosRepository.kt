@@ -1,10 +1,8 @@
 package com.example.gastosdiariosjetapckcompose.data.di.repository
 
-import android.util.Log
 import com.example.gastosdiariosjetapckcompose.data.di.dao.TotalGastosDao
 import com.example.gastosdiariosjetapckcompose.data.di.entity.TotalGastosEntity
 import com.example.gastosdiariosjetapckcompose.domain.model.TotalGastosModel
-import com.example.gastosdiariosjetapckcompose.domain.model.TotalIngresosModel
 import javax.inject.Inject
 
 class TotalGastosRepository @Inject constructor(private val totalGastosDao: TotalGastosDao) {

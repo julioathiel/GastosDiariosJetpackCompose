@@ -99,7 +99,7 @@ val categorieGastosNuevos = listOf(
     CategoryCrear("", R.drawable.ic_apartamento),
     CategoryCrear("", R.drawable.ic_asistencia_anciano),
     CategoryCrear("", R.drawable.ic_cerveza),
-    CategoryCrear("", R.drawable.ic_tabla),
+    CategoryCrear("", R.drawable.ic_barra_filled),
     CategoryCrear("", R.drawable.ic_lavadero_ropa),
     CategoryCrear("", R.drawable.ic_corazon),
     CategoryCrear("", R.drawable.ic_folder),

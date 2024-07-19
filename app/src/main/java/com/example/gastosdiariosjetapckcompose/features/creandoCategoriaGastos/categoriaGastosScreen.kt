@@ -70,9 +70,9 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavHostController
-import com.example.gastosdiariosjetapckcompose.ClaseEnum
 import com.example.gastosdiariosjetapckcompose.GlobalVariables.sharedLogic
 import com.example.gastosdiariosjetapckcompose.R
+import com.example.gastosdiariosjetapckcompose.domain.enums.IngresosGastosEnum
 import com.example.gastosdiariosjetapckcompose.domain.model.CategoryCrear
 import com.example.gastosdiariosjetapckcompose.domain.model.UsuarioCreaCatGastoModel
 import com.example.gastosdiariosjetapckcompose.domain.model.categorieGastosNuevos
@@ -88,7 +88,6 @@ fun CategoriaGastosScreen(
     navController: NavHostController, categoriaGastosViewModel: CategoriaGastosViewModel
 ) {
     val onDismiss by categoriaGastosViewModel.onDismiss
-    Log.d("onDismiss", "$onDismiss")
     val sheetStates = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     BackHandler {
@@ -134,17 +133,7 @@ fun CategoriaGastosScreen(
         when (uiState) {
             is ResultUiState.Error -> {}
             ResultUiState.Loading -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(color = colorResource(id = R.color.white))
-                ) {
-                    CircularProgressIndicator(
-                        Modifier
-                            .size(30.dp)
-                            .align(Alignment.Center)
-                    )
-                }
+                sharedLogic.LoaderCircularProgressPantalla()
             }
 
             is ResultUiState.Success -> {
@@ -155,12 +144,11 @@ fun CategoriaGastosScreen(
                     // Si la lista está vacía, mostrar
                     categoriaGastosViewModel.isActivatedFalse()
                     Column(
-                        modifier = Modifier
-                            .fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         BotonGastosIngresosPantallaGastos { tipoClase ->
-                            if (tipoClase == ClaseEnum.INGRESOS) {
+                            if (tipoClase == IngresosGastosEnum.INGRESOS) {
                                 navController.navigate(Routes.CategoriaIngresosScreen.route)
                             } else {
                                 //
@@ -171,9 +159,7 @@ fun CategoriaGastosScreen(
                 } else {
                     categoriaGastosViewModel.isActivatedTrue()
                     Box(
-                        Modifier
-                            .fillMaxSize()
-                            .background(colorResource(id = R.color.grayUno))
+                        Modifier.fillMaxSize()
                     ) {
 
                         Column(
@@ -182,7 +168,7 @@ fun CategoriaGastosScreen(
                         ) {
 
                             BotonGastosIngresosPantallaGastos { tipoClase ->
-                                if (tipoClase == ClaseEnum.INGRESOS) {
+                                if (tipoClase == IngresosGastosEnum.INGRESOS) {
                                     navController.navigate(Routes.CategoriaIngresosScreen.route)
                                 } else {
                                     //
@@ -228,81 +214,7 @@ fun ListaNuevaCategoriaGasto(
 }
 
 
-@Composable
-fun ItemGastos(
-    itemModel: UsuarioCreaCatGastoModel,
-    categoriaGastosViewModel: CategoriaGastosViewModel
-) {
-    // Estado para controlar la visibilidad del menú
-    var showMenu by remember { mutableStateOf(false) }
-    Box(modifier = Modifier.fillMaxSize()) {
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .background(Color.White)
-                .height(48.dp), verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                painter = painterResource(id = itemModel.categoriaIcon.toInt()),
-                contentDescription = null,
-                tint = colorResource(id = R.color.black),
-                modifier = Modifier.padding(start = 16.dp, end = 32.dp)
-            )
-            Text(
-                text = itemModel.nombreCategoria,
-                color = colorResource(id = R.color.black),
-                fontSize = 16.sp,
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.weight(1f)
-            )
-            IconButton(onClick = { showMenu = true }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_option),
-                    tint = Color.Black,
-                    contentDescription = null
-                )
-            }
 
-        }
-        DropdownMenu(
-            expanded = showMenu,
-            onDismissRequest = { showMenu = false },
-            modifier = Modifier.align(alignment = Alignment.TopEnd)
-        ) {
-            DropdownMenuItem(
-                text = { Text(text = "Editar") },
-                onClick = {
-                    showMenu = false
-                    categoriaGastosViewModel.selectedParaEditar(
-                        UsuarioCreaCatGastoModel(
-                            id = itemModel.id,
-                            nombreCategoria = itemModel.nombreCategoria,
-                            categoriaIcon = itemModel.categoriaIcon
-                        ), iconoSeleccionado = itemModel.categoriaIcon.toInt()
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_edit),
-                        contentDescription = ""
-                    )
-                },
-
-                )
-            DropdownMenuItem(text = { Text(text = "Eliminar") },
-                onClick = {
-                    categoriaGastosViewModel.eliminarItemSelected(itemModel)
-                },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_delete),
-                        contentDescription = ""
-                    )
-                }
-            )
-        }
-    }
-}
 
 @Composable
 fun ContentBottomSheet(
@@ -348,8 +260,8 @@ fun ContentBottomSheet(
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
-                unfocusedContainerColor = colorResource(id = R.color.grayDos),
-                focusedContainerColor = colorResource(id = R.color.grayDos)
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
             )
         )
         Spacer(modifier = Modifier.padding(10.dp))
@@ -371,7 +283,8 @@ fun ContentBottomSheet(
                         UsuarioCreaCatGastoModel(
                             nombreCategoria = titulo,
                             categoriaIcon = categoriaSeleccionada!!.icon.toString()
-                        ))
+                        )
+                    )
                 }
                 //despues de crear o editar, cierra el bottomsheet
                 onDismiss()
@@ -379,14 +292,10 @@ fun ContentBottomSheet(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(50.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = colorResource(
-                id = R.color.blue)
-            ),
             enabled = !(titulo.isEmpty() || categoriaSeleccionada == null)
         ) {
-            Text(text = "Guardar")
+            Text(text = stringResource(id = R.string.guardar))
         }
-        Spacer(modifier = Modifier.padding(bottom = 10.dp))
     }
 }
 
@@ -419,7 +328,8 @@ fun CategoryItemGastos(
     isSelected: Boolean,
     onCategorySelected: (CategoryCrear) -> Unit
 ) {
-    val iconColor = if (isSelected) Color(0xFFCE93D8) else Color.Black
+    val iconColor =
+        if (isSelected) MaterialTheme.colorScheme.inversePrimary else MaterialTheme.colorScheme.onSurfaceVariant
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -454,17 +364,16 @@ fun VacioGastos(categoriaGastosViewModel: CategoriaGastosViewModel) {
 }
 
 @Composable
-fun BotonGastosIngresosPantallaGastos(onTipoSeleccionado: (ClaseEnum) -> Unit) {
+fun BotonGastosIngresosPantallaGastos(onTipoSeleccionado: (IngresosGastosEnum) -> Unit) {
     var selectedIndex by remember { mutableStateOf(0) }
-    val options = listOf(ClaseEnum.GASTOS, ClaseEnum.INGRESOS)
+    val options = listOf(IngresosGastosEnum.GASTOS, IngresosGastosEnum.INGRESOS)
     SingleChoiceSegmentedButtonRow {
         options.forEachIndexed { index, label ->
             val isSelected = index == selectedIndex
             val color = if (isSelected) {
                 when (label) {
-                    ClaseEnum.GASTOS -> Color(0xFFFFEBEE)
-                    ClaseEnum.INGRESOS -> colorResource(id = R.color.fondoVerdeDinero)
-                    else -> Color.Transparent
+                    IngresosGastosEnum.GASTOS -> Color(0xFFFFEBEE)
+                    IngresosGastosEnum.INGRESOS -> colorResource(id = R.color.fondoVerdeDinero)
                 }
             } else {
                 Color.Transparent
@@ -472,9 +381,8 @@ fun BotonGastosIngresosPantallaGastos(onTipoSeleccionado: (ClaseEnum) -> Unit) {
 
             val colorText = if (isSelected) {
                 when (label) {
-                    ClaseEnum.GASTOS -> Color(0xFFE57373)
-                    ClaseEnum.INGRESOS -> colorResource(id = R.color.verdeDinero)
-                    else -> Color.Transparent
+                    IngresosGastosEnum.GASTOS -> colorResource(id = R.color.rojoDinero)
+                    IngresosGastosEnum.INGRESOS -> colorResource(id = R.color.verdeDinero)
                 }
             } else {
                 Color.Transparent
@@ -486,12 +394,15 @@ fun BotonGastosIngresosPantallaGastos(onTipoSeleccionado: (ClaseEnum) -> Unit) {
                     onTipoSeleccionado(options[index])
                 },
                 selected = index == selectedIndex,
-                colors = SegmentedButtonDefaults.colors(activeContainerColor = color),
+                colors = SegmentedButtonDefaults.colors(
+                    activeContainerColor = color,
+                    inactiveContainerColor = Color.Transparent
+                ),
                 border = BorderStroke(color = colorText, width = 1.dp)
             ) {
                 Text(
                     label.toString(),
-                    color = if (isSelected) colorText else Color.Black
+                    color = if (isSelected) colorText else MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -504,37 +415,28 @@ fun Toolbar(categoriaGastosViewModel: CategoriaGastosViewModel) {
     val activado = categoriaGastosViewModel.isActivated.value
     var isBorrarTodo by remember { mutableStateOf(false) }
     TopAppBar(
-        title = {
-            Text(
-                text = "Catagorias nuevas",
-                color = colorResource(id = R.color.black),
-                modifier = Modifier.padding(8.dp)
-            )
-        },
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = colorResource(id = R.color.white)),
+        title = { Text(text = "Catagorias nuevas") },
         actions = {
             if (activado) {
                 IconButton(onClick = { isBorrarTodo = true }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_option),
-                        tint = Color.Black,
-                        contentDescription = "borrar todo"
+                        contentDescription = null
                     )
                 }
                 DropdownMenu(
                     expanded = isBorrarTodo,
                     onDismissRequest = { isBorrarTodo = !isBorrarTodo }) {
                     DropdownMenuItem(
-                        text = { Text("Borrar todo") },
+                        text = { Text("Eliminar todo") },
                         onClick = { categoriaGastosViewModel.borrandoLista() },
-                        trailingIcon = {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_delete),
-                                tint = Color.Black,
-                                contentDescription = "borrar todo"
-                            )
-                        })
-
+//                        trailingIcon = {
+//                            Icon(
+//                                painter = painterResource(id = R.drawable.ic_delete),
+//                                contentDescription = "eliminar toodo"
+//                            )
+//                        }
+                    )
                 }
             }
         }

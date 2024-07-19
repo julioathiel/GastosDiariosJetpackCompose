@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 @Entity
 data class UsuarioCreaCatIngresoEntity(
     @PrimaryKey(autoGenerate = true)
-    val id: Long = 0,
+    val id: Int = 0,
     val nombreCategoria: String,
     val categoriaIcon: String
 )

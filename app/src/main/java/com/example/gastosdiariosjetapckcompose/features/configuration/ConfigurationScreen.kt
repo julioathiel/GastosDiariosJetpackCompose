@@ -1,6 +1,5 @@
 package com.example.gastosdiariosjetapckcompose.features.configuration
 
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -10,70 +9,70 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import com.example.gastosdiariosjetapckcompose.GlobalVariables.sharedLogic
 import com.example.gastosdiariosjetapckcompose.R
 import com.example.gastosdiariosjetapckcompose.domain.model.DialogCustom
+import com.example.gastosdiariosjetapckcompose.features.configuration.components.ShareSheet
 import com.example.gastosdiariosjetapckcompose.navigation.Routes
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 
 @Composable
 fun ConfigurationScreen(
+    navController: NavHostController,
     configurationViewModel: ConfigurationViewModel,
-    navController: NavHostController
 ) {
     // Estado para controlar si se está mostrando el diálogo
     val showDialog = configurationViewModel.showDialog.value
-    var resetComplete = configurationViewModel.resetComplete.value
-    var showProgress =configurationViewModel.showProgress.value
+    val showShareApp = configurationViewModel.showShareApp.value
+    val resetComplete = configurationViewModel.resetComplete.value
     val alertDialog = DialogCustom()
     val context = LocalContext.current
-
+    // Establecer el estado de la pestaña seleccionada como el índice correspondiente a la pestaña "Stadist"
+    val seleccionadoTabIndex by rememberSaveable { mutableIntStateOf(2) }
     BackHandler {
         navController.navigate(Routes.HomeScreen.route)
     }
-
+    var a by remember { mutableStateOf(false) }
     Scaffold(
         topBar = { Toolbar() },
-        containerColor = colorResource(id = R.color.white)
+        bottomBar = {
+            sharedLogic.TabView(
+                navController = navController,
+                seleccionadoTabIndex = seleccionadoTabIndex
+            )
+        },
+        containerColor = MaterialTheme.colorScheme.background
     ) { it ->
 
         // Contenido del Scaffold
         ListConf(modifier = Modifier.padding(it),
-            items = ItemConfiguration.values().toList(),
+            items = ItemConfiguration.entries,
             onItemClick = { item ->
                 when (item) {
                     ItemConfiguration.CATEGORIASNUEVAS -> {
                         navController.navigate(Routes.CategoriaGastosScreen.route)
-                    }
-
-                    ItemConfiguration.DIVISA -> {
-                        println()
                     }
 
                     ItemConfiguration.UPDATEDATE -> {
@@ -85,24 +84,30 @@ fun ConfigurationScreen(
                     }
 
                     ItemConfiguration.RESET -> {
-                        println()
+                        //  println()
+                        configurationViewModel.setShowResetDialog(true)
+                    }
+
+                    ItemConfiguration.TUTORIAL -> {
+                        configurationViewModel.setBooleanPagerFalse()
+                        navController.navigate(Routes.ViewPagerScreen.route)
+                    }
+
+                    ItemConfiguration.COMPARTIR -> {
+                        configurationViewModel.setShowShare(true)
                     }
 
                     ItemConfiguration.ACERCADE -> {
-
+                        navController.navigate(Routes.AcercaDe.route)
                     }
 
                     else -> {}
                 }
-                // Aquí puedes manejar el evento de clic en un elemento de la lista
-                // Por ejemplo, mostrar el diálogo cuando se hace clic en un elemento específico
-                if (item == ItemConfiguration.RESET) {
-                    // configurationViewModel.clearDatabase()
-                    // Muestra el diálogo cuando se detecta un reinicio exitoso
-                    configurationViewModel.showResetDialog()
-                }
             })
-        val scope = rememberCoroutineScope()
+        if (showShareApp) {
+            val enlace = stringResource(id = R.string.share_app)
+            ShareSheet(enlace, onDissmiss = { configurationViewModel.setShowShare(false) })
+        }
         // Mostrar el diálogo cuando sea necesario
         if (showDialog) {
             alertDialog.MostrarDialogo(
@@ -110,19 +115,28 @@ fun ConfigurationScreen(
                 "pantallaregistoCategoria",
                 onDismiss = { configurationViewModel.dismissDialog() },
                 onAccept = {
-                    configurationViewModel.clearDatabase()//borra ase de datos
+                    //eliminando predeterminadamente
+                    configurationViewModel.clearDatabase()//borra base de datos
                     configurationViewModel.checkDatabaseEmpty()//verifica si esta vacia
                 },
+                opcionesEliminar = configurationViewModel.opcionesEliminar,
+                onConfirm = {
+                    //opciones que el usuario eligio a eliminar
+                    selectedOptions ->
+                    selectedOptions.forEach { option ->
+                        option.action()
+                    }
+                }
             )
         }
         //si esta vacia muestra otro dialogo
         if (resetComplete) {
-                alertDialog.MostrarDialogoCongratulations(
-                    context = context,
-                    pantalla = "reinicioCompletado",
-                    onDismiss = { configurationViewModel.setResetComplete(false) },
-                    onAccept = { configurationViewModel.setResetComplete(false) }
-                )
+            alertDialog.MostrarDialogoCongratulations(
+                context = context,
+                pantalla = "reinicioCompletado",
+                onDismiss = { configurationViewModel.setResetComplete(false) },
+                onAccept = { configurationViewModel.setResetComplete(false) }
+            )
         }
     }
 }
@@ -135,7 +149,7 @@ fun ListConf(
 ) {
     Column(
         modifier = modifier
-            .background(color = colorResource(id = R.color.white))
+            .background(color = MaterialTheme.colorScheme.background)
     ) {
         items.forEach {
 
@@ -151,19 +165,21 @@ fun ListConf(
                 ) {
                 Image(
                     painter = painterResource(id = it.icon),
-                    contentDescription = it.title
+                    contentDescription = it.title,
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant)
                 )
                 Spacer(modifier = Modifier.padding(horizontal = 16.dp))
                 Column {
                     Text(
                         text = it.title,
-                        color = Color.Black,
-                        fontFamily = FontFamily(Font(R.font.lato_bold))
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = it.descripcion, color = colorResource(id = R.color.grayCuatro),
+                        text = it.descripcion,
+                        fontSize = 16.sp,
                         style = MaterialTheme.typography.bodySmall,
-                         fontSize = 14.sp
+                        color = colorResource(id = R.color.grayCuatro)
                     )
                 }
             }
@@ -179,11 +195,9 @@ fun Toolbar() {
     TopAppBar(
         title = {
             Text(
-                text = stringResource(R.string.toolbar_configuracion),
-                color = colorResource(id = R.color.black)
+                text = stringResource(R.string.toolbar_configuracion)
             )
-        },
-        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.White),
+        }
     )
 }
 
