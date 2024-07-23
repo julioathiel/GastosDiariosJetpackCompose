@@ -32,6 +32,10 @@ class TotalGastosRepository @Inject constructor(private val totalGastosDao: Tota
 
     }
 
+    suspend fun clearAllTotalGastosRepository(){
+        totalGastosDao.deleteAllTotalGastos()
+    }
+
 }
 
 fun TotalGastosModel.toData(): TotalGastosEntity {

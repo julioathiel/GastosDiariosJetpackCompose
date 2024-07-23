@@ -6,23 +6,32 @@ import com.example.gastosdiariosjetapckcompose.domain.model.UsuarioCreaCatIngres
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class InsertUserCatIngresoUsecase @Inject constructor(private val usuarioCreaCatIngresoRepository: UsuarioCreaCatIngresoRepository){
-    suspend operator fun invoke(item: UsuarioCreaCatIngresosModel){
+class InsertUserCatIngresoUsecase @Inject constructor(private val usuarioCreaCatIngresoRepository: UsuarioCreaCatIngresoRepository) {
+    suspend operator fun invoke(item: UsuarioCreaCatIngresosModel) {
         usuarioCreaCatIngresoRepository.insertUsuarioCreaCatIngresosRepository(item)
     }
 }
-class UpdateUserCatIngresoUsecase @Inject constructor(private val usuarioCreaCatIngresoRepository: UsuarioCreaCatIngresoRepository){
-    suspend operator fun invoke(item: UsuarioCreaCatIngresosModel){
+
+class UpdateUserCatIngresoUsecase @Inject constructor(private val usuarioCreaCatIngresoRepository: UsuarioCreaCatIngresoRepository) {
+    suspend operator fun invoke(item: UsuarioCreaCatIngresosModel) {
         usuarioCreaCatIngresoRepository.updateUsuarioCreaCatIngresosRepository(item)
     }
 }
-class GetUserCatIngresoUsecase @Inject constructor(private val usuarioCreaCatIngresoRepository: UsuarioCreaCatIngresoRepository){
+
+class GetUserCatIngresoUsecase @Inject constructor(private val usuarioCreaCatIngresoRepository: UsuarioCreaCatIngresoRepository) {
     operator fun invoke(): Flow<List<UsuarioCreaCatIngresosModel>> {
         return usuarioCreaCatIngresoRepository.listaCategoriaUnicaIngresos
     }
 }
-class DeleteUserCatIngresoUsecase @Inject constructor(private val usuarioCreaCatIngresoRepository: UsuarioCreaCatIngresoRepository){
-    suspend operator fun invoke(item: UsuarioCreaCatIngresosModel){
+
+class DeleteUserCatIngresoUsecase @Inject constructor(private val usuarioCreaCatIngresoRepository: UsuarioCreaCatIngresoRepository) {
+    suspend operator fun invoke(item: UsuarioCreaCatIngresosModel) {
         usuarioCreaCatIngresoRepository.deleteUsuarioCreaCatIngresosRepository(item)
+    }
+}
+
+class ClearAllUserCreaCatIngresosUseCase @Inject constructor(private val repository: UsuarioCreaCatIngresoRepository) {
+    suspend operator fun invoke() {
+        repository.clearAllUserCreaCatIngresosRepository()
     }
 }

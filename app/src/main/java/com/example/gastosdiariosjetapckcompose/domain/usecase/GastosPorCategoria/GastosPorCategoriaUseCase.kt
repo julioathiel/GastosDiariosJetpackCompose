@@ -1,5 +1,6 @@
 package com.example.gastosdiariosjetapckcompose.domain.usecase.GastosPorCategoria
 
+import com.example.gastosdiariosjetapckcompose.data.di.repository.FechaSaveRepository
 import com.example.gastosdiariosjetapckcompose.data.di.repository.GastosPorCategoriaRepository
 import com.example.gastosdiariosjetapckcompose.domain.model.GastosPorCategoriaModel
 import kotlinx.coroutines.flow.Flow
@@ -39,5 +40,11 @@ class DeleteGastosPorCategoriaUseCase @Inject constructor(private val gastosPorC
 class CheckDatabaseGastosPorCategoriaEmptyUseCase @Inject constructor(private val gastosPorCategoriaRepository: GastosPorCategoriaRepository){
     suspend operator fun invoke(): Boolean {
         return gastosPorCategoriaRepository.isDatabaseGastosPorCategoriaEmpty()
+    }
+}
+
+class ClearAllGastosPorCatUseCase @Inject constructor(private val gastosPorCategoriaRepository: GastosPorCategoriaRepository){
+    suspend operator fun invoke(){
+        gastosPorCategoriaRepository.clearAllGastosPorCat()
     }
 }

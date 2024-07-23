@@ -38,6 +38,10 @@ class MovimientosRepository @Inject constructor(private val movimientosDao: Movi
     suspend fun isDatabaseAllExpensesEmpty(): Boolean {
         return movimientosDao.getMovimientos().first().isEmpty()
     }
+
+    suspend fun clearAllMovimientosRepository(){
+        movimientosDao.deleteAllMovimientos()
+    }
 }
 
 fun MovimientosModel.toData(): MovimientosEntity {

@@ -5,23 +5,29 @@ import com.example.gastosdiariosjetapckcompose.domain.model.UsuarioCreaCatGastoM
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class InsertUserCatGastoUsecase @Inject constructor(private val usuarioCreaCatGastoRepository: UsuarioCreaCatGastoRepository){
+class InsertUserCatGastoUsecase @Inject constructor(private val repository: UsuarioCreaCatGastoRepository){
     suspend operator fun invoke(item: UsuarioCreaCatGastoModel){
-        usuarioCreaCatGastoRepository.insertUsuarioCreaCatGastoRepository(item)
+        repository.insertUsuarioCreaCatGastoRepository(item)
     }
 }
-class UpdateUserCatGastoUsecase @Inject constructor(private val usuarioCreaCatGastoRepository: UsuarioCreaCatGastoRepository){
+class UpdateUserCatGastoUsecase @Inject constructor(private val repository: UsuarioCreaCatGastoRepository){
     suspend operator fun invoke(item: UsuarioCreaCatGastoModel){
-        usuarioCreaCatGastoRepository.updateUsuarioCreaCatGastoRepository(item)
+        repository.updateUsuarioCreaCatGastoRepository(item)
     }
 }
-class GetUserCatGastoUsecase @Inject constructor(private val usuarioCreaCatGastoRepository: UsuarioCreaCatGastoRepository){
+class GetUserCatGastoUsecase @Inject constructor(private val repository: UsuarioCreaCatGastoRepository){
     operator fun invoke(): Flow<List<UsuarioCreaCatGastoModel>> {
-        return usuarioCreaCatGastoRepository.listaCategoriaUnicaGastos
+        return repository.listaCategoriaUnicaGastos
     }
 }
-class DeleteUserCatGastoUsecase @Inject constructor(private val usuarioCreaCatGastoRepository: UsuarioCreaCatGastoRepository){
+class DeleteUserCatGastoUsecase @Inject constructor(private val repository: UsuarioCreaCatGastoRepository){
     suspend operator fun invoke(item: UsuarioCreaCatGastoModel){
-        usuarioCreaCatGastoRepository.deleteUsuarioCreaCatGastoRepository(item)
+        repository.deleteUsuarioCreaCatGastoRepository(item)
+    }
+}
+
+class ClearAllUserCatGastosUseCase @Inject constructor(private val repository : UsuarioCreaCatGastoRepository){
+    suspend operator fun  invoke(){
+        repository.clearAllUserCatGastosRepository()
     }
 }

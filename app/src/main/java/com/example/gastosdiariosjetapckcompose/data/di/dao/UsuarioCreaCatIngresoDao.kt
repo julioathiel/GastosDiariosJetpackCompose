@@ -23,4 +23,6 @@ interface UsuarioCreaCatIngresoDao {
     @Delete
     suspend fun deleteUsuarioCreaCatIngreso(item: UsuarioCreaCatIngresoEntity)
 
+    @Query("delete from UsuarioCreaCatIngresoEntity")
+    suspend fun deleteAllUsuarioCreaCatIngresos()
 }

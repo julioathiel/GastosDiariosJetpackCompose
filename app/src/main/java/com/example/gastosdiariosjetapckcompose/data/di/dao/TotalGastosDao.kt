@@ -22,4 +22,7 @@ interface TotalGastosDao {
 
     @Delete
     suspend fun deleteTotalGastos(totales: TotalGastosEntity)
+
+    @Query("delete from TotalGastosEntity")
+    suspend fun deleteAllTotalGastos()
 }

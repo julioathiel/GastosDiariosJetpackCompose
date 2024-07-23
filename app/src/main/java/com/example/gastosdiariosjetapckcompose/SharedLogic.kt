@@ -14,18 +14,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Badge
-import androidx.compose.material3.Icon
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -113,25 +112,21 @@ class SharedLogic {
         return resultado.toDouble()
     }
 
-    fun calcularProgresoRelativo(totalIngresos: Double?, totalGastos: Double?): Double {
+    //calcula el maximo que debe tener el progressBar
+    fun calcularProgresoRelativo(totalIngresos: Double?, totalGastos: Double?): Float {
         val ingresosTotales = totalIngresos ?: 0.0
         val gastosTotales = totalGastos ?: 0.0
         if (ingresosTotales > 0) {
-            return gastosTotales / ingresosTotales
+            return (gastosTotales / ingresosTotales).toFloat()
+
         }
-        return 0.0
+        return 0.0f
+
     }
 
-    fun formateandoPorcentaje(progresoRelativo: Double): String {
-        return String.format("%.0f", progresoRelativo * 100)
-    }
-
-    fun calcularLimitePorDia(diasRestantes: Int?, dineroActual: Double): Double {
-        return if (diasRestantes != null && dineroActual != null && diasRestantes > 0) {
-            dineroActual / diasRestantes.toDouble()
-        } else {
-            0.0
-        }
+    //calcula el progreso relativo para transformarlo en porcentaje de int
+    fun formattedPorcentaje(progresoRelativo: Float): String {
+        return String.format(Locale.US,  "%.0f", progresoRelativo * 100)
     }
 
     fun convertidorDeTexto(dineroAConvertir: Double): Pair<String, String> {
@@ -197,7 +192,7 @@ class SharedLogic {
                                     title = transaccion.title,
                                     nuevoValor = cantidadIngresada,
                                     description = description,
-                                   itemModel =  transaccion
+                                    itemModel = transaccion
                                 )
                                 onDissmis()
                                 cantidadIngresada = ""
@@ -337,6 +332,7 @@ class SharedLogic {
                     selected = index == selectedIndex,
                     colors = SegmentedButtonDefaults.colors(
                         activeContainerColor = color,
+                        activeContentColor = colorText,
                         inactiveContainerColor = MaterialTheme.colorScheme.surfaceVariant
                     ),
                     border = BorderStroke(color = colorText, width = 0.dp),

@@ -4,12 +4,16 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -17,12 +21,10 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
@@ -54,7 +56,7 @@ fun ConfigurationScreen(
     BackHandler {
         navController.navigate(Routes.HomeScreen.route)
     }
-    var a by remember { mutableStateOf(false) }
+
     Scaffold(
         topBar = { Toolbar() },
         bottomBar = {
@@ -84,7 +86,6 @@ fun ConfigurationScreen(
                     }
 
                     ItemConfiguration.RESET -> {
-                        //  println()
                         configurationViewModel.setShowResetDialog(true)
                     }
 
@@ -118,6 +119,7 @@ fun ConfigurationScreen(
                     //eliminando predeterminadamente
                     configurationViewModel.clearDatabase()//borra base de datos
                     configurationViewModel.checkDatabaseEmpty()//verifica si esta vacia
+
                 },
                 opcionesEliminar = configurationViewModel.opcionesEliminar,
                 onConfirm = {
@@ -135,7 +137,10 @@ fun ConfigurationScreen(
                 context = context,
                 pantalla = "reinicioCompletado",
                 onDismiss = { configurationViewModel.setResetComplete(false) },
-                onAccept = { configurationViewModel.setResetComplete(false) }
+                onAccept = {
+                    configurationViewModel.setResetComplete(false)
+                    configurationViewModel.setBooleanPagerFalse()
+                }
             )
         }
     }
@@ -144,15 +149,29 @@ fun ConfigurationScreen(
 
 @Composable
 fun ListConf(
-    modifier: Modifier, items: List<ItemConfiguration>,
+    modifier: Modifier,
+    items: List<ItemConfiguration>,
     onItemClick: (ItemConfiguration) -> Unit,
 ) {
+    val context = LocalContext.current
+
     Column(
         modifier = modifier
             .background(color = MaterialTheme.colorScheme.background)
+            .verticalScroll(
+                rememberScrollState()
+            )
     ) {
+        var lastCategory: String? = null
         items.forEach {
-
+            if(lastCategory != it.category) {
+                // Agregar línea divisoria
+                if (lastCategory != null) {
+                    HorizontalDivider(color = Color.LightGray, thickness = 1.dp)
+                }
+                // Actualizar la última categoría
+                lastCategory = it.category
+            }
             Row(
                 Modifier
                     .fillMaxWidth()
@@ -165,25 +184,25 @@ fun ListConf(
                 ) {
                 Image(
                     painter = painterResource(id = it.icon),
-                    contentDescription = it.title,
+                    contentDescription = it.title.toString(),
                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurfaceVariant)
                 )
                 Spacer(modifier = Modifier.padding(horizontal = 16.dp))
                 Column {
                     Text(
-                        text = it.title,
+                        text = context.getString(it.title),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = it.descripcion,
+                        text = context.getString(it.description),
                         fontSize = 16.sp,
                         style = MaterialTheme.typography.bodySmall,
                         color = colorResource(id = R.color.grayCuatro)
                     )
                 }
             }
-            //Divider()
+
         }
 
     }

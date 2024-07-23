@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface CurrentMoneyDao {
     @Query("SELECT * from currentMoneyEntity LIMIT 1")
-  suspend fun getMoney(): CurrentMoneyEntity
+    suspend fun getMoney(): CurrentMoneyEntity
     //se utiliza para recuperar el registro de dinero actual guardado en la base de datos
     //LIMIT 1 significa que solo se debe devolver un resultado de la consulta, incluso
     // si hay mas registros que coinciden con los criterios de busqueda
@@ -26,5 +26,9 @@ interface CurrentMoneyDao {
     //se utiliza para actualizar el registro existente de dinero actual en la base de datos
 
     @Delete
-    suspend fun deleteMoney(money:CurrentMoneyEntity)
+    suspend fun deleteMoney(money: CurrentMoneyEntity)
+
+    @Query("delete from currentMoneyEntity")
+    suspend fun deleteAllMoney()
+
 }

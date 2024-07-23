@@ -59,11 +59,11 @@ fun ActualizarMaximoFechaScreen(
 @Composable
 fun Content(
     maxWhitd: PaddingValues,
-    actualizarMaximoFechaViewModel: ActualizarMaximoFechaViewModel,
+    viewModel: ActualizarMaximoFechaViewModel,
     scafoldState: ScaffoldState
 ) {
-    val selectedOptionState by actualizarMaximoFechaViewModel.selectedOption.observeAsState()
-    val selectedSwitchOption = actualizarMaximoFechaViewModel.selectedSwitchOption.value
+    val selectedOptionState by viewModel.selectedOption.observeAsState()
+    val selectedSwitchOption = viewModel.selectedSwitchOption.value
     val scope = rememberCoroutineScope()
 
     Column(
@@ -103,7 +103,7 @@ fun Content(
             31,
             selectedOptionState,
             selectedSwitchOption,
-            actualizarMaximoFechaViewModel
+            viewModel
         )
 
         SwitchWithText(
@@ -111,7 +111,7 @@ fun Content(
             60,
             selectedOptionState,
             selectedSwitchOption,
-            actualizarMaximoFechaViewModel
+            viewModel
         )
 
         SwitchWithText(
@@ -119,7 +119,7 @@ fun Content(
             90,
             selectedOptionState,
             selectedSwitchOption,
-            actualizarMaximoFechaViewModel
+            viewModel
         )
 
         Spacer(modifier = Modifier
@@ -128,7 +128,7 @@ fun Content(
         Button(
             onClick = {
                 selectedOptionState?.let {
-                    actualizarMaximoFechaViewModel.setSelectedOption(
+                  viewModel.setSelectedOption(
                         it,
                         selectedSwitchOption
                     )
@@ -151,14 +151,14 @@ fun Content(
 fun onSwitchCheckedChange(
     switchNumber: Int,
     isChecked: Boolean,
-    actualizarMaximoFechaViewModel: ActualizarMaximoFechaViewModel
+    viewModel: ActualizarMaximoFechaViewModel
 ) {
     if (isChecked) {
-        actualizarMaximoFechaViewModel.updateSelectedSwitchOption(isChecked)
-        actualizarMaximoFechaViewModel.updateSelectedOption(switchNumber)
+       viewModel.updateSelectedSwitchOption(isChecked)
+        viewModel.updateSelectedOption(switchNumber)
     } else {
-        actualizarMaximoFechaViewModel.updateSelectedSwitchOption(isChecked)
-        actualizarMaximoFechaViewModel.updateSelectedOption(null)
+        viewModel.updateSelectedSwitchOption(isChecked)
+        viewModel.updateSelectedOption(null)
     }
 }
 
@@ -169,7 +169,7 @@ fun SwitchWithText(
     switchNumber: Int,
     selectedOption: Int?,
     selectedSwitchOption: Boolean,
-    actualizarMaximoFechaViewModel: ActualizarMaximoFechaViewModel
+    viewModel: ActualizarMaximoFechaViewModel
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically
@@ -180,12 +180,12 @@ fun SwitchWithText(
         Switch(
             checked = selectedOption == switchNumber && selectedSwitchOption,
             onCheckedChange = { isChecked ->
-                onSwitchCheckedChange(switchNumber, isChecked, actualizarMaximoFechaViewModel)
+                onSwitchCheckedChange(switchNumber, isChecked, viewModel)
             },
             modifier = Modifier.height(30.dp),
             colors = SwitchDefaults.colors(
-                checkedThumbColor = colorResource(id = R.color.blue), // Cambiar el color de fondo cuando está seleccionado (en este caso, rojo)
-                checkedTrackColor = colorResource(id = R.color.fondoCelesteblue)
+//                checkedThumbColor = colorResource(id = R.color.blue), // Cambiar el color de fondo cuando está seleccionado (en este caso, rojo)
+//                checkedTrackColor = colorResource(id = R.color.fondoCelesteblue)
             )
         )
     }

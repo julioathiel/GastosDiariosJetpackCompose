@@ -1,5 +1,6 @@
 package com.example.gastosdiariosjetapckcompose.domain.usecase.fechaElegida
 
+import com.example.gastosdiariosjetapckcompose.data.di.repository.BarDataGraphRepository
 import com.example.gastosdiariosjetapckcompose.data.di.repository.CurrentMoneyRepository
 import com.example.gastosdiariosjetapckcompose.data.di.repository.FechaSaveRepository
 import com.example.gastosdiariosjetapckcompose.domain.model.FechaSaveModel
@@ -33,6 +34,12 @@ class DeleteFechaUsecase @Inject constructor(private val repository: FechaSaveRe
 class CheckDatabaseFechaGuardadaEmptyUseCase @Inject constructor(private val repository: FechaSaveRepository) {
     suspend operator fun invoke(): Boolean {
         return repository.isDatabaseFechaGuardadaEmpty()
+    }
+}
+
+class ClearAllFechaUsecase @Inject constructor(private val repository: FechaSaveRepository){
+    suspend operator fun invoke(){
+        repository.clearAllFecha()
     }
 }
 

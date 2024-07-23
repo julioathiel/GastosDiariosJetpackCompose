@@ -76,6 +76,7 @@ fun AppNavigation(
             HomeScreen(
                 navController = navController,
                 homeViewModel,
+                registroTransaccionesViewModel,
                 configurationViewModel
             )
         }

@@ -33,6 +33,10 @@ class FechaSaveRepository @Inject constructor(private val fechaSaveDao: FechaSav
         //si es null devolvera true ya que no hay nada
     }
 
+    suspend fun clearAllFecha(){
+        fechaSaveDao.deleteAllDate()
+    }
+
 }
 fun FechaSaveModel.toData():FechaSaveEntity{
     return FechaSaveEntity(this.id,this.fechaSave,this.isSelected)

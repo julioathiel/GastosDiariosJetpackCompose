@@ -11,14 +11,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
@@ -28,15 +25,19 @@ import com.example.gastosdiariosjetapckcompose.GlobalVariables.sharedLogic
 import com.example.gastosdiariosjetapckcompose.R
 import com.example.gastosdiariosjetapckcompose.features.home.AnimatedProgressBar
 import com.example.gastosdiariosjetapckcompose.features.home.HomeViewModel
+import com.example.gastosdiariosjetapckcompose.features.registroTransaccionsPorcentaje.RegistroTransaccionesViewModel
 
 @Composable
-fun CardBotonRegistro(homeViewModel: HomeViewModel) {
+fun CardBotonRegistro(
+    homeViewModel: HomeViewModel
+) {
     val totalIngresosProgress by homeViewModel.mostrandoDineroTotalIngresos.observeAsState()
     val totalGastosProgress by homeViewModel.mostrandoDineroTotalGastos.observeAsState()
 
     val progresoRelativo =
         sharedLogic.calcularProgresoRelativo(totalIngresosProgress, totalGastosProgress)
-    val porcentaje = sharedLogic.formateandoPorcentaje(progresoRelativo)
+    val porcentaje = sharedLogic.formattedPorcentaje(progresoRelativo)
+
 
     Card(
         modifier = Modifier
@@ -58,29 +59,32 @@ fun CardBotonRegistro(homeViewModel: HomeViewModel) {
             )
 
             AnimatedProgressBar(
-                progress = progresoRelativo.toFloat(),
+                progress = progresoRelativo,
                 modifier = Modifier.fillMaxWidth()
             )
+
             Spacer(modifier = Modifier.height(16.dp))
-            HorizontalDivider()
+         //   HorizontalDivider()
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                    .height(50.dp).padding(8.dp),
+               horizontalArrangement = Arrangement.End
             ) {
+
                 Text(
                     text = sharedLogic.formattedCurrency(totalGastosProgress),
                     color = colorResource(id = R.color.rojoDinero),
                     style = MaterialTheme.typography.titleMedium
                 )
-                VerticalDivider()
+               Text(text = "/", modifier = Modifier.padding(horizontal = 4.dp))
                 Text(
                     text = sharedLogic.formattedCurrency(totalIngresosProgress),
+
                     color = colorResource(id = R.color.verdeDinero),
                     style = MaterialTheme.typography.titleMedium
                 )
+
             }
         }
     }

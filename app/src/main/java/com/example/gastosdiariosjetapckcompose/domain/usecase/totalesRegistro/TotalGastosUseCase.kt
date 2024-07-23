@@ -2,35 +2,42 @@ package com.example.gastosdiariosjetapckcompose.domain.usecase.totalesRegistro
 
 import com.example.gastosdiariosjetapckcompose.data.di.repository.CurrentMoneyRepository
 import com.example.gastosdiariosjetapckcompose.data.di.repository.TotalGastosRepository
+import com.example.gastosdiariosjetapckcompose.data.di.repository.TotalIngresosRepository
 import com.example.gastosdiariosjetapckcompose.domain.model.TotalGastosModel
 import javax.inject.Inject
 
-class InsertTotalGastosUseCase @Inject constructor(private val totalGastosRepository: TotalGastosRepository) {
+class InsertTotalGastosUseCase @Inject constructor(private val repository: TotalGastosRepository) {
     suspend operator fun invoke(item:TotalGastosModel) {
-        totalGastosRepository.insertTotalGastos(item)
+        repository.insertTotalGastos(item)
     }
 }
 
-class UpdateTotalGastosUseCase @Inject constructor(private val totalGastosRepository: TotalGastosRepository) {
+class UpdateTotalGastosUseCase @Inject constructor(private val repository: TotalGastosRepository) {
     suspend operator fun invoke(item:TotalGastosModel) {
-        totalGastosRepository.updateTotalGastos(item)
+        repository.updateTotalGastos(item)
     }
 }
 
-class GetTotalGastosUseCase @Inject constructor(private val totalGastosRepository: TotalGastosRepository) {
+class GetTotalGastosUseCase @Inject constructor(private val repository: TotalGastosRepository) {
     suspend operator fun invoke(): TotalGastosModel? {
-        return totalGastosRepository.getTotalGastos()
+        return repository.getTotalGastos()
     }
 }
 
-class DeleteTotalGastosUseCase @Inject constructor(private val totalGastosRepository: TotalGastosRepository) {
+class DeleteTotalGastosUseCase @Inject constructor(private val repository: TotalGastosRepository) {
     suspend operator fun invoke(item:TotalGastosModel) {
-        return totalGastosRepository.deleteTotalGastos(item)
+        return repository.deleteTotalGastos(item)
     }
 }
-class CheckDatabaseTotalGastosEmptyUseCase @Inject constructor(private val totalGastosRepository: TotalGastosRepository) {
+class CheckDatabaseTotalGastosEmptyUseCase @Inject constructor(private val repository: TotalGastosRepository) {
     suspend operator fun invoke(): Boolean {
-        return totalGastosRepository.isDatabaseTotalGastosEmpty()
+        return repository.isDatabaseTotalGastosEmpty()
+    }
+}
+
+class ClearAllTotalGastosUseCase @Inject constructor(private val repository: TotalGastosRepository){
+    suspend operator fun invoke(){
+        repository.clearAllTotalGastosRepository()
     }
 }
 

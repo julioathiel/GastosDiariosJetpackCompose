@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -76,6 +78,9 @@ fun Content(vm: RegistroTransaccionesViewModel, modifier: Modifier) {
            vm.uiState.collect { value = it }
         }
     }
+
+    LaunchedEffect(Unit) { vm.getDatosGastos() }
+
     when (uiState) {
         is RegistroTransaccionesUiState.Error -> {}
         RegistroTransaccionesUiState.Loading -> {
@@ -84,8 +89,7 @@ fun Content(vm: RegistroTransaccionesViewModel, modifier: Modifier) {
 
         is RegistroTransaccionesUiState.Success -> {
             // Obtener la lista de transacciones desde el ViewModel
-            val listGastosPorCat =
-                (uiState as RegistroTransaccionesUiState.Success).listGastosPorCat
+            val listGastosPorCat = (uiState as RegistroTransaccionesUiState.Success).listGastosPorCat
             Column(modifier = modifier.fillMaxSize()) {
                 GastosPorCategoriaList(
                     listTransacciones = listGastosPorCat, vm,
@@ -113,7 +117,7 @@ fun GastosPorCategoriaList(
         state = listState
     ) {
         item {
-            // Mostrar el gráfico aquí siempre, incluso si no hay datos
+//            // Mostrar el gráfico aquí siempre, incluso si no hay datos
             BarGrahpConfigCustom(registroTransaccionesViewModel)
         }
         item {
@@ -141,7 +145,9 @@ fun GastosPorCategoriaList(
         // Mostrar mensaje o indicador visual cuando la lista está vacía
         if (transaccionesRevertidas.isEmpty()) {
             item {
-                Box(modifier = Modifier.fillMaxWidth().padding(top = 50.dp)){
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 50.dp)){
 
                     Text(
                         text = stringResource(R.string.no_hay_transacciones_disponibles),
@@ -152,8 +158,8 @@ fun GastosPorCategoriaList(
                 }
             }
         } else {
-            items(transaccionesRevertidas, key = { it.id }) { transaccion ->
-                ItemCategory(transaccion, registroTransaccionesViewModel)
+            items(transaccionesRevertidas, key = { it.id }) { transaction ->
+                ItemCategory(transaction, registroTransaccionesViewModel)
             }
         }
 

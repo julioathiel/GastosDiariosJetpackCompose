@@ -21,4 +21,7 @@ interface TotalIngresosDao {
 
     @Delete
     suspend fun deleteTotalIngresos(totales: TotalIngresosEntity)
+
+    @Query("delete from TotalIngresosEntity")
+    suspend fun deleteAllTotalIngresos()
 }

@@ -3,7 +3,6 @@ package com.example.gastosdiariosjetapckcompose.features.creandoCategoriaIngreso
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,8 +25,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,11 +41,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -218,18 +215,15 @@ fun ItemIngresos(
     Row(
         Modifier
             .fillMaxWidth()
-            .background(Color.White)
             .height(48.dp), verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             painter = painterResource(id = itemModel.categoriaIcon.toInt()),
             contentDescription = null,
-            tint = colorResource(id = R.color.black),
             modifier = Modifier.padding(start = 16.dp, end = 32.dp)
         )
         Text(
             text = itemModel.nombreCategoria,
-            color = colorResource(id = R.color.black),
             fontSize = 16.sp,
             style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.weight(1f)
@@ -237,7 +231,6 @@ fun ItemIngresos(
         IconButton(onClick = { showMenu = true }) {
             Icon(
                 painter = painterResource(id = R.drawable.ic_option),
-                tint = Color.Black,
                 contentDescription = null
             )
         }
@@ -278,9 +271,9 @@ fun ContentBottomSheet(
         HorizontalDivider()
 
         CategoryListIngresos(
-            iconoSeleccionado = categoriaSeleccionada,
-        ) { icono ->
-            categoriaIngresosViewModel.iconoSelecionadoIngresos(icono)
+            iconSelected = categoriaSeleccionada,
+        ) { icon ->
+            categoriaIngresosViewModel.iconoSelecionadoIngresos(icon)
         }
 
         HorizontalDivider()
@@ -338,7 +331,7 @@ fun ContentBottomSheet(
 
 @Composable
 fun CategoryListIngresos(
-    iconoSeleccionado: CategoryCrear?,
+    iconSelected: CategoryCrear?,
     onCategorySelected: (CategoryCrear) -> Unit
 ) {
     LazyVerticalGrid(
@@ -350,7 +343,7 @@ fun CategoryListIngresos(
         items(categorieGastosNuevos) { category ->
             CategoryItemIngresos(
                 category = category,
-                isSelected = category == iconoSeleccionado,
+                isSelected = category == iconSelected,
                 onCategorySelected = onCategorySelected
             )
         }
@@ -401,7 +394,7 @@ fun VacioIngresos(categoriaIngresosViewModel: CategoriaIngresosViewModel) {
 
 @Composable
 fun BotonGastosIngresos(onTipoSeleccionado: (IngresosGastosEnum) -> Unit) {
-    var selectedIndex by remember { mutableStateOf(1) }
+    var selectedIndex by remember { mutableIntStateOf(1) }
     val options = listOf(IngresosGastosEnum.GASTOS, IngresosGastosEnum.INGRESOS)
     SingleChoiceSegmentedButtonRow {
         options.forEachIndexed { index, label ->
@@ -410,7 +403,6 @@ fun BotonGastosIngresos(onTipoSeleccionado: (IngresosGastosEnum) -> Unit) {
                 when (label) {
                     IngresosGastosEnum.GASTOS -> Color(0xFFFFEBEE)
                     IngresosGastosEnum.INGRESOS -> colorResource(id = R.color.fondoVerdeDinero)
-                    else -> Color.Transparent
                 }
             } else {
                 Color.Transparent
@@ -420,7 +412,6 @@ fun BotonGastosIngresos(onTipoSeleccionado: (IngresosGastosEnum) -> Unit) {
                 when (label) {
                     IngresosGastosEnum.GASTOS -> MaterialTheme.colorScheme.error
                     IngresosGastosEnum.INGRESOS -> colorResource(id = R.color.verdeDinero)
-                    else -> Color.Transparent
                 }
             } else {
                 Color.Transparent
@@ -434,6 +425,7 @@ fun BotonGastosIngresos(onTipoSeleccionado: (IngresosGastosEnum) -> Unit) {
                 selected = index == selectedIndex,
                 colors = SegmentedButtonDefaults.colors(
                     activeContainerColor = color,
+                    activeContentColor = colorText,
                     inactiveContainerColor = Color.Transparent
                 ),
                 border = BorderStroke(color = colorText, width = 1.dp),
@@ -450,12 +442,12 @@ fun BotonGastosIngresos(onTipoSeleccionado: (IngresosGastosEnum) -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Toolbar(categoriaGastosViewModel: CategoriaIngresosViewModel) {
-    val activado = categoriaGastosViewModel.isActivated.value
+    val activation = categoriaGastosViewModel.isActivated.value
     var isBorrarTodo by remember { mutableStateOf(false) }
     TopAppBar(
         title = { Text(text = "Catagorias nuevas") },
         actions = {
-            if (activado) {
+            if (activation) {
                 IconButton(onClick = { isBorrarTodo = true }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_option),
@@ -466,15 +458,8 @@ fun Toolbar(categoriaGastosViewModel: CategoriaIngresosViewModel) {
                     expanded = isBorrarTodo,
                     onDismissRequest = { isBorrarTodo = !isBorrarTodo }) {
                     DropdownMenuItem(
-                        text = { Text("Eliminar todo") },
-                        onClick = { categoriaGastosViewModel.borrandoLista() },
-//                        trailingIcon = {
-//                            Icon(
-//                                painter = painterResource(id = R.drawable.ic_delete),
-//                                tint = Color.Black,
-//                                contentDescription = null
-//                            )
-//                        }
+                        text = { Text(stringResource(id = R.string.eliminar_todo)) },
+                        onClick = { categoriaGastosViewModel.borrandoLista() }
                     )
 
                 }

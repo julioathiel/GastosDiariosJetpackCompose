@@ -30,6 +30,10 @@ class UsuarioCreaCatIngresoRepository @Inject constructor(private val usuarioCre
     suspend fun deleteUsuarioCreaCatIngresosRepository(item: UsuarioCreaCatIngresosModel){
         usuarioCreaCatIngresoDao.deleteUsuarioCreaCatIngreso(item.toData())
     }
+
+    suspend fun clearAllUserCreaCatIngresosRepository(){
+        usuarioCreaCatIngresoDao.deleteAllUsuarioCreaCatIngresos()
+    }
 }
 
 fun UsuarioCreaCatIngresosModel.toData(): UsuarioCreaCatIngresoEntity {

@@ -33,3 +33,9 @@ class CheckDatabaseAllExpensesEmptyUseCase @Inject constructor(private val movim
         return movimientosRepository.isDatabaseAllExpensesEmpty()
     }
 }
+
+class ClearAllMovimientosUseCase @Inject constructor(private val movimientosRepository: MovimientosRepository){
+    suspend operator fun  invoke(){
+        movimientosRepository.clearAllMovimientosRepository()
+    }
+}

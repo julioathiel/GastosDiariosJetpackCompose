@@ -25,4 +25,8 @@ interface GastosPorCategoriaDao {
 
     @Delete
     suspend fun deleteGastosPorCategoria(item: GastosPorCategoriaEntity)
+
+    @Query("delete from GastosPorCategoriaEntity")
+    suspend fun deleteAllGastosPorCategoria()
+
 }

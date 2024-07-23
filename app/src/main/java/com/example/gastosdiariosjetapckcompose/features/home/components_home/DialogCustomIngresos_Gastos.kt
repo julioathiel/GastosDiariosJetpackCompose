@@ -16,9 +16,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ExposedDropdownMenuDefaults
-import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -57,12 +55,14 @@ import com.example.gastosdiariosjetapckcompose.domain.model.categoriaDefault
 import com.example.gastosdiariosjetapckcompose.domain.model.categoriesGastos
 import com.example.gastosdiariosjetapckcompose.domain.model.categoriesIngresos
 import com.example.gastosdiariosjetapckcompose.features.home.HomeViewModel
+import com.example.gastosdiariosjetapckcompose.features.registroTransaccionsPorcentaje.RegistroTransaccionesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddTransactionDialog(
     showDialogTransaccion: Boolean, onDissmis: () -> Unit,
     homeViewModel: HomeViewModel,
+    registroTransaccionesViewModel: RegistroTransaccionesViewModel,
     navController: NavController
 ) {
     val isChecked by homeViewModel.isChecked
@@ -140,6 +140,7 @@ fun AddTransactionDialog(
                                         cantidadIngresada
                                     )
                                 }
+//                               registroTransaccionesViewModel.getDatosGastos()
                                 cantidadIngresada = ""
                                 description = ""
                             }

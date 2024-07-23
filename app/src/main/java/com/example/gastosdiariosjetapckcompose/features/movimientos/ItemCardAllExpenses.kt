@@ -81,11 +81,6 @@ fun ItemCardAllExpenses(
     ) {
 
         Spacer(modifier = Modifier.padding(start = 16.dp))
-        val iconResourceId = LocalContext.current.resources.getIdentifier(
-            transaccion.iconResourceName,
-            "drawable",
-            LocalContext.current.packageName
-        )
 
         //contenedor de icono
         Box(
@@ -99,7 +94,7 @@ fun ItemCardAllExpenses(
         ) {
             // Icono dentro del círculo
             Image(
-                painter = painterResource(id = iconResourceId),
+                painter = painterResource(id = transaccion.iconResourceName.toInt()),
                 contentDescription = null,
                 alignment = Alignment.Center,
                 colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.primary)

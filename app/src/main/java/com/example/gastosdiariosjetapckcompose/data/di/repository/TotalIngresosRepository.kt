@@ -32,6 +32,10 @@ class TotalIngresosRepository @Inject constructor(private val totalIngresosDao: 
         //por ende devolvera un true ya que no hay nada
     }
 
+    suspend fun clearAllTotalIngresosRepository(){
+        totalIngresosDao.deleteAllTotalIngresos()
+    }
+
 }
 
 fun TotalIngresosModel.toData(): TotalIngresosEntity {

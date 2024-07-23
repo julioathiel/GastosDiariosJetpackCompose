@@ -22,4 +22,7 @@ interface UsuarioCreaCatGastoDao {
     @Delete
     suspend fun deleteUsuarioCreaCatGasto(item: UsuarioCreaCatGastoEntity)
 
+    @Query("delete from UsuarioCreaCatGastoEntity")
+    suspend fun deleteAllUsuarioCreaCatGastos()
+
 }

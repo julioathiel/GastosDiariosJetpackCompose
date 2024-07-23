@@ -21,4 +21,7 @@ interface ImagenSeleccionadaDao {
 
     @Delete
     suspend fun deleteImagenSeleccionada(uri:ImagenSeleccionadaEntity)
+
+    @Query("delete from ImagenSeleccionadaEntity")
+    suspend fun deleteAllImagenSelected()
 }

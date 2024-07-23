@@ -21,4 +21,7 @@ interface MovimientosDao {
 
     @Delete
     suspend fun deleteMovimientos(item: MovimientosEntity)
+
+    @Query("delete from MovimientosEntity")
+    suspend fun deleteAllMovimientos()
 }

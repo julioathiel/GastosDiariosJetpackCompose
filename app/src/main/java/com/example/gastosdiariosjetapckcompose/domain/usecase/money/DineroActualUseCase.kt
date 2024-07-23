@@ -1,37 +1,42 @@
 package com.example.gastosdiariosjetapckcompose.domain.usecase.money
 
+import com.example.gastosdiariosjetapckcompose.data.di.entity.CurrentMoneyEntity
 import com.example.gastosdiariosjetapckcompose.data.di.repository.CurrentMoneyRepository
-import com.example.gastosdiariosjetapckcompose.data.di.repository.MovimientosRepository
 import com.example.gastosdiariosjetapckcompose.domain.model.CurrentMoneyModel
-import com.example.gastosdiariosjetapckcompose.domain.model.MovimientosModel
 import javax.inject.Inject
 
-class AddCurrentMoneyUseCase @Inject constructor(private val currentMoneyRepository: CurrentMoneyRepository) {
+class AddCurrentMoneyUseCase @Inject constructor(private val repository: CurrentMoneyRepository) {
     suspend operator fun invoke(currentMoneyModel: CurrentMoneyModel) {
-        currentMoneyRepository.insertCurrentMoney(currentMoneyModel)
+        repository.insertCurrentMoney(currentMoneyModel)
     }
 }
 
-class GetCurrentMoneyUseCase @Inject constructor(private val currentMoneyRepository: CurrentMoneyRepository) {
+class GetCurrentMoneyUseCase @Inject constructor(private val repository: CurrentMoneyRepository) {
     suspend operator fun invoke(): CurrentMoneyModel{
-        return currentMoneyRepository.getMoney()
+        return repository.getMoney()
     }
 }
 
-class UpdateCurrentMoneyUseCase @Inject constructor(private val currentMoneyRepository: CurrentMoneyRepository) {
+class UpdateCurrentMoneyUseCase @Inject constructor(private val repository: CurrentMoneyRepository) {
     suspend operator fun invoke(money: CurrentMoneyModel){
-        currentMoneyRepository.updateCurrentMoney(money)
+        repository.updateCurrentMoney(money)
     }
 }
 
-class DeleteCurrentMoneyUseCase @Inject constructor(private val currentMoneyRepository: CurrentMoneyRepository) {
+class DeleteCurrentMoneyUseCase @Inject constructor(private val repository: CurrentMoneyRepository) {
     suspend operator fun invoke(item: CurrentMoneyModel) {
-        currentMoneyRepository.deleteCurrentMoneyRepository(item)
+        repository.deleteCurrentMoneyRepository(item)
     }
 }
 
-class CheckDatabaseMoneyEmptyUseCase @Inject constructor(private val currentMoneyRepository: CurrentMoneyRepository) {
+class CheckDatabaseMoneyEmptyUseCase @Inject constructor(private val repository: CurrentMoneyRepository) {
     suspend operator fun invoke(): Boolean {
-        return currentMoneyRepository.isDatabaseMoneyEmpty()
+        return repository.isDatabaseMoneyEmpty()
+    }
+}
+
+class ClearAllCurrentMoneyUseCase @Inject constructor(private val repository: CurrentMoneyRepository){
+    suspend operator fun invoke(){
+        repository.clearAllCurrentMoneyRepository()
     }
 }

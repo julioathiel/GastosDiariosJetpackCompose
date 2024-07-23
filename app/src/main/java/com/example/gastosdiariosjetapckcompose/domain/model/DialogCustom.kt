@@ -58,7 +58,7 @@ class DialogCustom {
             "pantallaregistoCategoria" -> {
                 PantallaInfo(
                     titulo = context.getString(R.string.reiniciarAplicacion),
-                    texto = "Aceptas eliminar todo?",
+                    texto = "",
                     iconoResId = R.drawable.ic_refresh// ID del recurso de icono para la pantalla de registro de categoría
                 )
             }

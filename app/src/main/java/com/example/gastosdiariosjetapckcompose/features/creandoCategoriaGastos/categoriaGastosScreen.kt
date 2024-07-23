@@ -52,6 +52,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
@@ -365,7 +366,7 @@ fun VacioGastos(categoriaGastosViewModel: CategoriaGastosViewModel) {
 
 @Composable
 fun BotonGastosIngresosPantallaGastos(onTipoSeleccionado: (IngresosGastosEnum) -> Unit) {
-    var selectedIndex by remember { mutableStateOf(0) }
+    var selectedIndex by remember { mutableIntStateOf(0) }
     val options = listOf(IngresosGastosEnum.GASTOS, IngresosGastosEnum.INGRESOS)
     SingleChoiceSegmentedButtonRow {
         options.forEachIndexed { index, label ->
@@ -396,6 +397,7 @@ fun BotonGastosIngresosPantallaGastos(onTipoSeleccionado: (IngresosGastosEnum) -
                 selected = index == selectedIndex,
                 colors = SegmentedButtonDefaults.colors(
                     activeContainerColor = color,
+                    activeContentColor = colorText,
                     inactiveContainerColor = Color.Transparent
                 ),
                 border = BorderStroke(color = colorText, width = 1.dp)

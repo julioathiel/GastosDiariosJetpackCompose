@@ -15,7 +15,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -23,7 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
@@ -38,12 +37,14 @@ import com.example.gastosdiariosjetapckcompose.features.home.components_home.Cou
 import com.example.gastosdiariosjetapckcompose.features.home.components_home.Header
 import com.example.gastosdiariosjetapckcompose.features.home.components_home.MyFAB
 import com.example.gastosdiariosjetapckcompose.features.home.components_home.NuevoMes
+import com.example.gastosdiariosjetapckcompose.features.registroTransaccionsPorcentaje.RegistroTransaccionesViewModel
 import kotlin.system.exitProcess
 
 @Composable
 fun HomeScreen(
     navController: NavHostController,
     homeViewModel: HomeViewModel,
+    registroTransaccionesViewModel: RegistroTransaccionesViewModel,
     configuracion: ConfigurationViewModel
 ) {
     BackHandler {
@@ -56,7 +57,7 @@ fun HomeScreen(
     val isReinicioExitoso by configuracion.appResetExitoso.observeAsState()
     val itemActualizado by sharedLogic.itemActualizado.observeAsState()
     // Establecer el estado de la pestaña seleccionada como 0 para la pestaña "Home"
-    val seleccionadoTabIndex by rememberSaveable { mutableStateOf(0) }
+    val seleccionadoTabIndex by rememberSaveable { mutableIntStateOf(0) }
 
     LaunchedEffect(Unit) {
         // Observa el reinicio de la aplicación y actualiza los valores relevantes
@@ -79,6 +80,7 @@ fun HomeScreen(
             SnackbarHost(hostState = isShowSnackbar)
         }
     ) { paddingValues ->
+
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -98,6 +100,7 @@ fun HomeScreen(
                 showDialogTransaccion = showDialogTransaction,
                 onDissmis = { homeViewModel.onDialogClose() },
                 homeViewModel,
+                registroTransaccionesViewModel,
                 navController
             )
         }

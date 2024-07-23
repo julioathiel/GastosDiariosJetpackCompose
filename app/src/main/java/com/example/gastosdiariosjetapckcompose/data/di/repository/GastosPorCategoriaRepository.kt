@@ -44,6 +44,10 @@ class GastosPorCategoriaRepository @Inject constructor(private val gastosPorCate
     suspend fun isDatabaseGastosPorCategoriaEmpty(): Boolean {
         return gastosPorCategoriaDao.getGastosPorCategoria().first().isEmpty()
     }
+
+    suspend fun clearAllGastosPorCat(){
+        gastosPorCategoriaDao.deleteAllGastosPorCategoria()
+    }
 }
 
 fun GastosPorCategoriaModel.toData(): GastosPorCategoriaEntity {

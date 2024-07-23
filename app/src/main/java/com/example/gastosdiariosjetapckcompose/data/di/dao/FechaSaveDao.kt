@@ -20,4 +20,7 @@ interface FechaSaveDao {
 
     @Delete
     suspend fun deleteFecha(item: FechaSaveEntity)
+
+    @Query("delete from FechaSaveEntity")
+    suspend fun deleteAllDate()
 }

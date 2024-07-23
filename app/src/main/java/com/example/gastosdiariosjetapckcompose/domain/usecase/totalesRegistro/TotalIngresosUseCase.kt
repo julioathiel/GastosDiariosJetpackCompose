@@ -6,32 +6,38 @@ import com.example.gastosdiariosjetapckcompose.domain.model.MovimientosModel
 import com.example.gastosdiariosjetapckcompose.domain.model.TotalIngresosModel
 import javax.inject.Inject
 
-class InsertTotalIngresosUseCase @Inject constructor(private val totalIngresosRepository: TotalIngresosRepository) {
+class InsertTotalIngresosUseCase @Inject constructor(private val repository: TotalIngresosRepository) {
     suspend operator fun invoke(item:TotalIngresosModel) {
-        totalIngresosRepository.insertTotalIngresos(item)
+        repository.insertTotalIngresos(item)
     }
 }
 
-class UpdateTotalIngresosUseCase @Inject constructor(private val totalIngresosRepository: TotalIngresosRepository) {
+class UpdateTotalIngresosUseCase @Inject constructor(private val repository: TotalIngresosRepository) {
     suspend operator fun invoke(item: TotalIngresosModel) {
-        totalIngresosRepository.updateTotalIngresos(item)
+        repository.updateTotalIngresos(item)
     }
 }
 
-class GetTotalIngresosUseCase @Inject constructor(private val totalIngresosRepository: TotalIngresosRepository) {
+class GetTotalIngresosUseCase @Inject constructor(private val repository: TotalIngresosRepository) {
     suspend operator fun invoke(): TotalIngresosModel? {
-        return totalIngresosRepository.getTotalIngresos()
+        return repository.getTotalIngresos()
     }
 }
 
-class DeleteTotalIngresosUseCase @Inject constructor(private val totalIngresosRepository:TotalIngresosRepository){
+class DeleteTotalIngresosUseCase @Inject constructor(private val repository:TotalIngresosRepository){
     suspend operator fun invoke(item: TotalIngresosModel) {
-        totalIngresosRepository.deleteTotalIngresosRepository(item)
+        repository.deleteTotalIngresosRepository(item)
     }
 }
 
-class CheckDatabaseTotalIngresosEmptyUseCase @Inject constructor(private val totalIngresosRepository:TotalIngresosRepository) {
+class CheckDatabaseTotalIngresosEmptyUseCase @Inject constructor(private val repository:TotalIngresosRepository) {
     suspend operator fun invoke(): Boolean {
-        return totalIngresosRepository.isDatabaseTotalIngresosEmpty()
+        return repository.isDatabaseTotalIngresosEmpty()
+    }
+}
+
+class ClearAllTotalIngresosUseCase @Inject constructor(private val repository: TotalIngresosRepository){
+    suspend operator fun invoke(){
+        repository.clearAllTotalIngresosRepository()
     }
 }

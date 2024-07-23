@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.Ingresosdiariosjetapckcompose.domain.usecase.UsuarioCreaCatIngreso.GetUserCatIngresoUsecase
 import com.example.gastosdiariosjetapckcompose.GlobalVariables.sharedLogic
+import com.example.gastosdiariosjetapckcompose.data_base_manager.DataBaseManager
 import com.example.gastosdiariosjetapckcompose.domain.model.CategoryGasto
 import com.example.gastosdiariosjetapckcompose.domain.model.CategoryIngreso
 import com.example.gastosdiariosjetapckcompose.domain.model.CurrentMoneyModel
@@ -41,9 +42,12 @@ import com.example.gastosdiariosjetapckcompose.domain.usecase.totalesRegistro.In
 import com.example.gastosdiariosjetapckcompose.domain.usecase.totalesRegistro.UpdateTotalGastosUseCase
 import com.example.gastosdiariosjetapckcompose.domain.usecase.totalesRegistro.UpdateTotalIngresosUseCase
 import com.example.gastosdiariosjetapckcompose.features.core.DataStorePreferences
+import com.example.gastosdiariosjetapckcompose.features.registroTransaccionsPorcentaje.RegistroTransaccionesViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -91,6 +95,7 @@ class HomeViewModel @Inject constructor(
     //obteniendo lista creada por el usuario
     private val getUserCatGastoUsecase: GetUserCatGastoUsecase,
     private val getUserCatIngresoUsecase: GetUserCatIngresoUsecase,
+    private val dataBaseManager: DataBaseManager
 ) : ViewModel() {
 
     private val _selectedImageUri = MutableLiveData<String>()
@@ -149,6 +154,7 @@ class HomeViewModel @Inject constructor(
     private val _enabledBotonGastos = mutableStateOf<Boolean>(false)
     val enabledBotonGastos: State<Boolean> = _enabledBotonGastos
 
+
     init {
         viewModelScope.launch {
             //obteniendo fecha guardada maxima por el usuario
@@ -161,6 +167,7 @@ class HomeViewModel @Inject constructor(
         listCatIngresosNueva()//actualizando la lista de categoria del menu desplegable
         calculando(fechaActual)
     }
+
 
     private fun calculando(fechaActual: LocalDate) {
         viewModelScope.launch(Dispatchers.Main) {
@@ -181,16 +188,18 @@ class HomeViewModel @Inject constructor(
 
                     // ej: 2023-12-12
                     //si la fecha actual es igual que la fecha guardada
-                    if (fechaActual.isEqual(fechaParseadaAGuion)) {
+                    if (fechaActual.isEqual(fechaParseadaAGuion) || (fechaActual > fechaParseadaAGuion)) {
                         //si aun tiene dinero el usuario al finalizar la fecha elegida
                         if (dineroDisponible != 0.0) {
                             Log.d("miApp", "actualizando valores")
                             actualizarFechaUnMesMas(fechaActual, fechaParseadaAGuion)
                             updateGastosTotal(TotalGastosModel(totalGastos = 0.0))
                             updateIngresoTotal(TotalIngresosModel(totalIngresos = dineroDisponible))
+                            dataBaseManager.deleteAllExpenses()
+                            dataBaseManager.deleteAllGastosPorCategory()
                             //actualizando el liveData con el nuevo valor maximo del progress
                             _mostrandoDineroTotalIngresos.value = dineroDisponible
-                            Log.d("fechaIgualDiaSeleccion", "${fechaConBarra}")
+
                             initMostrandoAlUsuario()
                         } else {
                             //si el usuario no tiene dinero al llegar la fecha
@@ -199,8 +208,6 @@ class HomeViewModel @Inject constructor(
                         }
                     } else {
                         //si aun no es la fecha elegida por el usuario se mostrara esto
-                        Log.d("miApp", "fecha NO es igual a fecha actual")
-                        Log.d("miApp", "Ingresando a los datos")
                         initMostrandoAlUsuario()
                     }
                 } else {
@@ -304,19 +311,6 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-//    fun mostrarDineroTotal() {
-//        viewModelScope.launch(Dispatchers.Main) {
-//            try {
-//                val datos = dataBaseUtility.obtenerDineroTotal(getCurrentMoneyUseCase)
-//                _dineroActual.value = datos
-//            } catch (e: Exception) {
-//                e.printStackTrace()
-//                Log.e("mostrarDineroTotal", "Error al obtener el dinero total: ${e.message}")
-//            }
-//        }
-//    }
-
-
     private fun mostrandoAlUsuario(fechaConBarra: String) {
         mostrarFecha(fechaConBarra)
         mostrarDiasRestantes(fechaConBarra)
@@ -417,7 +411,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun convertirFechaPersonalizada(date: String): String {
+    private fun convertirFechaPersonalizada(date: String): String {
         val partesFecha = date.split("/") // Dividir la fecha en partes: [dia, mes, año]
         if (partesFecha.size == 3) {
             val dia = partesFecha[0]
@@ -431,7 +425,7 @@ class HomeViewModel @Inject constructor(
     }
 
 
-    fun obtenerNombreMes(mes: Int): String {
+    private fun obtenerNombreMes(mes: Int): String {
         return DateFormatSymbols().months[mes - 1].substring(0, 3).lowercase(Locale.ROOT)
             .replaceFirstChar {
                 if (it.isLowerCase())

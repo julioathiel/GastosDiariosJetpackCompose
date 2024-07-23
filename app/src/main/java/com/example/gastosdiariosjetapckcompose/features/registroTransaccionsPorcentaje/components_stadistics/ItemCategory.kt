@@ -1,8 +1,5 @@
 package com.example.gastosdiariosjetapckcompose.features.registroTransaccionsPorcentaje.components_stadistics
 
-import android.graphics.drawable.Drawable
-import android.graphics.drawable.Icon
-import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -22,7 +19,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,10 +30,6 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
-import androidx.core.content.res.TypedArrayUtils.getDrawable
-import androidx.core.content.res.TypedArrayUtils.getResourceId
-import coil.compose.rememberAsyncImagePainter
 import com.example.gastosdiariosjetapckcompose.GlobalVariables.sharedLogic
 import com.example.gastosdiariosjetapckcompose.R
 import com.example.gastosdiariosjetapckcompose.domain.model.GastosPorCategoriaModel
@@ -50,12 +42,12 @@ fun ItemCategory(
     transaccion: GastosPorCategoriaModel,
     registroTransViewModel: RegistroTransaccionesViewModel
 ) {
+    val context = LocalContext.current
     val totalGastado = sharedLogic.formattedCurrency(transaccion.totalGastado.toDouble())
 
-    val progresstotal by registroTransViewModel.mostrandoDineroTotalIngresosRegistros.observeAsState(
-        0.0
-    )
+    val progressMaximoTotal:Double? by registroTransViewModel.mostrandoDineroTotalIngresosRegistros.collectAsState()
     val uiState: RegistroTransaccionesUiState by registroTransViewModel.uiState.collectAsState()
+
     val categoriaDeseada = transaccion.title // Nombre de la categoría
     val movimientoCategoria = when (val estado = uiState) {
         is RegistroTransaccionesUiState.Success -> {
@@ -65,20 +57,11 @@ fun ItemCategory(
         else -> null
     }
     val dineroGastadoTotal = movimientoCategoria?.totalGastado
-    // Obtén el valor máximo para el ProgressBar, por ejemplo, del uiState
-    val progressMaximoTotal: Double = progresstotal
     // Obtén el valor actual de los gastos para el ProgressBar, por ejemplo, del uiState
     val progressTotalGastosActual: Double = dineroGastadoTotal!!.toDouble()
 
-    val progresoRelativo =
-        sharedLogic.calcularProgresoRelativo(progressMaximoTotal, progressTotalGastosActual)
-    val porcentaje = sharedLogic.formateandoPorcentaje(progresoRelativo)
-
-    val iconResourceId = LocalContext.current.resources.getIdentifier(
-        transaccion.categoriaIcon,
-        "drawable",
-        LocalContext.current.packageName
-    )
+    val progresoRelativo = sharedLogic.calcularProgresoRelativo(progressMaximoTotal, progressTotalGastosActual)
+    val porcentaje = sharedLogic.formattedPorcentaje(progresoRelativo)
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -95,7 +78,7 @@ fun ItemCategory(
             contentAlignment = Alignment.Center
         ) {
             Image(
-                painter = painterResource(id = iconResourceId),
+                painter = painterResource(id = transaccion.categoriaIcon.toInt()),
                 contentDescription = "",
                 alignment = Alignment.Center,
                 modifier = Modifier.size(24.dp),
@@ -119,17 +102,15 @@ fun ItemCategory(
                     text = totalGastado,
                     style = MaterialTheme.typography.bodySmall
                 )
-                Log.d("porcentaje", porcentaje)
                 Text(
                     text = "$porcentaje%",
                     fontSize = 14.sp,
                     textAlign = TextAlign.End,
-                    modifier = Modifier.fillMaxWidth(),
-                    fontFamily = FontFamily(Font(R.font.lato_bold))
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
             AnimatedProgressBarRegistro(
-                progress = progresoRelativo.toFloat(),
+                progress = progresoRelativo,
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -141,6 +122,7 @@ fun AnimatedProgressBarRegistro(
     progress: Float,
     modifier: Modifier = Modifier
 ) {
+
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
         animationSpec = tween(durationMillis = 1000), label = ""
