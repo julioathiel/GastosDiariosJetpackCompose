@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">GastosDiariosJetapckCompose</string>
 
-//globales
+    //globales
     <string name="eliminar">Eliminar</string>
     <string name="editar">Editar</string>
     <string name="guardar">Guardar</string>
@@ -16,7 +16,7 @@
     <string name="reseteoConfirmado">Reinicio exitoso</string>
     <string name="reiniciarAplicacion">Reiniciar aplicación</string>
     <string name="reinicioCompletado">Reinicio completado</string>
-     //texfield
+    //texfield
     <string name="descripcion">Descripción</string>
 
     //modelBottomSheet
@@ -37,13 +37,15 @@
     <string name="gastos">Gastos</string>
     <string name="body_vacio">Parece que aún no has añadido nada a tu lista. ¿Por qué no comienzas ahora mismo?</string>
     <string name="sin_resultados">Sin resultados</string>
-    //toolbar
+    <!--TOOLBAR-->
     <string name="toolbar_configuracion">Configuracion</string>
     <string name="toolbar_cambio_fecha">Cambio de fechas</string>
-    <string name="toolbar_registro_gastos">Registro Movimientos</string>
+    <string name="toolbar_registro_gastos">Registro de transacciones</string>
+    <string name="toolbar_analisis_de_gastos">Análisis de gastos</string>
+    <!-- ///////////////////////////////////////////////////////////////////////////////////// -->
 
     <!-- PANTALLA DE ELEGIR FECHA MAXIMA -->
-    <string name="elige_una_opcion">Elige una opcion</string>
+    <string name="elige_una_opcion">Elige una opción</string>
     <string name="primer_mes">31 días</string>
     <string name="dos_meses">60 días</string>
     <string name="tres_meses">90 días</string>
@@ -51,49 +53,54 @@
     <string name="_60_d_as_para_cobros_cada_dos_meses">60 días para cobros cada dos meses.\n</string>
     <string name="_90_d_as_para_cobros_cada_3_meses">90 días para cobros cada 3 meses.</string>
     <!-- ///////////////////////////////////////////////////////////////////////////////////// -->
+    <!--PANTALL DE ESTADISTICAS -->
 
+
+    <!-- ///////////////////////////////////////////////////////////////////////////////////// -->
 
 
     <string name="elige_una_categoria">Elige una categoria</string>
+    <string name="categories_gastos">categories gastos</string>
+    <string name="categories_ingresos">categories ingresos</string>
     <string name="lo_mas_gastado_este_mes">Lo más gastado este mes</string>
     <string name="resetear">Resetear</string>
     <string name="no_hay_transacciones_disponibles">No hay transacciones disponibles</string>
-
 
 
     <string name="delete_datos_graficos">Eliminar también los datos estadisticos del gráfico</string>
 
     <!--TITULOS Y DESCRIPCIONES DE LA PANTALLA DE CONFIGURACION -->
     <string name="create_category_title">Crear categoría</string>
-    <string name="create_category_description">Permite crear nuevas categorías en la app</string>
+    <string name="create_category_description">Permite crear nuevas categorías</string>
 
-    <string name="update_date_title">Actualizar fecha máxima</string>
-    <string name="update_date_description">Permite ajustar el límite máximo de la fecha</string>
+    <string name="update_date_title">Actualizar fecha</string>
+    <string name="update_date_description">Límite máximo de fecha</string>
 
     <string name="notifications_title">Notificaciones</string>
-    <string name="notifications_description">Elemento para gestionar las notificaciones de la aplicación</string>
+    <string name="notifications_description">Actualizar las notificaciones</string>
 
     <string name="reset_title">Restablecer aplicación</string>
     <string name="reset_description">Elimina todos los datos de la app</string>
 
-    <string name="tutorial_title">Tutorial</string>
-    <string name="tutorial_description">Accede a un tutorial para aprender a usar la app</string>
+    <string name="tutorial_title">Ver tutorial</string>
+    <string name="tutorial_description">Aprende a usar la app</string>
 
-    <string name="share_app_title">Compartir la app</string>
-    <string name="share_app_description">Comparte la app con amigos a través de diferentes plataformas</string>
+    <string name="share_app_title">Compartir</string>
+    <string name="share_app_description">Comparte la app con amigos</string>
 
     <string name="about_title">Acerca de</string>
-    <string name="about_description">Información sobre la app y los desarrolladores</string>
+    <string name="about_description">Sobre la app</string>
 
     <string name="export_data_title">Exportar datos</string>
-    <string name="export_data_description">Elemento para exportar datos de la aplicación</string>
+    <string name="export_data_description">Pdf / Excel</string>
 
-    <string name="advanced_settings_title">Ajustes avanzados</string>
-    <string name="advanced_settings_description">Elementos relacionados con ajustes avanzados o personalización</string>
-<!--    <string name="advanced_settings_title">Ajustes avanzados</string>-->
-<!--    <string name="advanced_settings_description">Elemento para enviar comentarios o sugerencias</string>-->
+    <string name="advanced_settings_title">Ajustes</string>
+    <string name="advanced_settings_description">Avanzados o personalizados</string>
+
     <!-- ///////////////////////////////////////////////////////////////////////////////////// -->
+    <string name="title_notification_programada">Gastos Diarios</string>
+    <string name="textLarge_notification_programada">No olvides agregar las transacciones para llevar un buen control de tus gastos</string>
 
-
-<string name="share_app">https://www.google.com.ar/?hl=e</string>
+    <string name="share_app">https://www.google.com.ar/?hl=e</string>
+    <string name="si_presionas_eliminar_se_hara_de_inmediato">Si presionas eliminar, se hara de inmediato.</string>
 </resources>

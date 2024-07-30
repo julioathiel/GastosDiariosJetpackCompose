@@ -8,7 +8,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
-import com.example.gastosdiariosjetapckcompose.GlobalVariables.sharedLogic
+import com.example.gastosdiariosjetapckcompose.data.core.GlobalVariables.sharedLogic
 import com.example.gastosdiariosjetapckcompose.features.home.HomeViewModel
 import com.example.gastosdiariosjetapckcompose.features.home.showSnackbar
 import kotlinx.coroutines.launch

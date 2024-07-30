@@ -1,8 +1,6 @@
 package com.example.gastosdiariosjetapckcompose.ui.theme
 
 import android.app.Activity
-import android.graphics.Color
-import android.graphics.Color.toArgb
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -20,14 +18,13 @@ import androidx.core.view.WindowCompat
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
     secondary = PurpleGrey80,
-    tertiary = Pink80
+    tertiary = Pink80,
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = Purple40,
     secondary = PurpleGrey40,
     tertiary = Pink40
-
 
     /* Other default colors to override
     background = Color(0xFFFFFBFE),
@@ -43,7 +40,7 @@ private val LightColorScheme = lightColorScheme(
 @Composable
 fun GastosDiariosJetapckComposeTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-   //  El color dinámico está disponible en Android 12
+    //  El color dinámico está disponible en Android 12
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
@@ -60,7 +57,8 @@ fun GastosDiariosJetapckComposeTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.background.toArgb()//si queremos cambiar la parte de arriba de todoo
+            window.statusBarColor =
+                colorScheme.background.toArgb()//si queremos cambiar la parte de arriba de todoo
             window.navigationBarColor = colorScheme.background.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
         }

@@ -17,3 +17,4 @@ val VioletClaro = Color(0xFF8247C5)
 val Violet = Color(0xFF6534C9)
 val RosaClaro = Color(0xFFFFE8D2)
 val VerdeMenta = Color(0xFF98FF98)
+

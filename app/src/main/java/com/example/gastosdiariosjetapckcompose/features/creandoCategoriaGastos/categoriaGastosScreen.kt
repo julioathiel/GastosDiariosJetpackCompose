@@ -1,15 +1,12 @@
 package com.example.gastosdiariosjetapckcompose.features.creandoCategoriaGastos
 
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,11 +22,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.BottomSheetScaffold
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,10 +38,8 @@ import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -66,12 +58,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavHostController
-import com.example.gastosdiariosjetapckcompose.GlobalVariables.sharedLogic
+import com.example.gastosdiariosjetapckcompose.data.core.GlobalVariables.sharedLogic
 import com.example.gastosdiariosjetapckcompose.R
 import com.example.gastosdiariosjetapckcompose.domain.enums.IngresosGastosEnum
 import com.example.gastosdiariosjetapckcompose.domain.model.CategoryCrear
@@ -79,7 +70,6 @@ import com.example.gastosdiariosjetapckcompose.domain.model.UsuarioCreaCatGastoM
 import com.example.gastosdiariosjetapckcompose.domain.model.categorieGastosNuevos
 import com.example.gastosdiariosjetapckcompose.domain.uiState.ResultUiState
 import com.example.gastosdiariosjetapckcompose.navigation.Routes
-import com.squareup.wire.internal.immutableCopyOf
 
 
 @OptIn(ExperimentalMaterial3Api::class)

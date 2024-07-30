@@ -46,7 +46,7 @@ fun MyDatePickerDialog(homeViewModel: HomeViewModel) {
     }
     //selectedDate obtiene la fecha ··/··/····
     selectedDate?.let { it ->
-       homeViewModel.enviandoFechaElegida(it)
+       homeViewModel.sendDateElegida(it)
 
     }
 }
@@ -67,7 +67,7 @@ fun DatePickerView(
             val endTimeMillis = horaActualMillis + diasEnMillis
             return utcTimeMillis in horaActualMillis..endTimeMillis
 
-            //todoo esto retorna solamente un dia antes de lo seleccionado por eso lo arreglo cuando lo paso a la funcion converterMillisToDate()
+            //retorna solamente un dia antes de lo seleccionado por eso lo arreglo cuando lo paso a la funcion converterMillisToDate()
         }
     })
 

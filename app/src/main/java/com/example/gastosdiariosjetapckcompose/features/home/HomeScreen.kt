@@ -17,7 +17,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -28,7 +27,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.example.gastosdiariosjetapckcompose.GlobalVariables.sharedLogic
+import com.example.gastosdiariosjetapckcompose.data.core.GlobalVariables.sharedLogic
 import com.example.gastosdiariosjetapckcompose.features.configuration.ConfigurationViewModel
 import com.example.gastosdiariosjetapckcompose.features.home.components_home.AddTransactionDialog
 import com.example.gastosdiariosjetapckcompose.features.home.components_home.BodyHeader
@@ -37,14 +36,12 @@ import com.example.gastosdiariosjetapckcompose.features.home.components_home.Cou
 import com.example.gastosdiariosjetapckcompose.features.home.components_home.Header
 import com.example.gastosdiariosjetapckcompose.features.home.components_home.MyFAB
 import com.example.gastosdiariosjetapckcompose.features.home.components_home.NuevoMes
-import com.example.gastosdiariosjetapckcompose.features.registroTransaccionsPorcentaje.RegistroTransaccionesViewModel
 import kotlin.system.exitProcess
 
 @Composable
 fun HomeScreen(
     navController: NavHostController,
     homeViewModel: HomeViewModel,
-    registroTransaccionesViewModel: RegistroTransaccionesViewModel,
     configuracion: ConfigurationViewModel
 ) {
     BackHandler {
@@ -75,7 +72,6 @@ fun HomeScreen(
         },
         floatingActionButton = { MyFAB(homeViewModel, isShowSnackbar) },
         floatingActionButtonPosition = FabPosition.Center,
-        containerColor = MaterialTheme.colorScheme.background,
         snackbarHost = {
             SnackbarHost(hostState = isShowSnackbar)
         }
@@ -95,17 +91,16 @@ fun HomeScreen(
             NuevoMes(viewModel = homeViewModel)
             Spacer(modifier = Modifier.padding(vertical = 30.dp))
             CardBotonRegistro(homeViewModel)
-
             AddTransactionDialog(
+                modifier = Modifier.fillMaxWidth(),
                 showDialogTransaccion = showDialogTransaction,
                 onDissmis = { homeViewModel.onDialogClose() },
-                homeViewModel,
-                registroTransaccionesViewModel,
-                navController
+                homeViewModel, navController
             )
         }
     }
 }
+
 suspend fun showSnackbar(
     snackbarHostState: SnackbarHostState,
     message: String
@@ -116,6 +111,7 @@ suspend fun showSnackbar(
         duration = SnackbarDuration.Short
     )
 }
+
 @Composable
 fun AnimatedProgressBar(
     progress: Float,

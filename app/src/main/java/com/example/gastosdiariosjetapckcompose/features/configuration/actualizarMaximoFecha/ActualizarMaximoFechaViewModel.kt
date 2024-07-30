@@ -7,7 +7,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.gastosdiariosjetapckcompose.features.core.DataStorePreferences
+import com.example.gastosdiariosjetapckcompose.data.core.DataStorePreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectIndexed
 import kotlinx.coroutines.flow.first
@@ -25,10 +25,7 @@ class ActualizarMaximoFechaViewModel @Inject constructor(
     private val _selectedSwitchOption = mutableStateOf(false)
     var selectedSwitchOption: State<Boolean> = _selectedSwitchOption
 
-    init {
-        obtenerFechaMaxima()
-
-    }
+    init { obtenerFechaMaxima() }
 
     // Función para obtener la fecha máxima del DataStore
     private fun obtenerFechaMaxima() {
@@ -43,7 +40,6 @@ class ActualizarMaximoFechaViewModel @Inject constructor(
     // Agrega la función para guardar la fecha máxima
     fun setSelectedOption(option: Int, selectedSwitchOption: Boolean) {
         viewModelScope.launch {
-            _selectedOption.value = option
             dataStorePreferences.setSelectedOption(option.toString(), selectedSwitchOption)
         }
     }

@@ -64,7 +64,7 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavHostController
-import com.example.gastosdiariosjetapckcompose.GlobalVariables.sharedLogic
+import com.example.gastosdiariosjetapckcompose.data.core.GlobalVariables.sharedLogic
 import com.example.gastosdiariosjetapckcompose.R
 import com.example.gastosdiariosjetapckcompose.domain.enums.IngresosGastosEnum
 import com.example.gastosdiariosjetapckcompose.domain.model.CategoryCrear

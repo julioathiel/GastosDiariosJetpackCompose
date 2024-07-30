@@ -37,7 +37,7 @@ fun NuevoMes(viewModel: HomeViewModel) {
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
                 .background(
-                    colorResource(id = R.color.grayUno),
+                    MaterialTheme.colorScheme.primaryContainer,
                     shape = RoundedCornerShape(8.dp)
                 ),
             horizontalAlignment = Alignment.CenterHorizontally

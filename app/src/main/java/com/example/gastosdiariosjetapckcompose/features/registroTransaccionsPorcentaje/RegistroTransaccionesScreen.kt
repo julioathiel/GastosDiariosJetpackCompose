@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -30,7 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
-import com.example.gastosdiariosjetapckcompose.GlobalVariables.sharedLogic
+import com.example.gastosdiariosjetapckcompose.data.core.GlobalVariables.sharedLogic
 import com.example.gastosdiariosjetapckcompose.R
 import com.example.gastosdiariosjetapckcompose.domain.model.GastosPorCategoriaModel
 import com.example.gastosdiariosjetapckcompose.domain.uiState.RegistroTransaccionesUiState
@@ -177,7 +175,7 @@ fun Toolbar() {
     TopAppBar(
         title = {
             Text(
-                text = "Registro Transacciones"
+                text = stringResource(id = R.string.toolbar_analisis_de_gastos)
             )
         }
     )

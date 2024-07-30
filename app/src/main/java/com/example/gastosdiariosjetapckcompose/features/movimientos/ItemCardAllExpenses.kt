@@ -1,6 +1,5 @@
 package com.example.gastosdiariosjetapckcompose.features.movimientos
 
-import android.webkit.WebSettings.TextSize
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -25,13 +24,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.gastosdiariosjetapckcompose.GlobalVariables.sharedLogic
+import com.example.gastosdiariosjetapckcompose.data.core.GlobalVariables.sharedLogic
 import com.example.gastosdiariosjetapckcompose.R
 import com.example.gastosdiariosjetapckcompose.domain.model.MovimientosModel
 
@@ -116,7 +114,7 @@ fun ItemCardAllExpenses(
                     Text(
                         text = transaccion.subTitle,
                         fontSize = 16.sp,
-                        color = colorResource(id = R.color.grayCuatro),
+                        color = MaterialTheme.colorScheme.outline,
                         style = MaterialTheme.typography.bodySmall,
                         maxLines = if (isExpanded) Int.MAX_VALUE else 1,
                         // Mostrar "..." si el texto excede una línea

@@ -1,5 +1,6 @@
-package com.example.gastosdiariosjetapckcompose
+package com.example.gastosdiariosjetapckcompose.data.core
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -60,8 +61,10 @@ import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
+import com.example.gastosdiariosjetapckcompose.R
 import com.example.gastosdiariosjetapckcompose.domain.enums.IngresosGastosEnum
 import com.example.gastosdiariosjetapckcompose.domain.model.MovimientosModel
+import com.example.gastosdiariosjetapckcompose.features.home.HomeViewModel
 import com.example.gastosdiariosjetapckcompose.features.home.components_home.tabBarItems
 import com.example.gastosdiariosjetapckcompose.features.movimientos.MovimientosViewModel
 import com.example.gastosdiariosjetapckcompose.navigation.Routes
@@ -84,6 +87,7 @@ class SharedLogic {
 
     val _limitePorDia = MutableStateFlow(0.0)
     val limitePorDia: StateFlow<Double> = _limitePorDia
+
     fun calcularLimitePorDia(dineroActual: Double): Double {
         val limitePorDia =
             if (_diasRestantes.value != null && dineroActual != null && _diasRestantes.value != 0) {
@@ -107,8 +111,11 @@ class SharedLogic {
         return formattedAmount.replace(currencySymbol, "").trim()
     }
 
-    fun agregarDineroAlTotal(nuevoValor: Double, valorExistente: Double): Double {
+    fun agregarDinero(nuevoValor: Double, valorExistente: Double): Double {
+        Log.d("miApp", "fun agregarDinero  NUEVO VALOR = : $nuevoValor")
+        Log.d("miApp", "fun agregarDinero  VALOReXISTENTE= : $valorExistente")
         val resultado = BigDecimal(valorExistente + nuevoValor).setScale(2, RoundingMode.HALF_EVEN)
+        Log.d("miApp", "fun agregarDinero = : $resultado")
         return resultado.toDouble()
     }
 
@@ -126,7 +133,7 @@ class SharedLogic {
 
     //calcula el progreso relativo para transformarlo en porcentaje de int
     fun formattedPorcentaje(progresoRelativo: Float): String {
-        return String.format(Locale.US,  "%.0f", progresoRelativo * 100)
+        return String.format(Locale.US, "%.0f", progresoRelativo * 100)
     }
 
     fun convertidorDeTexto(dineroAConvertir: Double): Pair<String, String> {
@@ -297,6 +304,7 @@ class SharedLogic {
 
     @Composable
     fun BotonGastosIngresos(
+        homeViewModel: HomeViewModel,
         enabledBotonGastos: Boolean,
         botonActivado: Int,
         onTipoSeleccionado: (IngresosGastosEnum) -> Unit
@@ -314,7 +322,6 @@ class SharedLogic {
                 } else {
                     MaterialTheme.colorScheme.onSurfaceVariant
                 }
-
                 val colorText = if (isSelected) {
                     when (label) {
                         IngresosGastosEnum.GASTOS -> colorResource(id = R.color.rojoDinero)
@@ -323,6 +330,9 @@ class SharedLogic {
                 } else {
                     Color.Transparent //los bordes no se veran
                 }
+
+                val enabledButton = enabledBotonGastos || label != IngresosGastosEnum.GASTOS
+
                 SegmentedButton(
                     shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
                     onClick = {
@@ -337,7 +347,7 @@ class SharedLogic {
                     ),
                     border = BorderStroke(color = colorText, width = 0.dp),
                     // Deshabilitar el botón de gastos si enabledBotonGastos es falso o habilitar todoo si esta en true
-                    enabled = enabledBotonGastos || label != IngresosGastosEnum.GASTOS
+                    enabled = enabledButton
                 ) {
                     Text(
                         label.toString(),
@@ -357,8 +367,8 @@ class SharedLogic {
 
         AlertDialog(
             onDismissRequest = { onDismiss() },
-            title = { Text(text = "Elige una opcion") },
-            text = { Text(text = "Si presionas eliminar, se hara de inmediato.") },
+            title = { Text(text = stringResource(id = R.string.elige_una_opcion)) },
+            text = { Text(text = stringResource(R.string.si_presionas_eliminar_se_hara_de_inmediato)) },
             confirmButton = {
                 TextButton(
                     onClick = {

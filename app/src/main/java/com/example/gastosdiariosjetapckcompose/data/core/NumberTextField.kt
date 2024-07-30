@@ -1,4 +1,4 @@
-package com.example.gastosdiariosjetapckcompose
+package com.example.gastosdiariosjetapckcompose.data.core
 
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping
@@ -29,17 +29,17 @@ class CurrencyAmountInputVisualTransformation(
             val parts = inputText.split(decimalSeparator)//divide el unputext en dos partes
             intPart = parts[0].reversed()//se invierte desde la posicion 0 para que queden en elorden correcto
                 .chunked(3)//se toman grupos de 3
-                .joinToString(separadorConComa.toString())//se le agrega el separador de miles osea la ( , )
+                .joinToString(decimalSeparator.toString())//se le agrega el separador de miles osea la ( , )
                 .reversed() //se invierte para quedar en el orden correcto
             fractionPart = parts[1].take(numberOfDecimals)
         } else {
             intPart = inputText.reversed()
                 .chunked(3)//se toman grupos de 3
-                .joinToString(separadorConComa.toString())
+                .joinToString(decimalSeparator.toString())
                 .reversed()
         }
 
-        val formattedNumber = "$intPart${if (inputText.contains(decimalSeparator)) decimalSeparator else ""}$fractionPart"
+        val formattedNumber = "$intPart${if (inputText.contains(decimalSeparator)) separadorConComa else ""}$fractionPart"
 
         // Crea un nuevo AnnotatedString con el número formateado
         val newText = AnnotatedString(

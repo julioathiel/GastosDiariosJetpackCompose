@@ -1,4 +1,4 @@
-package com.example.gastosdiariosjetapckcompose.features.recordatorio.components
+package com.example.gastosdiariosjetapckcompose.features.notificacion.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column

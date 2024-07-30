@@ -20,6 +20,8 @@ import com.example.gastosdiariosjetapckcompose.features.configuration.Configurat
 import com.example.gastosdiariosjetapckcompose.features.configuration.ConfigurationViewModel
 import com.example.gastosdiariosjetapckcompose.features.configuration.actualizarMaximoFecha.ActualizarMaximoFechaScreen
 import com.example.gastosdiariosjetapckcompose.features.configuration.actualizarMaximoFecha.ActualizarMaximoFechaViewModel
+import com.example.gastosdiariosjetapckcompose.features.configuration.ajustes_avanzados.AjustesScreen
+import com.example.gastosdiariosjetapckcompose.features.configuration.ajustes_avanzados.AjustesViewModel
 import com.example.gastosdiariosjetapckcompose.features.creandoCategoriaGastos.CategoriaGastosScreen
 import com.example.gastosdiariosjetapckcompose.features.creandoCategoriaGastos.CategoriaGastosViewModel
 import com.example.gastosdiariosjetapckcompose.features.creandoCategoriaIngresos.CategoriaIngresosScreen
@@ -28,12 +30,14 @@ import com.example.gastosdiariosjetapckcompose.features.home.HomeScreen
 import com.example.gastosdiariosjetapckcompose.features.home.HomeViewModel
 import com.example.gastosdiariosjetapckcompose.features.movimientos.MovimientosScreen
 import com.example.gastosdiariosjetapckcompose.features.movimientos.MovimientosViewModel
-import com.example.gastosdiariosjetapckcompose.features.recordatorio.NotificationViewModel
-import com.example.gastosdiariosjetapckcompose.features.recordatorio.RecordatorioScreen
+import com.example.gastosdiariosjetapckcompose.features.notificacion.NotificationViewModel
+import com.example.gastosdiariosjetapckcompose.features.notificacion.RecordatorioScreen
 import com.example.gastosdiariosjetapckcompose.features.registroTransaccionsPorcentaje.RegistroTransaccionesScreen
 import com.example.gastosdiariosjetapckcompose.features.registroTransaccionsPorcentaje.RegistroTransaccionesViewModel
 import com.example.gastosdiariosjetapckcompose.features.viewPagerScreen.ViewPagerScreen
 import com.example.gastosdiariosjetapckcompose.features.viewPagerScreen.ViewPagerViewModel
+import com.google.android.gms.tasks.Task
+import com.google.android.play.core.appupdate.AppUpdateInfo
 
 @Composable
 fun AppNavigation(
@@ -46,7 +50,8 @@ fun AppNavigation(
     actualizarMaximoFechaViewModel: ActualizarMaximoFechaViewModel,
     viewPagerViewModel: ViewPagerViewModel,
     notificationViewModel: NotificationViewModel,
-    acercaDeViewModel: AcercaDeViewModel
+    acercaDeViewModel: AcercaDeViewModel,
+    ajustesViewModel: AjustesViewModel
 ) {
     val navController = rememberNavController()
 
@@ -76,7 +81,6 @@ fun AppNavigation(
             HomeScreen(
                 navController = navController,
                 homeViewModel,
-                registroTransaccionesViewModel,
                 configurationViewModel
             )
         }
@@ -144,6 +148,9 @@ fun AppNavigation(
                 navController,
                 acercaDeViewModel
             )
+        }
+        composable(Routes.AjustesScreen.route){
+            AjustesScreen(ajustesViewModel,navController)
         }
     }
 }

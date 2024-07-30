@@ -19,4 +19,5 @@ sealed class Routes(val route: String) {
     object ActualizarMaximoFechaScreen : Routes("ActualizarMaximoFechaScreen")
     object LoadingScreen : Routes("LoadingScreen")
     object AcercaDe : Routes("AcercaDe")
+    object AjustesScreen : Routes("AjustesScreen")
 }

@@ -21,11 +21,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.gastosdiariosjetapckcompose.GlobalVariables.sharedLogic
+import com.example.gastosdiariosjetapckcompose.data.core.GlobalVariables.sharedLogic
 import com.example.gastosdiariosjetapckcompose.R
 import com.example.gastosdiariosjetapckcompose.features.home.AnimatedProgressBar
 import com.example.gastosdiariosjetapckcompose.features.home.HomeViewModel
-import com.example.gastosdiariosjetapckcompose.features.registroTransaccionsPorcentaje.RegistroTransaccionesViewModel
 
 @Composable
 fun CardBotonRegistro(
@@ -43,9 +42,9 @@ fun CardBotonRegistro(
         modifier = Modifier
             .padding(horizontal = 16.dp),
         colors = CardDefaults.cardColors(
-            MaterialTheme.colorScheme.surfaceContainerLow
+           MaterialTheme.colorScheme.surfaceContainerLow
         ),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(20.dp),
         border = BorderStroke(1.dp, color = Color.Unspecified)
     ) {
         Column(
@@ -55,6 +54,7 @@ fun CardBotonRegistro(
         ) {
             Text(
                 text = "$porcentaje%",
+                modifier = Modifier.padding(top = 8.dp),
                 fontSize = 12.sp
             )
 
@@ -67,8 +67,7 @@ fun CardBotonRegistro(
          //   HorizontalDivider()
             Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp).padding(8.dp),
+                    .fillMaxWidth().padding(8.dp),
                horizontalArrangement = Arrangement.End
             ) {
 

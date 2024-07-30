@@ -5,7 +5,6 @@ import com.example.gastosdiariosjetapckcompose.R
 
 interface CategoriesModel {
     val name: String
-
     @get:DrawableRes
     var icon: Int
 }
@@ -22,8 +21,7 @@ val categoriaDefault = listOf(
 val categoriesIngresos = mutableListOf(
     CategoryIngreso("Sueldo", R.drawable.ic_sueldo),
     CategoryIngreso("Deposito", R.drawable.ic_banco),
-    CategoryIngreso("Ahorros", R.drawable.ic_ahorro),
-    CategoryIngreso("Otros", R.drawable.ic_otros),
+    CategoryIngreso("Ahorros", R.drawable.ic_ahorro)
 )
 
 val categoriesGastos = mutableListOf(
@@ -46,7 +44,6 @@ val categoriesGastos = mutableListOf(
     CategoryGasto("Vestimenta", R.drawable.ic_vestimenta),
     CategoryGasto("Servicios", R.drawable.ic_recibo),
     CategoryGasto("Educacion", R.drawable.ic_school),
-    CategoryGasto("Otros", R.drawable.ic_otros),
     CategoryGasto("Telefonia", R.drawable.ic_call),
 )
 

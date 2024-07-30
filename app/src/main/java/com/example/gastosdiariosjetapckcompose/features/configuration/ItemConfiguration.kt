@@ -24,6 +24,5 @@ enum class ItemConfiguration(
 //    ENVIAR_COMENTARIO(R.drawable.ic_feedback, R.string.send_feedback_title, R.string.send_feedback_description, "Ayuda y soporte"),
 //    REPORTAR_PROBLEMA(R.drawable.ic_report, R.string.report_issue_title, R.string.report_issue_description, "Ayuda y soporte"),
 //    IDIOMA(R.drawable.ic_language, R.string.language_title, R.string.language_description, "Otros ajustes"),
-//    NOTIFICACIONES(R.drawable.ic_notifications, R.string.notifications_title, R.string.notifications_description, "Otros ajustes"),
 //    CONTRASEÑA(R.drawable.ic_lock, R.string.password_title, R.string.password_description, "Otros ajustes")
 }

@@ -18,13 +18,15 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
@@ -87,7 +89,12 @@ fun Content(
                     )
                 ) {
                 }
-                withStyle(style = SpanStyle(fontSize = 14.sp,color = colorResource(id = R.color.grayCuatro))) {
+                withStyle(
+                    style = SpanStyle(
+                        fontSize = 14.sp,
+                        color = colorResource(id = R.color.grayCuatro)
+                    )
+                ) {
                     append(stringResource(R.string._31_d_as_para_cobros_mensuales))
                     append(stringResource(R.string._60_d_as_para_cobros_cada_dos_meses))
                     append(stringResource(R.string._90_d_as_para_cobros_cada_3_meses))
@@ -98,43 +105,53 @@ fun Content(
         HorizontalDivider()
         Spacer(modifier = Modifier.size(20.dp))
 
+        var isPrueba by remember { mutableStateOf(false) }
+        var selectedSwitchNumber by remember { mutableStateOf(selectedOptionState) }
         SwitchWithText(
             stringResource(R.string.primer_mes),
-            31,
-            selectedOptionState,
-            selectedSwitchOption,
-            viewModel
-        )
+            numberSwitch = 31,
+            selectedSwitchNumber
+        ) { isActivated ->
+            if (isActivated) {
+                selectedSwitchNumber = 31
+                isPrueba = true
+            }
+        }
 
         SwitchWithText(
             stringResource(R.string.dos_meses),
-            60,
-            selectedOptionState,
-            selectedSwitchOption,
-            viewModel
-        )
+            numberSwitch = 60,
+            selectedSwitchNumber,
+        ) { isActivated ->
+            if (isActivated) {
+                selectedSwitchNumber = 60
+                isPrueba = true
+            }
+        }
 
         SwitchWithText(
             stringResource(R.string.tres_meses),
-            90,
-            selectedOptionState,
-            selectedSwitchOption,
-            viewModel
-        )
+            numberSwitch = 90,
+            selectedSwitchNumber,
+        ) { isActivated ->
+            if (isActivated) {
+                selectedSwitchNumber = 90
+                isPrueba = true
+            }
+        }
 
-        Spacer(modifier = Modifier
-            .size(30.dp)
-            .weight(1f))
+        Spacer(
+            modifier = Modifier
+                .size(30.dp)
+                .weight(1f)
+        )
         Button(
             onClick = {
-                selectedOptionState?.let {
-                  viewModel.setSelectedOption(
-                        it,
-                        selectedSwitchOption
-                    )
-                }
-                scope.launch {
-                    scafoldState.snackbarHostState.showSnackbar("Opción guardada correctamente")
+                if (isPrueba) {
+                    viewModel.setSelectedOption(selectedSwitchNumber!!, selectedSwitchOption)
+                    scope.launch {
+                        scafoldState.snackbarHostState.showSnackbar("Opción guardada correctamente")
+                    }
                 }
             },
             modifier = Modifier
@@ -147,48 +164,31 @@ fun Content(
     }
 }
 
-// Función para manejar el cambio de estado de los switches
-fun onSwitchCheckedChange(
-    switchNumber: Int,
-    isChecked: Boolean,
-    viewModel: ActualizarMaximoFechaViewModel
-) {
-    if (isChecked) {
-       viewModel.updateSelectedSwitchOption(isChecked)
-        viewModel.updateSelectedOption(switchNumber)
-    } else {
-        viewModel.updateSelectedSwitchOption(isChecked)
-        viewModel.updateSelectedOption(null)
-    }
-}
 
 // Crear los switches de forma dinámica
 @Composable
 fun SwitchWithText(
     switchText: String,
-    switchNumber: Int,
-    selectedOption: Int?,
-    selectedSwitchOption: Boolean,
-    viewModel: ActualizarMaximoFechaViewModel
+    numberSwitch:Int,
+    selectedSwitchNumber: Int?,
+    isActivated: (Boolean) -> Unit
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = switchText, modifier = Modifier.weight(1f)
-        )
+        Text(text = switchText, modifier = Modifier.weight(1f))
+
         Switch(
-            checked = selectedOption == switchNumber && selectedSwitchOption,
+            checked = selectedSwitchNumber == numberSwitch,
             onCheckedChange = { isChecked ->
-                onSwitchCheckedChange(switchNumber, isChecked, viewModel)
+                if (isChecked) {
+                    isActivated(true)
+                }
             },
-            modifier = Modifier.height(30.dp),
-            colors = SwitchDefaults.colors(
-//                checkedThumbColor = colorResource(id = R.color.blue), // Cambiar el color de fondo cuando está seleccionado (en este caso, rojo)
-//                checkedTrackColor = colorResource(id = R.color.fondoCelesteblue)
-            )
+            modifier = Modifier.height(30.dp)
         )
     }
+
     Spacer(modifier = Modifier.size(20.dp))
     HorizontalDivider()
     Spacer(modifier = Modifier.size(20.dp))

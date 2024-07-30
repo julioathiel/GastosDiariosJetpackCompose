@@ -1,4 +1,4 @@
-package com.example.gastosdiariosjetapckcompose
+package com.example.gastosdiariosjetapckcompose.bar_graph_custom
 
 import android.util.Log
 import com.example.gastosdiariosjetapckcompose.domain.model.BarDataModel
@@ -9,11 +9,7 @@ import com.example.gastosdiariosjetapckcompose.domain.usecase.bar_graph.UpdateBa
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
 

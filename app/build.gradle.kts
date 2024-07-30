@@ -135,4 +135,10 @@ dependencies {
     //lottie
     implementation ("com.airbnb.android:lottie-compose:5.2.0")
 
+    //in-app updates
+    val in_app_update_version = "2.1.0"
+    implementation("com.google.android.play:app-update:$in_app_update_version")
+    implementation("com.google.android.play:app-update-ktx:$in_app_update_version")
+
+
 }

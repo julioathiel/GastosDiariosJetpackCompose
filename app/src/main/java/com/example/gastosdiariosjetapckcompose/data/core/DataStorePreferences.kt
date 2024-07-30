@@ -1,4 +1,4 @@
-package com.example.gastosdiariosjetapckcompose.features.core
+package com.example.gastosdiariosjetapckcompose.data.core
 
 import android.content.Context
 import androidx.datastore.core.DataStore
@@ -8,10 +8,10 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
-import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.example.gastosdiariosjetapckcompose.Constants.HORAS_PREDEFINIDAS
-import com.example.gastosdiariosjetapckcompose.Constants.MINUTOS_PREDEFINIDOS
+import com.example.gastosdiariosjetapckcompose.data.core.Constants.HORAS_PREDEFINIDAS
+import com.example.gastosdiariosjetapckcompose.data.core.Constants.MINUTOS_PREDEFINIDOS
+import com.example.gastosdiariosjetapckcompose.domain.model.DarkModeModel
 import com.example.gastosdiariosjetapckcompose.domain.model.FechaMaximaDataModel
 import com.example.gastosdiariosjetapckcompose.domain.model.FechaMaximaDataModel.Companion.selectedOptionKey
 import com.example.gastosdiariosjetapckcompose.domain.model.FechaMaximaDataModel.Companion.selectedSwitchOptionKey
@@ -20,7 +20,6 @@ import com.example.gastosdiariosjetapckcompose.domain.model.TimeDataModel.Compan
 import com.example.gastosdiariosjetapckcompose.domain.model.TimeDataModel.Companion.selectedMinuteKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 
@@ -35,9 +34,29 @@ class DataStorePreferences(private val context: Context) {
     private val Context.viewPagerShow: DataStore<Preferences> by preferencesDataStore("VIEW_PAGER")
     private val showViewPagerKey = booleanPreferencesKey("SHOW_PAGER")
 
+    private val Context.darkModeStore: DataStore<Preferences> by preferencesDataStore("DARK_MODE")
+    private val darkModeKey = booleanPreferencesKey("dark_mode")
+
+    val darkModeFlow: Flow<DarkModeModel> = context.darkModeStore.data
+        .catch {
+            if (it is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw it
+            }
+        }
+        .map { preferences ->
+            DarkModeModel(preferences[darkModeKey] ?: false)
+        }
+
+    suspend fun updateIsDarkModeActive(isDarkModeActive:Boolean){
+       context.darkModeStore.edit { preferences ->
+           preferences[darkModeKey] = isDarkModeActive
+       }
+    }
 
     //para recibir el dia maximo guardada
-    fun getFechaMaximoMes() = context.dataStore.data
+    fun getFechaMaximoMes(): Flow<FechaMaximaDataModel> = context.dataStore.data
         .catch {
             if (it is IOException) {
                 it.printStackTrace()
@@ -68,7 +87,7 @@ class DataStorePreferences(private val context: Context) {
 
 
     // Recuperar la hora y el minuto seleccionados
-    fun getHoraMinuto() = context.selectedHourKey.data
+    fun getHoraMinuto(): Flow<TimeDataModel> = context.selectedHourKey.data
         .catch { exception ->
             if (exception is IOException) {
                 exception.printStackTrace()

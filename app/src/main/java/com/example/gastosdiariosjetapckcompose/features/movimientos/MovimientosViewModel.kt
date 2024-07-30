@@ -3,7 +3,7 @@ package com.example.gastosdiariosjetapckcompose.features.movimientos
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.gastosdiariosjetapckcompose.GlobalVariables.sharedLogic
+import com.example.gastosdiariosjetapckcompose.data.core.GlobalVariables.sharedLogic
 import com.example.gastosdiariosjetapckcompose.domain.model.CurrentMoneyModel
 import com.example.gastosdiariosjetapckcompose.domain.model.MovimientosModel
 import com.example.gastosdiariosjetapckcompose.domain.uiState.MovimientosUiState

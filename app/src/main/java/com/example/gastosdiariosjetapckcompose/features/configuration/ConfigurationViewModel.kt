@@ -15,7 +15,7 @@ import com.example.gastosdiariosjetapckcompose.domain.usecase.money.CheckDatabas
 import com.example.gastosdiariosjetapckcompose.domain.usecase.movimientos.CheckDatabaseAllExpensesEmptyUseCase
 import com.example.gastosdiariosjetapckcompose.domain.usecase.totalesRegistro.CheckDatabaseTotalGastosEmptyUseCase
 import com.example.gastosdiariosjetapckcompose.domain.usecase.totalesRegistro.CheckDatabaseTotalIngresosEmptyUseCase
-import com.example.gastosdiariosjetapckcompose.features.core.DataStorePreferences
+import com.example.gastosdiariosjetapckcompose.data.core.DataStorePreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject

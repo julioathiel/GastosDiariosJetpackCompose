@@ -54,4 +54,8 @@ class DataBaseManager @Inject constructor(
     suspend fun deleteAllGastosPorCategory(){
         clearAllGastosPorCatUseCase()
     }
+
+    suspend fun deleteCurrentMoney(){
+        clearAllCurrentMoneyUseCase()
+    }
 }

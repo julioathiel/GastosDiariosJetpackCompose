@@ -3,8 +3,8 @@ package com.example.gastosdiariosjetapckcompose.features.registroTransaccionsPor
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.gastosdiariosjetapckcompose.CircularBuffer
-import com.example.gastosdiariosjetapckcompose.GlobalVariables.sharedLogic
+import com.example.gastosdiariosjetapckcompose.bar_graph_custom.CircularBuffer
+import com.example.gastosdiariosjetapckcompose.data.core.GlobalVariables.sharedLogic
 import com.example.gastosdiariosjetapckcompose.domain.model.BarDataModel
 import com.example.gastosdiariosjetapckcompose.domain.uiState.RegistroTransaccionesUiState
 import com.example.gastosdiariosjetapckcompose.domain.usecase.GastosPorCategoria.GetGastosPorCategoriaUseCase
@@ -20,12 +20,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.Calendar
 import java.util.Locale
 import javax.inject.Inject
@@ -105,8 +103,9 @@ class RegistroTransaccionesViewModel @Inject constructor(
                 val porcentaje: String = sharedLogic.formattedPorcentaje(porcentajeMes)
                 _porcentajeGasto.value = porcentaje.toInt()
                 Log.d("obteniendoTotal", "porcentaje = $porcentaje")
-
-                insertGraph(maximoGastos, porcentaje.toFloat())
+                if (porcentaje.toInt() != 0) {
+                    insertGraph(maximoGastos, porcentaje.toFloat())
+                }
             } catch (e: Exception) {
                 Log.e("ExceptionCalcularMaximo", "Ocurrió una excepción: ${e.message}")
                 Log.e("ExceptionCalcularMaximo", Log.getStackTraceString(e))

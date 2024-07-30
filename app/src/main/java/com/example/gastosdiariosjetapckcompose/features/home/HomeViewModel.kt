@@ -10,7 +10,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.Ingresosdiariosjetapckcompose.domain.usecase.UsuarioCreaCatIngreso.GetUserCatIngresoUsecase
-import com.example.gastosdiariosjetapckcompose.GlobalVariables.sharedLogic
+import com.example.gastosdiariosjetapckcompose.data.core.GlobalVariables.sharedLogic
+import com.example.gastosdiariosjetapckcompose.R
 import com.example.gastosdiariosjetapckcompose.data_base_manager.DataBaseManager
 import com.example.gastosdiariosjetapckcompose.domain.model.CategoryGasto
 import com.example.gastosdiariosjetapckcompose.domain.model.CategoryIngreso
@@ -41,13 +42,10 @@ import com.example.gastosdiariosjetapckcompose.domain.usecase.totalesRegistro.In
 import com.example.gastosdiariosjetapckcompose.domain.usecase.totalesRegistro.InsertTotalIngresosUseCase
 import com.example.gastosdiariosjetapckcompose.domain.usecase.totalesRegistro.UpdateTotalGastosUseCase
 import com.example.gastosdiariosjetapckcompose.domain.usecase.totalesRegistro.UpdateTotalIngresosUseCase
-import com.example.gastosdiariosjetapckcompose.features.core.DataStorePreferences
-import com.example.gastosdiariosjetapckcompose.features.registroTransaccionsPorcentaje.RegistroTransaccionesViewModel
+import com.example.gastosdiariosjetapckcompose.data.core.DataStorePreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -138,9 +136,6 @@ class HomeViewModel @Inject constructor(
 
     private val _fechaElegidaConGuion = MutableLiveData<String?>()
 
-//    private val _fechaElegidaBarra = MutableLiveData<String?>()
-//    val fechaElegidaBarra: LiveData<String?> = _fechaElegidaBarra
-
     private val _fechaElegidaBarra = MutableStateFlow("")
     val fechaElegidaBarra: StateFlow<String?> = _fechaElegidaBarra
 
@@ -158,18 +153,18 @@ class HomeViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             //obteniendo fecha guardada maxima por el usuario
-            dataStorePreferences.getFechaMaximoMes().collect { mesMaximo ->
-                _selectedOptionFechaMaxima.value = mesMaximo.numeroGuardado.toInt()
+            dataStorePreferences.getFechaMaximoMes().collect { it ->
+                _selectedOptionFechaMaxima.value = it.numeroGuardado.toInt()
             }
         }
         val fechaActual = LocalDate.now()
         listCatGastosNueva()//actualizando la lista de categoria del menu desplegable
         listCatIngresosNueva()//actualizando la lista de categoria del menu desplegable
-        calculando(fechaActual)
+        calculandoInit(fechaActual)
     }
 
 
-    private fun calculando(fechaActual: LocalDate) {
+    private fun calculandoInit(fechaActual: LocalDate) {
         viewModelScope.launch(Dispatchers.Main) {
             try {
                 val dineroDisponible = withContext(Dispatchers.IO) {
@@ -191,12 +186,18 @@ class HomeViewModel @Inject constructor(
                     if (fechaActual.isEqual(fechaParseadaAGuion) || (fechaActual > fechaParseadaAGuion)) {
                         //si aun tiene dinero el usuario al finalizar la fecha elegida
                         if (dineroDisponible != 0.0) {
-                            Log.d("miApp", "actualizando valores")
-                            actualizarFechaUnMesMas(fechaActual, fechaParseadaAGuion)
+                            updateFechaUnMesMas(fechaActual, fechaParseadaAGuion)
                             updateGastosTotal(TotalGastosModel(totalGastos = 0.0))
                             updateIngresoTotal(TotalIngresosModel(totalIngresos = dineroDisponible))
                             dataBaseManager.deleteAllExpenses()
-                            dataBaseManager.deleteAllGastosPorCategory()
+                            crearTransaccion(
+                                cantidad = dineroDisponible.toString(),
+                                categoryName = "Saldo restante",
+                                description = "",
+                                categoryIcon = R.drawable.ic_sueldo,
+                                isChecked = true
+                            )
+
                             //actualizando el liveData con el nuevo valor maximo del progress
                             _mostrandoDineroTotalIngresos.value = dineroDisponible
 
@@ -204,6 +205,7 @@ class HomeViewModel @Inject constructor(
                         } else {
                             //si el usuario no tiene dinero al llegar la fecha
                             // entonces se reinician los datos del progress
+
                             reseteandoProgress()
                         }
                     } else {
@@ -222,13 +224,17 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun reseteandoProgress() {
+        //si el usuario gasto el dinero antes del dia de la fecha elegida
         viewModelScope.launch {
+            dataBaseManager.deleteAllExpenses()
+            dataBaseManager.deleteAllGastosPorCategory()
+            updateCurrentMoney(CurrentMoneyModel(money = 0.0, isChecked = false))
             updateIngresoTotal(TotalIngresosModel(totalIngresos = 0.0))
             updateGastosTotal(TotalGastosModel(totalGastos = 0.0))
         }
     }
 
-    fun mostrandoDineroTotalProgress() {
+    private fun mostrandoDineroTotalProgress() {
         viewModelScope.launch(Dispatchers.Main) {
             try {
                 val dato = withContext(Dispatchers.IO) {
@@ -241,33 +247,43 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun mostrandoDineroTotalProgressGastos() {
+    private fun mostrandoDineroTotalProgressGastos() {
         viewModelScope.launch(Dispatchers.Main) {
             try {
-                val dato = withContext(Dispatchers.IO) {
+                val data = withContext(Dispatchers.IO) {
                     getTotalGastosUseCase()?.totalGastos
                 }
-                _mostrandoDineroTotalGastos.postValue(dato ?: 0.0)
+                _mostrandoDineroTotalGastos.postValue(data ?: 0.0)
             } catch (e: Exception) {
                 e.printStackTrace()
             }
         }
     }
 
-    private fun actualizarFechaUnMesMas(fechaActual: LocalDate, fechaParseada: LocalDate) {
-
+    private fun updateFechaUnMesMas(fechaActual: LocalDate, fechaParseada: LocalDate) {
         viewModelScope.launch {
             //se agrega un mes a la fecha guardada
-            val nuevoMes = agregandoUnMes(fechaActual, fechaParseada)
+            val nuevoMes: String = agregandoUnMes(fechaActual, fechaParseada)
             val fechaConBarra = convertidorFechaABarra(nuevoMes)
             _showNuevoMes.value = true
             //se actualiza en la base de datos la nueva fecha
-            actualizandoFecha(FechaSaveModel(fechaSave = fechaConBarra, isSelected = false))
+            updateFecha(FechaSaveModel(fechaSave = fechaConBarra, isSelected = false))
+
+            // al agregar un nuevo mes, eliminamos tambien la lista por categorias para que no se guarde nada en el grafico
+            // Verificar si es el último día del mes actual
+            val ultimoDiaDelMes = fechaActual.lengthOfMonth()
+            val esUltimoDiaDelMes = fechaActual.dayOfMonth == ultimoDiaDelMes
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+            val localDate = LocalDate.parse(nuevoMes, formatter)
+            // Eliminar la lista solo si no estamos en el último día del mes actual
+            if (localDate > fechaActual) {
+                dataBaseManager.deleteAllGastosPorCategory()
+            }
         }
     }
 
     fun initMostrandoAlUsuario() {
-        mostrarDineroTotal()
+        mostrarDineroActual()
         mostrarImagenPerfil()
         mostrandoDineroTotalProgress()
         mostrandoDineroTotalProgressGastos()
@@ -296,13 +312,13 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun mostrarDineroTotal() {
+    private fun mostrarDineroActual() {
         viewModelScope.launch(Dispatchers.Main) {
             try {
-                val datos = withContext(Dispatchers.IO) {
+                val data = withContext(Dispatchers.IO) {
                     getCurrentMoneyUseCase().money
                 }
-                _dineroActual.value = datos
+                _dineroActual.value = data
             } catch (e: Exception) {
                 e.printStackTrace()
                 Log.e("mostrarDineroTotal", "Error al obtener el dinero total: ${e.message}")
@@ -321,14 +337,14 @@ class HomeViewModel @Inject constructor(
     private fun mostrarFecha(fechaConBarra: String) {
         //fechaConBarra tiene el formato 05/07/2024
         _fechaElegidaBarra.value = convertirFechaPersonalizada(fechaConBarra)
+        //muestra 05 Jul 2024
     }
 
     private fun mostrarDiasRestantes(fechaConBarra: String) {
-        Log.d("diasRestantesAntes", "$fechaConBarra")
+        Log.d("diasRestantesAntes", fechaConBarra)
         val fechaConGuion = convertirFechaAGuion(fechaConBarra)
         //se manejan con dias con guion por eso hay que parsearlo antes de enviar
         sharedLogic._diasRestantes.value = diasRestantes(fechaConGuion)
-        Log.d("diasRestantes", "${sharedLogic._diasRestantes.value}")
     }
 
     private fun convertidorFechaABarra(fechaGuion: String): String {
@@ -346,19 +362,16 @@ class HomeViewModel @Inject constructor(
 
     private fun insertUpdateFecha(fechaConBarra: String) {
         viewModelScope.launch {
-            Log.d("miApp", "nuevaFecha = ${fechaConBarra}")
             try {
                 if (getFechaUsecase() == null) {
                     //si es true se ingresa por primera vez
-                    insertandoFecha(
+                    insertFecha(
                         FechaSaveModel(fechaSave = fechaConBarra, isSelected = false),
                         fechaConBarra
                     )
-                    Log.d("insertFecha", "insertandoFecha = $fechaConBarra")
                 } else {
                     //si es false se actualiza en la base de datos y por las dudas se sigue manteniendo que es false
-                    actualizandoFecha(FechaSaveModel(fechaSave = fechaConBarra, isSelected = false))
-                    Log.d("actualizandoFecha", "actualizandoFecha = $fechaConBarra")
+                    updateFecha(FechaSaveModel(fechaSave = fechaConBarra, isSelected = false))
                 }
             } catch (e: DateTimeParseException) {
                 Log.e("miApp", "Error al analizar la fecha: $fechaConBarra", e)
@@ -366,10 +379,10 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun insertandoFecha(item: FechaSaveModel, fechaConBarra: String) {
+    private fun insertFecha(item: FechaSaveModel, fechaConBarra: String) {
         viewModelScope.launch {
             insertFechaUsecase(item)//insertando en la base de datos
-            _fechaElegidaBarra.value = item.fechaSave
+            //  _fechaElegidaBarra.value = item.fechaSave
             mostrandoAlUsuario(fechaConBarra)
 
             // mostrarDiasRestantes(_fechaElegidaBarra.value.toString())
@@ -378,34 +391,28 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun actualizandoFecha(item: FechaSaveModel) {
+    private fun updateFecha(item: FechaSaveModel) {
         //obteniendo fecha con guion ej 2024-04-02
         viewModelScope.launch {
-            val nuevaFecha = getFechaUsecase()
-            if (nuevaFecha != null) {
-                nuevaFecha.fechaSave = item.fechaSave
-                nuevaFecha.isSelected = false
-                Log.d("miApp", "Actualizando fecha total = $nuevaFecha")
-                updateFechaUsecase(nuevaFecha)
-                mostrandoAlUsuario(nuevaFecha.fechaSave)
+            val newDate = getFechaUsecase()
+            if (newDate != null) {
+                newDate.fechaSave = item.fechaSave
+                newDate.isSelected = false
+                updateFechaUsecase(newDate)
+                mostrandoAlUsuario(newDate.fechaSave)
             } else {
                 Log.e("miApp", "El objeto nuevaFecha es nulo")
-                // Manejar el caso en el que getFechaUsecase() devuelve null, si es necesario
             }
         }
     }
 
-    fun enviandoFechaElegida(date: String) {
+    fun sendDateElegida(date: String) {
         // date me pasa ej 17/7/2024 pasarla a 17/07/2024
         val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         try {
-            val formattedDate =
-                sdf.parse(date) // Parseas la fecha en formato String a un objeto Date
-            val formattedDateString =
-                sdf.format(formattedDate!!) // Formateas la fecha a String según el patrón
-            val fechaConGuion = convertirFechaAGuion(formattedDateString)//devuelve 2024-04-01
-            _fechaElegidaConGuion.value = fechaConGuion
-            insertUpdateFecha(fechaConBarra = formattedDateString)
+            val dateFormat: Date? = sdf.parse(date)
+            val formattedDate: String = sdf.format(dateFormat!!)
+            insertUpdateFecha(fechaConBarra = formattedDate)
         } catch (e: ParseException) {
             Log.e("Error", "Error al formatear la fecha: ${e.message}")
         }
@@ -415,7 +422,7 @@ class HomeViewModel @Inject constructor(
         val partesFecha = date.split("/") // Dividir la fecha en partes: [dia, mes, año]
         if (partesFecha.size == 3) {
             val dia = partesFecha[0]
-            val mes = obtenerNombreMes(partesFecha[1].toInt()) // Obtener el nombre del mes
+            val mes = getNameMes(partesFecha[1].toInt()) // Obtener el nombre del mes
             val anio = partesFecha[2]
             return "$dia $mes.$anio" // Formato personalizado: 27 jun.2024
         } else {
@@ -424,8 +431,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-
-    private fun obtenerNombreMes(mes: Int): String {
+    private fun getNameMes(mes: Int): String {
         return DateFormatSymbols().months[mes - 1].substring(0, 3).lowercase(Locale.ROOT)
             .replaceFirstChar {
                 if (it.isLowerCase())
@@ -433,7 +439,6 @@ class HomeViewModel @Inject constructor(
                 else it.toString()
             } // Obtener el nombre del mes en formato corto y capitalizado
     }
-
 
     private fun convertirFechaAGuion(date: String): String {
         // Verificar si la fecha ya está en el formato con guion
@@ -457,7 +462,6 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-
     private fun diasRestantes(getFechaGuion: String?): Int {
         if (getFechaGuion.isNullOrEmpty()) {
             return 0
@@ -468,72 +472,91 @@ class HomeViewModel @Inject constructor(
         return dia.toInt()
     }
 
-    fun calculadora(nuevoValor: String) {
+    fun cantidadIngresada(cantidadIngresada: String, userSelected: Boolean) {
+        _cantidadIngresada.value = cantidadIngresada
         viewModelScope.launch {
-            // Obtener el valor de isChecked de manera síncrona
-            val getChecked = getCurrentMoneyUseCase().isChecked
-            Log.d("miApp", "getChecked: $getChecked")
+            val data = getCurrentMoneyUseCase()
+            val dataIngresos =
+                withContext(Dispatchers.IO) { getTotalIngresosUseCase()?.totalIngresos ?: 0.0 }
+            val dataGastos =
+                withContext(Dispatchers.IO) { getTotalGastosUseCase()?.totalGastos ?: 0.0 }
 
-            // Calcula el nuevo dinero según la opción elegida por el usuario
-            val nuevoTotalAgregado = when (_isChecked.value) {
-                true -> {
-                    sharedLogic.agregarDineroAlTotal(
-                        nuevoValor.toDouble(),
-                        _mostrandoDineroTotalIngresos.value ?: 0.0
-                    )
-                }
-
-                else -> {
-                    //cuando el usuario elige gastos se agrega al valor existente, sumandolo
-                    sharedLogic.agregarDineroAlTotal(
-                        nuevoValor.toDouble(),
-                        _mostrandoDineroTotalGastos.value ?: 0.0
-                    )
-                }
-            }
-            Log.d("miApp", "nuevoTotalAgregado en gastos es: $nuevoTotalAgregado")
-
-            val nuevoDinero = when (_isChecked.value) {
-                true -> {
-                    agregarDinero(nuevoValor.toDouble(), _dineroActual.value ?: 0.0)
-                }
-
-                else -> {
-                    maxOf(restarDinero(nuevoValor), 0.0)
-                }
-            }
-
-            // Actualiza el valor en _dineroActual.value y en la base de datos
-            _dineroActual.value = nuevoDinero
-
-            if (_isChecked.value == true) {
-                if (getChecked) {
-                    // Si la opción seleccionada es ingresos
-                    insertBaseDatos(CurrentMoneyModel(money = nuevoDinero))
-                    insertandoPrimerIngresoProgress(TotalIngresosModel(totalIngresos = nuevoTotalAgregado))
-                    insertandoPrimerGastoProgress(TotalGastosModel(totalGastos = 0.0))
-                } else {
-                    // Si ya hay datos en la base de datos para ingresos, actualizar el total de ingresos
-                    updateBaseDatos(CurrentMoneyModel(money = nuevoDinero))
-                    updateIngresoTotal(TotalIngresosModel(totalIngresos = nuevoTotalAgregado))
-                }
-            } else {
-                Log.d(
-                    "miApp",
-                    "nuevoTotalAgregado antes de actualizar el total gasto: $nuevoTotalAgregado"
-                )
-                if (nuevoDinero == 0.0 && nuevoTotalAgregado > 0.0) {
-                    //reseteando el progress
-                    reseteandoProgress()
-                } else {
-                    // Si el usuario eligió gastos, actualizar la base de datos con el nuevo dinero
-                    updateBaseDatos(CurrentMoneyModel(money = nuevoDinero))
-                    updateGastosTotal(TotalGastosModel(totalGastos = nuevoTotalAgregado))
-
-                }
-            }
-            sharedLogic._limitePorDia.value = sharedLogic.calcularLimitePorDia(nuevoDinero)
+            calculadoraDialog(
+                cantidadIngresada.toDouble(),
+                data,
+                dataIngresos,
+                dataGastos,
+                userSelected
+            )
         }
+    }
+
+    private fun calculadoraDialog(
+        cantidadIngresada: Double,
+        data: CurrentMoneyModel,
+        dataIngresos: Double,
+        dataGastos: Double,
+        userSelected: Boolean
+    ) {
+        viewModelScope.launch {
+            // Calcula el nuevo dinero según la opción elegida por el usuario
+            val nuevoTotal = when (userSelected) {
+                true -> {
+                    addDiner(cantidadIngresada, dataIngresos)
+                }
+
+                else -> {
+                    addDiner(cantidadIngresada, dataGastos)
+                }
+            }
+            val dineroActual = when (userSelected) {
+                true -> {
+                    addDiner(cantidadIngresada, data.money ?: 0.0)
+                }
+
+                else -> {
+                    maxOf(restarDinero(cantidadIngresada.toString()), 0.0)
+                }
+            }
+
+            //si el usuario eligio ingresos
+            when (userSelected) {
+                true -> if (data.isChecked) {
+                    //data.isChecked es true entonces significa que no hay nadad aun guardado
+                    insertBaseDatos(CurrentMoneyModel(money = dineroActual))
+                    insertPrimerIngresoProgress(TotalIngresosModel(totalIngresos = nuevoTotal))
+                    insertPrimerGastoProgress(TotalGastosModel(totalGastos = 0.0))
+                } else {
+                    //Si el usuario eligio Ingresos pero en data.isChecked es false
+                    // significa que ya hay datos guardatos, por ende se actualizaran los ingresos
+                    // Si ya hay datos en Room se actualiza el totalIngresos
+                    updateIngresoTotal(TotalIngresosModel(totalIngresos = nuevoTotal))
+                }
+                //Si el usuario eligio Gastos
+                false -> {
+                    //si el usuario eligio gastos
+                    if (dineroActual == 0.0 && nuevoTotal > 0.0) {
+                        //reseteando el progress
+                        reseteandoProgress()
+                    } else {
+                        // Si el usuario eligió gastos, actualizar la base de datos con el nuevo dinero
+                        updateGastosTotal(TotalGastosModel(totalGastos = nuevoTotal))
+                    }
+                }
+            }
+            //actualizando el dinero actual siempre
+            updateCurrentMoney(CurrentMoneyModel(money = dineroActual))
+            sharedLogic._limitePorDia.value = sharedLogic.calcularLimitePorDia(dineroActual)
+        }
+    }
+
+    private fun addDiner(cantidadIngresada: Double, dataTotal: Double): Double {
+        Log.d("miApp", "fun agregarDinero  NUEVO VALOR = : $cantidadIngresada")
+        Log.d("miApp", "fun agregarDinero  dataTotal = : $dataTotal")
+        val resultado =
+            BigDecimal(cantidadIngresada + dataTotal).setScale(2, RoundingMode.HALF_EVEN)
+        Log.d("miApp", "fun agregarDinero = : $resultado")
+        return resultado.toDouble()
     }
 
     private fun insertBaseDatos(item: CurrentMoneyModel) {
@@ -546,7 +569,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun insertandoPrimerIngresoProgress(item: TotalIngresosModel) {
+    private fun insertPrimerIngresoProgress(item: TotalIngresosModel) {
         viewModelScope.launch {
             val primerIngreso = TotalIngresosModel(totalIngresos = item.totalIngresos)
             insertTotalIngresosUseCase(primerIngreso)
@@ -554,7 +577,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun insertandoPrimerGastoProgress(item: TotalGastosModel) {
+    private fun insertPrimerGastoProgress(item: TotalGastosModel) {
         viewModelScope.launch {
             val primerGasto = TotalGastosModel(totalGastos = item.totalGastos)
             insertTotalGastosUseCase(primerGasto)
@@ -562,17 +585,19 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun updateBaseDatos(item: CurrentMoneyModel) {
+    private fun updateCurrentMoney(item: CurrentMoneyModel) {
+        Log.d("miApp", "update dinero actual = ${item.money}")
         viewModelScope.launch {
             val newValor = getCurrentMoneyUseCase()
             newValor.money = item.money
             newValor.isChecked = false
             updateCurrentMoneyUseCase(newValor)
-            _dineroActual.value = getCurrentMoneyUseCase().money
+            mostrarDineroActual()
         }
     }
 
     private fun updateIngresoTotal(item: TotalIngresosModel) {
+        Log.d("miApp", "item = fun updateIngresoTotal = ${item.totalIngresos}")
         viewModelScope.launch {
             val totalIngresosActual = getTotalIngresosUseCase()
             // Sumar solo el nuevo ingreso al total actual
@@ -581,6 +606,7 @@ class HomeViewModel @Inject constructor(
             if (totalIngresosActual != null) {
                 updateTotalIngresosUseCase(totalIngresosActual)
             }
+            mostrarDineroActual()
             _mostrandoDineroTotalIngresos.value = getTotalIngresosUseCase()?.totalIngresos
             Log.d("miApp", "actualizandoTotalIngresos: ${_mostrandoDineroTotalIngresos.value}")
         }
@@ -598,12 +624,6 @@ class HomeViewModel @Inject constructor(
             _mostrandoDineroTotalGastos.value = getTotalGastosUseCase()?.totalGastos
             Log.d("miApp", "actualizandoTotalGastos: ${_mostrandoDineroTotalGastos.value}")
         }
-    }
-
-    private fun agregarDinero(nuevoValor: Double, valorExistente: Double): Double {
-        val resultado = BigDecimal(valorExistente + nuevoValor)
-            .setScale(2, RoundingMode.HALF_EVEN)
-        return resultado.toDouble()
     }
 
     private fun restarDinero(nuevoValor: String): Double {
@@ -681,11 +701,11 @@ class HomeViewModel @Inject constructor(
     }
 
     //obtiene el nuevo valor de la plata que agregamos
-    private fun setCantidadIngresada(newValor: String) {
-        _cantidadIngresada.value = newValor
+    private fun setCantidadIngresada(value: String) {
+        _cantidadIngresada.value = value
     }
 
-    fun setDescription(nuevaDescripcion: String) {
+    private fun setDescription(nuevaDescripcion: String) {
         _description.value = nuevaDescripcion
     }
 
@@ -707,15 +727,16 @@ class HomeViewModel @Inject constructor(
 
         Log.d("fechaFormateada", fechaFormateada)
         viewModelScope.launch {
-            val transaccion = MovimientosModel(
-                iconResourceName = categoryIcon.toString(),
-                title = categoryName,
-                subTitle = description,
-                cash = cantidad,
-                select = isChecked,
-                date = fechaFormateada
+            addMovimientosUseCase(
+                MovimientosModel(
+                    iconResourceName = categoryIcon.toString(),
+                    title = categoryName,
+                    subTitle = description,
+                    cash = cantidad,
+                    select = isChecked,
+                    date = fechaFormateada
+                )
             )
-            addMovimientosUseCase(transaccion)
         }
         onDialogClose() // Asegúrate de tener una función llamada onDialogClose en tu viewModel
         setCantidadIngresada("") // Limpia los campos después de agregar la transacción
@@ -764,7 +785,6 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             _selectedImageUri.value = getUriImagenSeleccionadaUseCase().uri
             val prueba = getUriImagenSeleccionadaUseCase()
-            Log.d("miApp", "mostrandoImagen = ${prueba.id}, ${prueba.uri}, ${prueba.isChecked}")
         }
     }
 

@@ -13,7 +13,7 @@ import com.example.gastosdiariosjetapckcompose.data.di.dao.TotalGastosDao
 import com.example.gastosdiariosjetapckcompose.data.di.dao.TotalIngresosDao
 import com.example.gastosdiariosjetapckcompose.data.di.dao.UsuarioCreaCatGastoDao
 import com.example.gastosdiariosjetapckcompose.data.di.dao.UsuarioCreaCatIngresoDao
-import com.example.gastosdiariosjetapckcompose.features.core.DataStorePreferences
+import com.example.gastosdiariosjetapckcompose.data.core.DataStorePreferences
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
