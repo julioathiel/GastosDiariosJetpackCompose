@@ -27,11 +27,6 @@ class TotalGastosRepository @Inject constructor(private val totalGastosDao: Tota
         totalGastosDao.deleteTotalGastos(item.toData())
     }
 
-    suspend fun isDatabaseTotalGastosEmpty(): Boolean {
-        return totalGastosDao.getTotalGastos() == null
-
-    }
-
     suspend fun clearAllTotalGastosRepository(){
         totalGastosDao.deleteAllTotalGastos()
     }

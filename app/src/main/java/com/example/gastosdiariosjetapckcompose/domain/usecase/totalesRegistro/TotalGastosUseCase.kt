@@ -29,11 +29,6 @@ class DeleteTotalGastosUseCase @Inject constructor(private val repository: Total
         return repository.deleteTotalGastos(item)
     }
 }
-class CheckDatabaseTotalGastosEmptyUseCase @Inject constructor(private val repository: TotalGastosRepository) {
-    suspend operator fun invoke(): Boolean {
-        return repository.isDatabaseTotalGastosEmpty()
-    }
-}
 
 class ClearAllTotalGastosUseCase @Inject constructor(private val repository: TotalGastosRepository){
     suspend operator fun invoke(){

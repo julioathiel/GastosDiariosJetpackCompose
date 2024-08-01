@@ -22,7 +22,7 @@ class MyApp : Application() {
     override fun onCreate() {
         super.onCreate()
         // Inyectar y utilizar la instancia de DatabaseCleaner para limpiar la base de datos
-//        databaseCleaner.clearDataBase()
+     //   databaseCleaner.clearDataBase()
        createCanalNotification()
     }
 

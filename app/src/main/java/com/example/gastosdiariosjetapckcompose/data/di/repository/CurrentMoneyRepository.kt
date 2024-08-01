@@ -27,10 +27,6 @@ class CurrentMoneyRepository @Inject constructor(private val currentMoneyDao: Cu
         currentMoneyDao.deleteMoney(item.toData())
     }
 
-    suspend fun isDatabaseMoneyEmpty(): Boolean {
-       return currentMoneyDao.getMoney() == null
-    }
-
     suspend fun clearAllCurrentMoneyRepository(){
         currentMoneyDao.deleteAllMoney()
     }

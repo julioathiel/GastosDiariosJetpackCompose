@@ -34,6 +34,15 @@ class DataBaseManager @Inject constructor(
         clearAllImagenSelectedUseCase()
     }
 
+    //FUNCION PARA LA PANTALLA DE MOVIMIENTOS
+    suspend fun deleteAllScreenMovimientos(){
+        clearAllGastosPorCatUseCase()
+        clearAllMovimientosUseCase()
+        clearAllTotalIngresosUseCase()
+        clearAllTotalGastosUseCase()
+        clearAllCurrentMoneyUseCase()
+    }
+
     //----------------------------------------------//
     //  * funciones opcionales para eliminar las tablas completas de la base de datos *  //
     suspend fun deleteAllGraphBar() {

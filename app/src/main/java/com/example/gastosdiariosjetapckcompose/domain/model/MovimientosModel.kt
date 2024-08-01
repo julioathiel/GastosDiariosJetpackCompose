@@ -8,5 +8,4 @@ data class MovimientosModel(
     var cash: String,
     val select:Boolean,
     val date: String
-//    val date: String = DateFormat.getDateInstance().format(Date())
 )

@@ -7,6 +7,9 @@
     <string name="guardar">Guardar</string>
     <string name="confirmar">Confirmar</string>
     <string name="eliminar_todo">Eliminar todo</string>
+    <string name="atras">Atras</string>
+    <string name="siguiente">Siguiente</string>
+    <string name="ingresar">Ingresar</string>
 
     <string name="_0_00">$0.00</string>
 

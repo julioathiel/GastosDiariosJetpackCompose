@@ -34,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -64,9 +65,10 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.gastosdiariosjetapckcompose.R
 import com.example.gastosdiariosjetapckcompose.domain.enums.IngresosGastosEnum
 import com.example.gastosdiariosjetapckcompose.domain.model.MovimientosModel
-import com.example.gastosdiariosjetapckcompose.features.home.HomeViewModel
-import com.example.gastosdiariosjetapckcompose.features.home.components_home.tabBarItems
-import com.example.gastosdiariosjetapckcompose.features.movimientos.MovimientosViewModel
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.home.HomeViewModel
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.home.components_home.tabBarItems
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.movimientos.MovimientosViewModel
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.movimientos.OnActionsMovimientos
 import com.example.gastosdiariosjetapckcompose.navigation.Routes
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -195,12 +197,20 @@ class SharedLogic {
                         Button(
                             onClick = {
                                 // Actualizar dinero y descripción
-                                movimientosViewModel.actualizandoItem(
-                                    title = transaccion.title,
-                                    nuevoValor = cantidadIngresada,
-                                    description = description,
-                                    itemModel = transaccion
+                                movimientosViewModel.onEventHandler(
+                                    OnActionsMovimientos.EditItem(
+                                        title = transaccion.title,
+                                        nuevoValor = cantidadIngresada,
+                                        description = description,
+                                        item = transaccion
+                                    )
                                 )
+//                                movimientosViewModel.updateItem(
+//                                    title = transaccion.title,
+//                                    nuevoValor = cantidadIngresada,
+//                                    description = description,
+//                                    itemModel = transaccion
+//                                )
                                 onDissmis()
                                 cantidadIngresada = ""
                                 description = ""
@@ -278,28 +288,6 @@ class SharedLogic {
             //para mostrar la primer letra de la palabra en mayuscula
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words)
         )
-    }
-
-    @Composable
-    fun IsEmpty() {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_no_data),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(200.dp)
-                    .align(Alignment.CenterHorizontally)
-            )
-            Text(
-                text = stringResource(R.string.sin_resultados),
-                modifier = Modifier.padding(top = 30.dp),
-                style = MaterialTheme.typography.titleMedium,
-            )
-        }
     }
 
     @Composable
@@ -399,7 +387,7 @@ class SharedLogic {
         navController: NavController,
         seleccionadoTabIndex: Int
     ) {
-        NavigationBar(containerColor = MaterialTheme.colorScheme.background) {
+        NavigationBar(containerColor = MaterialTheme.colorScheme.surfaceContainer) {
             tabBarItems.fastForEachIndexed { index, tabBarItem ->
                 NavigationBarItem(
                     selected = seleccionadoTabIndex == index,
@@ -469,16 +457,6 @@ class SharedLogic {
         }
     }
 
-    @Composable
-    fun LoaderData(modifier: Modifier, image: Int, repeat: Boolean) {
-        val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(image))
-        val iterations = if (repeat) LottieConstants.IterateForever else 1
-        LottieAnimation(
-            composition = composition,
-            iterations = iterations,
-            modifier = modifier
-        )
-    }
 
     @Composable
     fun LoaderCircularProgressPantalla() {

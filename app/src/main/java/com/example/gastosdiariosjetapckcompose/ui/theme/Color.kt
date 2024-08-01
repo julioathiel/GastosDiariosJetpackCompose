@@ -13,8 +13,5 @@ val Pink40 = Color(0xFF7D5260)
 //PARA LA APP
 val BlackFondo = Color(0xFF101014)
 val ContraBlack = Color(0xFF1F1F1F)
-val VioletClaro = Color(0xFF8247C5)
-val Violet = Color(0xFF6534C9)
-val RosaClaro = Color(0xFFFFE8D2)
-val VerdeMenta = Color(0xFF98FF98)
-
+val VerdeCard = Color(0xFFEAF5ED)
+val VerdeDinero = Color(0xFF1DAB60)

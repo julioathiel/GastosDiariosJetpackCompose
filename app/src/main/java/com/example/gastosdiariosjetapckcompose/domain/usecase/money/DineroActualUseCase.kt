@@ -29,12 +29,6 @@ class DeleteCurrentMoneyUseCase @Inject constructor(private val repository: Curr
     }
 }
 
-class CheckDatabaseMoneyEmptyUseCase @Inject constructor(private val repository: CurrentMoneyRepository) {
-    suspend operator fun invoke(): Boolean {
-        return repository.isDatabaseMoneyEmpty()
-    }
-}
-
 class ClearAllCurrentMoneyUseCase @Inject constructor(private val repository: CurrentMoneyRepository){
     suspend operator fun invoke(){
         repository.clearAllCurrentMoneyRepository()

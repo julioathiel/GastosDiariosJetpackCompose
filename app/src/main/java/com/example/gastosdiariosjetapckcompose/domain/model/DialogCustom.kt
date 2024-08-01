@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.example.gastosdiariosjetapckcompose.data.core.GlobalVariables.sharedLogic
 import com.example.gastosdiariosjetapckcompose.R
+import com.example.gastosdiariosjetapckcompose.commons.CommonsLoaderData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -172,66 +173,6 @@ class DialogCustom {
                             Text(
                                 text = stringResource(id = android.R.string.ok)
                             )
-                        }
-
-                    }
-                }
-            }
-        }
-    }
-
-
-    @Composable
-    fun MostrarDialogoCongratulations(
-        context: Context,
-        pantalla: String,
-        onDismiss: () -> Unit,
-        onAccept: () -> Unit,
-    ) {
-        val pantallaInfo = pantallaInfo(pantalla, context)
-
-        Dialog(onDismissRequest = { onDismiss() }) {
-            Card(shape = RoundedCornerShape(28.dp)) {
-                Column(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 24.dp)
-                ) {
-
-                    sharedLogic.LoaderData(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .size(60.dp),
-                        image = R.raw.congratulation_lottie,
-                        repeat = false
-                    )
-
-                    Spacer(modifier = Modifier.size(16.dp))
-                    //titulo
-                    Text(
-                        text = pantallaInfo.titulo,
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
-                    )
-                    Spacer(modifier = Modifier.size(16.dp))
-                    //Cuerpo dialogo
-                    Text(
-                        text = pantallaInfo.texto,
-                        modifier = Modifier.align(Alignment.CenterHorizontally),
-                        color = Color.Unspecified
-                    )
-                    Spacer(modifier = Modifier.size(24.dp))
-
-                    Row(
-                        Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        TextButton(
-                            onClick = {
-                                onAccept()
-                            },
-                        ) {
-                            Text(text = stringResource(id = android.R.string.ok))
                         }
 
                     }

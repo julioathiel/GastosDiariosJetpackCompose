@@ -1,11 +1,9 @@
 package com.example.gastosdiariosjetapckcompose.navigation
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.gastosdiariosjetapckcompose.domain.uiState.AppNavegationUiState
 import com.example.gastosdiariosjetapckcompose.data.core.DataStorePreferences
-import com.example.gastosdiariosjetapckcompose.features.viewPagerScreen.ViewPagerViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted

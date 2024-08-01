@@ -14,30 +14,30 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.gastosdiariosjetapckcompose.features.acerca_de.AcercaDeScreen
-import com.example.gastosdiariosjetapckcompose.features.acerca_de.AcercaDeViewModel
-import com.example.gastosdiariosjetapckcompose.features.configuration.ConfigurationScreen
-import com.example.gastosdiariosjetapckcompose.features.configuration.ConfigurationViewModel
-import com.example.gastosdiariosjetapckcompose.features.configuration.actualizarMaximoFecha.ActualizarMaximoFechaScreen
-import com.example.gastosdiariosjetapckcompose.features.configuration.actualizarMaximoFecha.ActualizarMaximoFechaViewModel
-import com.example.gastosdiariosjetapckcompose.features.configuration.ajustes_avanzados.AjustesScreen
-import com.example.gastosdiariosjetapckcompose.features.configuration.ajustes_avanzados.AjustesViewModel
-import com.example.gastosdiariosjetapckcompose.features.creandoCategoriaGastos.CategoriaGastosScreen
-import com.example.gastosdiariosjetapckcompose.features.creandoCategoriaGastos.CategoriaGastosViewModel
-import com.example.gastosdiariosjetapckcompose.features.creandoCategoriaIngresos.CategoriaIngresosScreen
-import com.example.gastosdiariosjetapckcompose.features.creandoCategoriaIngresos.CategoriaIngresosViewModel
-import com.example.gastosdiariosjetapckcompose.features.home.HomeScreen
-import com.example.gastosdiariosjetapckcompose.features.home.HomeViewModel
-import com.example.gastosdiariosjetapckcompose.features.movimientos.MovimientosScreen
-import com.example.gastosdiariosjetapckcompose.features.movimientos.MovimientosViewModel
-import com.example.gastosdiariosjetapckcompose.features.notificacion.NotificationViewModel
-import com.example.gastosdiariosjetapckcompose.features.notificacion.RecordatorioScreen
-import com.example.gastosdiariosjetapckcompose.features.registroTransaccionsPorcentaje.RegistroTransaccionesScreen
-import com.example.gastosdiariosjetapckcompose.features.registroTransaccionsPorcentaje.RegistroTransaccionesViewModel
-import com.example.gastosdiariosjetapckcompose.features.viewPagerScreen.ViewPagerScreen
-import com.example.gastosdiariosjetapckcompose.features.viewPagerScreen.ViewPagerViewModel
-import com.google.android.gms.tasks.Task
-import com.google.android.play.core.appupdate.AppUpdateInfo
+import com.example.gastosdiariosjetapckcompose.commons.CommonsLoadingScreen
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.acerca_de.AcercaDeScreen
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.acerca_de.AcercaDeViewModel
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.configuration.ConfigurationScreen
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.configuration.ConfigurationViewModel
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.configuration.actualizarMaximoFecha.ActualizarMaximoFechaScreen
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.configuration.actualizarMaximoFecha.ActualizarMaximoFechaViewModel
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.configuration.ajustes_avanzados.AjustesScreen
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.configuration.ajustes_avanzados.AjustesViewModel
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.configuration.components.CongratulationsScreen
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.creandoCategoriaGastos.CategoriaGastosScreen
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.creandoCategoriaGastos.CategoriaGastosViewModel
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.creandoCategoriaIngresos.CategoriaIngresosScreen
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.creandoCategoriaIngresos.CategoriaIngresosViewModel
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.home.HomeScreen
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.home.HomeViewModel
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.movimientos.MovimientosScreen
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.movimientos.MovimientosViewModel
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.notificacion.NotificationViewModel
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.notificacion.RecordatorioScreen
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.registroTransaccionsPorcentaje.RegistroTransaccionesScreen
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.registroTransaccionsPorcentaje.RegistroTransaccionesViewModel
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.viewPagerScreen.ViewPagerScreen
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.viewPagerScreen.ViewPagerViewModel
 
 @Composable
 fun AppNavigation(
@@ -80,8 +80,7 @@ fun AppNavigation(
         composable(Routes.HomeScreen.route) {
             HomeScreen(
                 navController = navController,
-                homeViewModel,
-                configurationViewModel
+                homeViewModel
             )
         }
 
@@ -141,30 +140,19 @@ fun AppNavigation(
         }
 
         composable(Routes.LoadingScreen.route) {
-            LoadingScreen(navController = navController)
+            CommonsLoadingScreen(navController = navController)
         }
-        composable(Routes.AcercaDe.route){
-           AcercaDeScreen(
+        composable(Routes.AcercaDe.route) {
+            AcercaDeScreen(
                 navController,
                 acercaDeViewModel
             )
         }
-        composable(Routes.AjustesScreen.route){
-            AjustesScreen(ajustesViewModel,navController)
+        composable(Routes.AjustesScreen.route) {
+            AjustesScreen(ajustesViewModel, navController)
         }
-    }
-}
-
-@Composable
-fun LoadingScreen(navController: NavController) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        CircularProgressIndicator(
-            Modifier
-                .size(30.dp)
-                .align(Alignment.Center)
-        )
+        composable((Routes.CongratulationsScreen.route)) {
+            CongratulationsScreen(navController = navController, viewModel = configurationViewModel)
+        }
     }
 }
