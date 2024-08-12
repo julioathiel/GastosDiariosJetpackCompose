@@ -117,9 +117,8 @@ fun ItemCardAllExpenses(
                 if (transaccion.subTitle.isNotEmpty()) {
                     Text(
                         text = transaccion.subTitle,
-                        fontSize = 16.sp,
-                        color = MaterialTheme.colorScheme.outline,
-                        style = MaterialTheme.typography.bodySmall,
+//                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        style = MaterialTheme.typography.bodyLarge,
                         maxLines = if (isExpanded) Int.MAX_VALUE else 1,
                         // Mostrar "..." si el texto excede una línea
                         overflow = if (isExpanded) TextOverflow.Clip else TextOverflow.Ellipsis,

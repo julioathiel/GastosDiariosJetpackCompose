@@ -15,9 +15,9 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@drawable/ic_ahorro"
+        android:icon="@drawable/logo_limitday"
         android:label="@string/app_name"
-        android:roundIcon="@drawable/ic_ahorro"
+        android:roundIcon="@drawable/logo_limitday"
         android:supportsRtl="true"
         android:theme="@style/Theme.GastosDiariosJetapckCompose"
         tools:targetApi="31">

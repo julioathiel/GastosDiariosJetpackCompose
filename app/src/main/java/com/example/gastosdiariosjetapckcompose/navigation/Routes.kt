@@ -1,24 +1,42 @@
 package com.example.gastosdiariosjetapckcompose.navigation
 
+import com.example.gastosdiariosjetapckcompose.data.core.Constants.ACERCA_DE_SCREEN
+import com.example.gastosdiariosjetapckcompose.data.core.Constants.ACTUALIZAR_MAXIMO_FECHA_SCREEN
+import com.example.gastosdiariosjetapckcompose.data.core.Constants.AJUSTES_SCREEN
+import com.example.gastosdiariosjetapckcompose.data.core.Constants.CATEGORIA_GASTOS_SCREEN
+import com.example.gastosdiariosjetapckcompose.data.core.Constants.CATEGORIA_INGRESOS_SCREEN
+import com.example.gastosdiariosjetapckcompose.data.core.Constants.CONFIGURATION_SCREEN
+import com.example.gastosdiariosjetapckcompose.data.core.Constants.CONGRATULATIONS_SCREEN
+import com.example.gastosdiariosjetapckcompose.data.core.Constants.FORGOT_PASSWORD_SCREEN
+import com.example.gastosdiariosjetapckcompose.data.core.Constants.HOME_SCREEN
+import com.example.gastosdiariosjetapckcompose.data.core.Constants.INITIAL_LOGIN_SCREEN
+import com.example.gastosdiariosjetapckcompose.data.core.Constants.LOADING_SCREEN
+import com.example.gastosdiariosjetapckcompose.data.core.Constants.LOGIN_SCREEN
+import com.example.gastosdiariosjetapckcompose.data.core.Constants.MOVIMIENTOS_SCREEN
+import com.example.gastosdiariosjetapckcompose.data.core.Constants.RECORDATORIOS_SCREEN
+import com.example.gastosdiariosjetapckcompose.data.core.Constants.REGISTER_SCREEN
+import com.example.gastosdiariosjetapckcompose.data.core.Constants.REGISTER_TRANSACTION_SCREEN
+import com.example.gastosdiariosjetapckcompose.data.core.Constants.USER_PROFILE_SCREEN
+import com.example.gastosdiariosjetapckcompose.data.core.Constants.VIEWPAGER_SCREEN
+
 //se usara para manejar las Id de las rutas desde este lugar
 sealed class Routes(val route: String) {
-    //se crea la clase object  y se le pone un nombre que
-    // extendera de la misma clase Routes y le ponemos la ruta o ID para poder
-    // navegar entre pantallas
-    object LoginScreen : Routes("LoginScreen")
-    object ViewPagerScreen : Routes("ViewPagerScreen")
-    object HomeScreen : Routes("HomeScreen")
-    object RegisterScreen : Routes("RegisterScreen")
-    object ForgotPasswordScreen : Routes("ForgotPasswordScreen")
-    object MovimientosScreen : Routes("MovimientosScreen")
-    object ConfigurationScreen : Routes("ConfigurationScreen")
-    object RegistroTransaccionesScreen : Routes("RegistroTransaccionesScreen")
-    object RecordatorioScreen : Routes("RecordatorioScreen")
-    object CategoriaGastosScreen : Routes("CategoriaGastosScreen")
-    object CategoriaIngresosScreen : Routes("CategoriaIngresosScreen")
-    object ActualizarMaximoFechaScreen : Routes("ActualizarMaximoFechaScreen")
-    object LoadingScreen : Routes("LoadingScreen")
-    object AcercaDe : Routes("AcercaDe")
-    object AjustesScreen : Routes("AjustesScreen")
-    object CongratulationsScreen : Routes("CongratulationsScreen")
+    object InitialLoginScreen:Routes(INITIAL_LOGIN_SCREEN)
+    object LoginScreen : Routes(LOGIN_SCREEN)
+    object RegisterScreen : Routes(REGISTER_SCREEN)
+    object HomeScreen : Routes(HOME_SCREEN)
+    object ViewPagerScreen : Routes(VIEWPAGER_SCREEN)
+    object ForgotPasswordScreen : Routes(FORGOT_PASSWORD_SCREEN)
+    object MovimientosScreen : Routes(MOVIMIENTOS_SCREEN)
+    object ConfigurationScreen : Routes(CONFIGURATION_SCREEN)
+    object RegistroTransaccionesScreen : Routes(REGISTER_TRANSACTION_SCREEN)
+    object RecordatorioScreen : Routes(RECORDATORIOS_SCREEN)
+    object CategoriaGastosScreen : Routes(CATEGORIA_GASTOS_SCREEN)
+    object CategoriaIngresosScreen : Routes(CATEGORIA_INGRESOS_SCREEN)
+    object ActualizarMaximoFechaScreen : Routes(ACTUALIZAR_MAXIMO_FECHA_SCREEN)
+    object LoadingScreen : Routes(LOADING_SCREEN)
+    object AcercaDe : Routes(ACERCA_DE_SCREEN)
+    object AjustesScreen : Routes(AJUSTES_SCREEN)
+    object CongratulationsScreen : Routes(CONGRATULATIONS_SCREEN)
+    object UserProfileScreen:Routes(USER_PROFILE_SCREEN)
 }

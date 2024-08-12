@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Nightlight
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -21,26 +22,33 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.example.gastosdiariosjetapckcompose.R
+import com.example.gastosdiariosjetapckcompose.commons.CommonsToolbar
 import com.example.gastosdiariosjetapckcompose.domain.uiState.EventHandler
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AjustesScreen(viewModel: AjustesViewModel, navController: NavController) {
 
 
-   Scaffold(topBar = { TopAppBar(title = { Text(text = "Ajustes") }) }) { it: PaddingValues ->
+    Scaffold(topBar = {
+        CommonsToolbar(
+            title = stringResource(id = R.string.toolbar_ajustes),
+            colors = MaterialTheme.colorScheme.background
+        )
+    }) { it: PaddingValues ->
         Column(modifier = Modifier.padding(it)) {
             // Recolecta el estado del flujo de booleanos
             val state = viewModel.state
             SwitchItemDarkTheme(
                 onCheked = state.isDarkModeActive,
                 onCheckedChanged = { viewModel.onEventHandler(EventHandler.SelectedDarkThemeValue(it)) },
-                saveDarkThemeValue = {  viewModel.onEventHandler(EventHandler.SaveDarkThemeValue(it))}
+                saveDarkThemeValue = { viewModel.onEventHandler(EventHandler.SaveDarkThemeValue(it)) }
             )
         }
-   }
+    }
 }
 
 @Composable

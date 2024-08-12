@@ -10,7 +10,24 @@
     <string name="atras">Atras</string>
     <string name="siguiente">Siguiente</string>
     <string name="ingresar">Ingresar</string>
+    <string name="saldo_restante">Saldo restante</string>
 
+
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="iniciar_sesion">Iniciar sesión</string>
+    <string name="crear_cuenta">Crear cuenta</string>
+    <string name="email_error">Por favor, introduzca un correo electrónico válido.</string>
+    <string name="password_error">Su contraseña debe tener al menos seis caracteres e incluir un dígito, una letra minúscula y una letra mayúscula.</string>
+    <string name="password_match_error">Las contraseñas no coinciden.</string>
+    <string name="generic_error">Ocurrió algo incorrecto. Inténtalo nuevamente.</string>
+    <string name="empty_password_error">La contraseña no puede estar vacía.</string>
+
+    <!--SALUDOS -->
+    <string name="buenos_dias">Buenos días</string>
+    <string name="buenas_tardes">Buenas tardes</string>
+    <string name="buenas_noches">Buenas noches</string>
+    <!-- ///////////////////////////////////////////////////////////////////////////////////// -->
     <string name="_0_00">$0.00</string>
 
     <string name="recordatorio_titulo">Recordatorio diario</string>
@@ -23,16 +40,16 @@
     <string name="descripcion">Descripción</string>
 
     //modelBottomSheet
-    <string name="selecciona_un_icono">Selecciona un icono</string>
-    <string name="nuevo_titulo">Nuevo titulo</string>
+    <string name="selecciona_un_icono">Selecciona un ícono</string>
+    <string name="nuevo_titulo">Nuevo título</string>
 
 
-    //bodyHeader
+    <!--BODY HEADER-->
     <string name="tu_dinero_actual">Tu dinero actual</string>
     <string name="ir_a_movimientos">Ir a movimientos</string>
     <string name="por_dia">%1$s por día</string>
     //card dias restantes
-    <string name="dias_restantes">Dias restantes</string>
+    <string name="dias_restantes">Días restantes</string>
     //boton para eligir fecha
 
 
@@ -40,11 +57,13 @@
     <string name="gastos">Gastos</string>
     <string name="body_vacio">Parece que aún no has añadido nada a tu lista. ¿Por qué no comienzas ahora mismo?</string>
     <string name="sin_resultados">Sin resultados</string>
+    <!-- ///////////////////////////////////////////////////////////////////////////////////// -->
     <!--TOOLBAR-->
-    <string name="toolbar_configuracion">Configuracion</string>
+    <string name="toolbar_configuracion">Configuración</string>
     <string name="toolbar_cambio_fecha">Cambio de fechas</string>
     <string name="toolbar_registro_gastos">Registro de transacciones</string>
     <string name="toolbar_analisis_de_gastos">Análisis de gastos</string>
+    <string name="toolbar_ajustes">Ajustes</string>
     <!-- ///////////////////////////////////////////////////////////////////////////////////// -->
 
     <!-- PANTALLA DE ELEGIR FECHA MAXIMA -->
@@ -62,7 +81,7 @@
     <!-- ///////////////////////////////////////////////////////////////////////////////////// -->
 
 
-    <string name="elige_una_categoria">Elige una categoria</string>
+    <string name="elige_una_categoria">Elige una categoría</string>
     <string name="categories_gastos">categories gastos</string>
     <string name="categories_ingresos">categories ingresos</string>
     <string name="lo_mas_gastado_este_mes">Lo más gastado este mes</string>
@@ -73,6 +92,9 @@
     <string name="delete_datos_graficos">Eliminar también los datos estadisticos del gráfico</string>
 
     <!--TITULOS Y DESCRIPCIONES DE LA PANTALLA DE CONFIGURACION -->
+    <string name="perfil_usuario_title">Cuenta</string>
+    <string name="perfil_usuario_description">Perfil de usuario </string>
+
     <string name="create_category_title">Crear categoría</string>
     <string name="create_category_description">Permite crear nuevas categorías</string>
 
@@ -106,4 +128,5 @@
 
     <string name="share_app">https://www.google.com.ar/?hl=e</string>
     <string name="si_presionas_eliminar_se_hara_de_inmediato">Si presionas eliminar, se hara de inmediato.</string>
+    <string name="categor_as_nuevas">Categorías nuevas</string>
 </resources>

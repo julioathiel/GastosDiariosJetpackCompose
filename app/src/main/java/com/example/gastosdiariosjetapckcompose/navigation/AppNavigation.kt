@@ -1,19 +1,9 @@
 package com.example.gastosdiariosjetapckcompose.navigation
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.example.gastosdiariosjetapckcompose.commons.CommonsLoadingScreen
 import com.example.gastosdiariosjetapckcompose.mis_ui_screen.acerca_de.AcercaDeScreen
 import com.example.gastosdiariosjetapckcompose.mis_ui_screen.acerca_de.AcercaDeViewModel
@@ -24,12 +14,20 @@ import com.example.gastosdiariosjetapckcompose.mis_ui_screen.configuration.actua
 import com.example.gastosdiariosjetapckcompose.mis_ui_screen.configuration.ajustes_avanzados.AjustesScreen
 import com.example.gastosdiariosjetapckcompose.mis_ui_screen.configuration.ajustes_avanzados.AjustesViewModel
 import com.example.gastosdiariosjetapckcompose.mis_ui_screen.configuration.components.CongratulationsScreen
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.configuration.user_profile.UserProfileScreen
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.configuration.user_profile.UserProfileViewModel
 import com.example.gastosdiariosjetapckcompose.mis_ui_screen.creandoCategoriaGastos.CategoriaGastosScreen
 import com.example.gastosdiariosjetapckcompose.mis_ui_screen.creandoCategoriaGastos.CategoriaGastosViewModel
 import com.example.gastosdiariosjetapckcompose.mis_ui_screen.creandoCategoriaIngresos.CategoriaIngresosScreen
 import com.example.gastosdiariosjetapckcompose.mis_ui_screen.creandoCategoriaIngresos.CategoriaIngresosViewModel
 import com.example.gastosdiariosjetapckcompose.mis_ui_screen.home.HomeScreen
 import com.example.gastosdiariosjetapckcompose.mis_ui_screen.home.HomeViewModel
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.initial_login.InitialLoginScreen
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.initial_login.InitialLoginViewModel
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.initial_login.login.LoginScreen
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.initial_login.login.LoginViewModel
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.initial_login.register.RegisterScreen
+import com.example.gastosdiariosjetapckcompose.mis_ui_screen.initial_login.register.RegisterViewModel
 import com.example.gastosdiariosjetapckcompose.mis_ui_screen.movimientos.MovimientosScreen
 import com.example.gastosdiariosjetapckcompose.mis_ui_screen.movimientos.MovimientosViewModel
 import com.example.gastosdiariosjetapckcompose.mis_ui_screen.notificacion.NotificationViewModel
@@ -38,9 +36,15 @@ import com.example.gastosdiariosjetapckcompose.mis_ui_screen.registroTransaccion
 import com.example.gastosdiariosjetapckcompose.mis_ui_screen.registroTransaccionsPorcentaje.RegistroTransaccionesViewModel
 import com.example.gastosdiariosjetapckcompose.mis_ui_screen.viewPagerScreen.ViewPagerScreen
 import com.example.gastosdiariosjetapckcompose.mis_ui_screen.viewPagerScreen.ViewPagerViewModel
+import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun AppNavigation(
+    auth: FirebaseAuth,
+    navHostController: NavHostController,
+    initialLoginViewModel: InitialLoginViewModel,
+    loginViewModel: LoginViewModel,
+    registerViewModel: RegisterViewModel,
     homeViewModel: HomeViewModel,
     movimientosViewModel: MovimientosViewModel,
     configurationViewModel: ConfigurationViewModel,
@@ -51,35 +55,44 @@ fun AppNavigation(
     viewPagerViewModel: ViewPagerViewModel,
     notificationViewModel: NotificationViewModel,
     acercaDeViewModel: AcercaDeViewModel,
-    ajustesViewModel: AjustesViewModel
+    ajustesViewModel: AjustesViewModel,
+    userProfileViewModel: UserProfileViewModel
 ) {
-    val navController = rememberNavController()
-
-    val showViewPager by viewPagerViewModel.showViewPager().collectAsState(initial = null)
-    var loadingDestino = ""
-    loadingDestino = if (showViewPager == null) {
-        Routes.LoadingScreen.route
+    val loadingDestino = if (auth.currentUser?.email != null) {
+        Routes.HomeScreen.route
     } else {
-        if (showViewPager == true) {
-            Routes.HomeScreen.route
-        } else {
-            Routes.ViewPagerScreen.route
-        }
+        Routes.InitialLoginScreen.route
     }
 
     NavHost(
-        navController = navController, startDestination = loadingDestino
+        navController = navHostController, startDestination = loadingDestino
     ) {
+        composable(Routes.InitialLoginScreen.route) {
+            InitialLoginScreen(
+                navigateToRegister = { navHostController.navigate(Routes.RegisterScreen.route) },
+                navigateToLogin = { navHostController.navigate(Routes.LoginScreen.route) },
+                navigateToHomeScreen = { navHostController.navigate(Routes.HomeScreen.route) },
+                viewModel = initialLoginViewModel
+            )
+        }
+        composable(Routes.RegisterScreen.route) {
+            RegisterScreen(viewModel = registerViewModel, navHostController)
+        }
+        composable(Routes.LoginScreen.route) {
+            LoginScreen(viewModel = loginViewModel,
+                navigatoToHome = { navHostController.navigate(Routes.HomeScreen.route) })
+        }
+
         composable(Routes.ViewPagerScreen.route) {
             ViewPagerScreen(
-                navController = navController,
+                navController = navHostController,
                 viewModel = viewPagerViewModel
             )
         }
 
         composable(Routes.HomeScreen.route) {
             HomeScreen(
-                navController = navController,
+                navController = navHostController,
                 homeViewModel
             )
         }
@@ -87,72 +100,81 @@ fun AppNavigation(
         composable(Routes.RegistroTransaccionesScreen.route) {
             RegistroTransaccionesScreen(
                 registroTransaccionesViewModel,
-                navController = navController
+                navController = navHostController
             )
         }
         composable(Routes.ConfigurationScreen.route) {
             ConfigurationScreen(
-                navController = navController,
+                navController = navHostController,
                 configurationViewModel
             )
 
         }
         composable(Routes.RecordatorioScreen.route) {
             RecordatorioScreen(
-                navController = navController,
+                navController = navHostController,
                 notificationViewModel
             )
         }
         composable(Routes.ActualizarMaximoFechaScreen.route) {
             ActualizarMaximoFechaScreen(
-                NavController = navController,
+                NavController = navHostController,
                 actualizarMaximoFechaViewModel
             )
         }
         composable(Routes.CategoriaGastosScreen.route) {
             CategoriaGastosScreen(
-                navController = navController, categoriaGastosViewModel
+                navController = navHostController, categoriaGastosViewModel
             )
         }
         composable(Routes.CategoriaIngresosScreen.route) {
             CategoriaIngresosScreen(
-                navController = navController,
+                navController = navHostController,
                 categoriaIngresosViewModel = categoriaIngresosViewModel
             )
         }
         composable(Routes.MovimientosScreen.route) {
             MovimientosScreen(
-                navController = navController,
+                navController = navHostController,
                 movimientosViewModel = movimientosViewModel
             )
         }
         composable(Routes.RegistroTransaccionesScreen.route) {
             RegistroTransaccionesScreen(
                 registroTransaccionesViewModel,
-                navController = navController
+                navController = navHostController
             )
         }
         composable(Routes.ConfigurationScreen.route) {
             ConfigurationScreen(
-                navController = navController,
+                navController = navHostController,
                 configurationViewModel
             )
         }
 
+        composable(Routes.UserProfileScreen.route) {
+            UserProfileScreen(userProfileViewModel, onLogout = {
+                navHostController.navigate(Routes.InitialLoginScreen.route)
+            })
+        }
+
         composable(Routes.LoadingScreen.route) {
-            CommonsLoadingScreen(navController = navController)
+            CommonsLoadingScreen(navController = navHostController)
         }
         composable(Routes.AcercaDe.route) {
             AcercaDeScreen(
-                navController,
+                navHostController,
                 acercaDeViewModel
             )
         }
         composable(Routes.AjustesScreen.route) {
-            AjustesScreen(ajustesViewModel, navController)
+            AjustesScreen(ajustesViewModel, navHostController)
         }
         composable((Routes.CongratulationsScreen.route)) {
-            CongratulationsScreen(navController = navController, viewModel = configurationViewModel)
+            CongratulationsScreen(
+                navController = navHostController,
+                viewModel = configurationViewModel
+            )
         }
     }
 }

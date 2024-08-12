@@ -27,12 +27,12 @@ import com.example.gastosdiariosjetapckcompose.navigation.Routes
 
 @Composable
 fun BodyHeader(
-    navController: NavController,
+    onNavigationMovimientos:()->Unit,
     homeViewModel: HomeViewModel
 ) {
 
-    val limitePorDiaObserve by sharedLogic.limitePorDia.collectAsState()
-    val limitePorDia = sharedLogic.formattedCurrency(limitePorDiaObserve)
+    val limitPorDiaObserve by sharedLogic.limitePorDia.collectAsState()
+    val limitDia = sharedLogic.formattedCurrency(limitPorDiaObserve)
 
     Row(
         Modifier
@@ -44,9 +44,8 @@ fun BodyHeader(
         Text(text = stringResource(R.string.tu_dinero_actual))
 
         TextButton(
-            onClick = { navController.navigate(route = Routes.MovimientosScreen.route) },
-              //border = BorderStroke(0.dp, colorResource(id = R.color.blue)), // Borde transparente
-            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),// Fondo transparente
+            onClick = { onNavigationMovimientos() },
+            colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.End) {
                 Text(
@@ -65,14 +64,11 @@ fun BodyHeader(
 
 
     Column(modifier = Modifier.padding(start = 16.dp)) {
-        //muestra el dinero actual al usuario
         FormattedCurrencyCash(homeViewModel)
-
         Text(
-            text = stringResource(R.string.por_dia, limitePorDia),
+            text = stringResource(R.string.por_dia, limitDia),
             color = MaterialTheme.colorScheme.onBackground,
             style = MaterialTheme.typography.titleMedium
         )
-
     }
 }

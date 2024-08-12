@@ -3,6 +3,7 @@ package com.example.gastosdiariosjetapckcompose.mis_ui_screen.creandoCategoriaGa
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -40,6 +41,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -77,9 +79,9 @@ import com.example.gastosdiariosjetapckcompose.navigation.Routes
 @Composable
 
 fun CategoriaGastosScreen(
-    navController: NavHostController, categoriaGastosViewModel: CategoriaGastosViewModel
+    navController: NavHostController, viewModel: CategoriaGastosViewModel
 ) {
-    val onDismiss by categoriaGastosViewModel.onDismiss
+    val onDismiss by viewModel.onDismiss
     val sheetStates = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     BackHandler {
@@ -87,12 +89,14 @@ fun CategoriaGastosScreen(
         navController.navigate(Routes.ConfigurationScreen.route)
     }
 
-    BottomSheetScaffold(topBar = { Toolbar(categoriaGastosViewModel) },
+    BottomSheetScaffold(topBar = {
+        Toolbar(viewModel) { viewModel.borrandoLista() }
+    },
         sheetMaxWidth = 0.dp,
         sheetContent = {
             if (onDismiss) {
                 ModalBottomSheet(
-                    onDismissRequest = { categoriaGastosViewModel.onDismissSet(false) },
+                    onDismissRequest = { viewModel.onDismissSet(false) },
                     sheetState = sheetStates,
                     content = {
                         Column(
@@ -101,8 +105,8 @@ fun CategoriaGastosScreen(
                                 .padding(16.dp)
                         ) {
                             ContentBottomSheet(
-                                onDismiss = { categoriaGastosViewModel.onDismissSet(false) },
-                                categoriaGastosViewModel
+                                onDismiss = { viewModel.onDismissSet(false) },
+                                viewModel
                             )
                         }
                     },
@@ -116,10 +120,10 @@ fun CategoriaGastosScreen(
         val uiState by produceState<ResultUiState>(
             initialValue = ResultUiState.Loading,
             key1 = lifecycle,
-            key2 = categoriaGastosViewModel
+            key2 = viewModel
         ) {
             lifecycle.repeatOnLifecycle(state = Lifecycle.State.STARTED) {
-                categoriaGastosViewModel.uiState.collect { value = it }
+                viewModel.uiState.collect { value = it }
             }
         }
         when (uiState) {
@@ -134,7 +138,7 @@ fun CategoriaGastosScreen(
                 val categoriaNueva = (uiState as ResultUiState.Success).data
                 if (categoriaNueva.isEmpty()) {
                     // Si la lista está vacía, mostrar
-                    categoriaGastosViewModel.isActivatedFalse()
+                    viewModel.isActivatedFalse()
                     Column(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
@@ -146,12 +150,12 @@ fun CategoriaGastosScreen(
                                 //
                             }
                         }
-                        VacioGastos(categoriaGastosViewModel)
+                        VacioGastos(viewModel)
                     }
                 } else {
-                    categoriaGastosViewModel.isActivatedTrue()
+                    viewModel.isActivatedTrue()
                     Box(
-                        Modifier.fillMaxSize()
+                        Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
                     ) {
 
                         Column(
@@ -169,11 +173,11 @@ fun CategoriaGastosScreen(
                             }
                             ListaNuevaCategoriaGasto(
                                 listNueva = (uiState as ResultUiState.Success).data,
-                                categoriaGastosViewModel
+                                viewModel
                             )
                         }
                         FloatingActionButton(
-                            onClick = { categoriaGastosViewModel.onDismissSet(true) },
+                            onClick = { viewModel.onDismissSet(true) },
                             modifier = Modifier
                                 .align(alignment = Alignment.BottomEnd)
                                 .padding(20.dp)
@@ -204,8 +208,6 @@ fun ListaNuevaCategoriaGasto(
         }
     }
 }
-
-
 
 
 @Composable
@@ -403,13 +405,13 @@ fun BotonGastosIngresosPantallaGastos(onTipoSeleccionado: (IngresosGastosEnum) -
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Toolbar(categoriaGastosViewModel: CategoriaGastosViewModel) {
-    val activado = categoriaGastosViewModel.isActivated.value
+fun Toolbar(viewModel: CategoriaGastosViewModel, onClickAction: () -> Unit) {
+    val activation = viewModel.isActivated.value
     var isBorrarTodo by remember { mutableStateOf(false) }
     TopAppBar(
-        title = { Text(text = "Catagorias nuevas") },
+        title = { Text(text = stringResource(R.string.categor_as_nuevas)) },
         actions = {
-            if (activado) {
+            if (activation) {
                 IconButton(onClick = { isBorrarTodo = true }) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_option),
@@ -420,18 +422,13 @@ fun Toolbar(categoriaGastosViewModel: CategoriaGastosViewModel) {
                     expanded = isBorrarTodo,
                     onDismissRequest = { isBorrarTodo = !isBorrarTodo }) {
                     DropdownMenuItem(
-                        text = { Text("Eliminar todo") },
-                        onClick = { categoriaGastosViewModel.borrandoLista() },
-//                        trailingIcon = {
-//                            Icon(
-//                                painter = painterResource(id = R.drawable.ic_delete),
-//                                contentDescription = "eliminar toodo"
-//                            )
-//                        }
+                        text = { Text(stringResource(id = R.string.eliminar_todo)) },
+                        onClick = { onClickAction() }
                     )
                 }
             }
-        }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
     )
 }
 

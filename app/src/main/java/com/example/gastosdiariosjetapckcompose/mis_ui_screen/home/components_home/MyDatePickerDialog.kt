@@ -40,7 +40,7 @@ fun MyDatePickerDialog(homeViewModel: HomeViewModel) {
     }
     //selectedDate obtiene la fecha ··/··/····
     selectedDate?.let { it ->
-       homeViewModel.sendDateElegida(it)
+        homeViewModel.sendDateElegida(it)
 
     }
 }
@@ -50,25 +50,17 @@ fun MyDatePickerDialog(homeViewModel: HomeViewModel) {
 fun DatePickerView(
     onDateSelected: (String) -> Unit,
     onDismiss: () -> Unit,
-    homeViewModel: HomeViewModel
+    viewModel: HomeViewModel
 ) {
-    val fechaMaxima by homeViewModel.selectedOptionFechaMaxima.collectAsState()
+    val maxDate by viewModel.selectedOptionFechaMaxima.collectAsState()
+
     val state = rememberDatePickerState(selectableDates = object : SelectableDates {
         override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-
-            val horaActualMillis = System.currentTimeMillis()
-            val diasEnMillis = fechaMaxima.toLong() * 24 * 60 * 60 * 1000L // Convertir a Long para evitar desbordamiento
-            val endTimeMillis = horaActualMillis + diasEnMillis
-            return utcTimeMillis in horaActualMillis..endTimeMillis
-
-            //retorna solamente un dia antes de lo seleccionado por eso lo arreglo cuando lo paso a la funcion converterMillisToDate()
+            return viewModel.isDateSelectable(utcTimeMillis, maxDate)
         }
     })
 
-    val selectedDate = state.selectedDateMillis?.let {
-        val localDate = Instant.ofEpochMilli(it).atZone(ZoneId.of("UTC")).toLocalDate()
-        "${localDate.dayOfMonth}/${localDate.monthValue}/${localDate.year}"
-    } ?: ""
+    val selectedDate = viewModel.formatSelectedDate(state.selectedDateMillis)
 
     DatePickerDialog(onDismissRequest = { onDismiss() },
         confirmButton = {

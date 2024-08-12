@@ -1,5 +1,6 @@
 package com.example.gastosdiariosjetapckcompose.data.di.module
 
+import android.app.Application
 import android.content.Context
 import androidx.room.Room
 import com.example.gastosdiariosjetapckcompose.data.database.TodoDataBase
@@ -14,6 +15,10 @@ import com.example.gastosdiariosjetapckcompose.data.di.dao.TotalIngresosDao
 import com.example.gastosdiariosjetapckcompose.data.di.dao.UsuarioCreaCatGastoDao
 import com.example.gastosdiariosjetapckcompose.data.di.dao.UsuarioCreaCatIngresoDao
 import com.example.gastosdiariosjetapckcompose.data.core.DataStorePreferences
+import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.ktx.initialize
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -37,6 +42,12 @@ class DataBaseModule {
     // se necesita para eliminar la base de datros desde MyApp
     fun provideDatabaseCleaner(@ApplicationContext appContext: Context): DataBaseCleaner {
         return DataBaseCleaner(appContext)
+    }
+
+    @Provides
+    @Singleton
+    fun provideContext(application: Application): Context {
+        return application.applicationContext
     }
 
     @Provides
@@ -104,5 +115,10 @@ class DataBaseModule {
     @Singleton
     fun provideBarDataGraph(database: TodoDataBase): BarDataDao {
         return database.barDataDao() //nueva tabla
+    }
+
+    @Provides
+    fun provideFirebaseAuth(): FirebaseAuth {
+        return FirebaseAuth.getInstance()
     }
 }

@@ -1,5 +1,6 @@
 package com.example.gastosdiariosjetapckcompose.mis_ui_screen.acerca_de
 
+import android.graphics.drawable.Drawable
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -7,6 +8,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -18,12 +21,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
 import com.example.gastosdiariosjetapckcompose.R
 
 @Composable
 fun AcercaDeScreen(navController: NavHostController, acercaDeViewModel: AcercaDeViewModel) {
     val applicationContext = LocalContext.current
     var versionName = ""
+    val pInfo = applicationContext.packageManager.getPackageInfo(applicationContext.packageName, 0)
+    val appIcon: Drawable =
+        applicationContext.packageManager.getApplicationIcon(applicationContext.packageName)
+    val title = pInfo.applicationInfo.loadLabel(applicationContext.packageManager).toString()
     Column(
         modifier = Modifier
             .padding(16.dp)
@@ -31,31 +39,30 @@ fun AcercaDeScreen(navController: NavHostController, acercaDeViewModel: AcercaDe
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Nombre de la Aplicación", style = MaterialTheme.typography.headlineMedium)
+
+        Text(text = title, style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Descripción breve de la aplicación y sus funcionalidades principales",
-            style = MaterialTheme.typography.bodyLarge
-        )
-        Spacer(modifier = Modifier.height(16.dp))
+
         Image(
-            painter = painterResource(id = R.drawable.ic_ahorro),
+            painter = rememberAsyncImagePainter(model = appIcon),
             contentDescription = "App Icon",
+            modifier = Modifier.size(60.dp),
             colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.inverseSurface)
         )
         Spacer(modifier = Modifier.height(16.dp))
 
         try {
-            var pInfo = applicationContext.packageManager.getPackageInfo(applicationContext.packageName, 0)
-           versionName = pInfo.versionName
-           // Toast.makeText(applicationContext, "Versión: $versionName",Toast.LENGTH_SHORT).show()
+            versionName = pInfo.versionName
+            // Toast.makeText(applicationContext, "Versión: $versionName",Toast.LENGTH_SHORT).show()
 
-        }catch (e:Exception){
+        } catch (e: Exception) {
             e.printStackTrace()
         }
 
-        Text(text = "Versión: $versionName",
-            style = MaterialTheme.typography.labelMedium)
+        Text(
+            text = "Versión: $versionName",
+            style = MaterialTheme.typography.labelMedium
+        )
         Spacer(modifier = Modifier.height(16.dp))
 
         Text(

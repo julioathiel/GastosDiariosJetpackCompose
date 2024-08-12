@@ -205,12 +205,6 @@ class SharedLogic {
                                         item = transaccion
                                     )
                                 )
-//                                movimientosViewModel.updateItem(
-//                                    title = transaccion.title,
-//                                    nuevoValor = cantidadIngresada,
-//                                    description = description,
-//                                    itemModel = transaccion
-//                                )
                                 onDissmis()
                                 cantidadIngresada = ""
                                 description = ""
@@ -387,7 +381,7 @@ class SharedLogic {
         navController: NavController,
         seleccionadoTabIndex: Int
     ) {
-        NavigationBar(containerColor = MaterialTheme.colorScheme.surfaceContainer) {
+        NavigationBar(containerColor = MaterialTheme.colorScheme.background) {
             tabBarItems.fastForEachIndexed { index, tabBarItem ->
                 NavigationBarItem(
                     selected = seleccionadoTabIndex == index,

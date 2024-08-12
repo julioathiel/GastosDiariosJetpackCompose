@@ -34,6 +34,7 @@ import com.example.gastosdiariosjetapckcompose.mis_ui_screen.home.components_hom
 import com.example.gastosdiariosjetapckcompose.mis_ui_screen.home.components_home.Header
 import com.example.gastosdiariosjetapckcompose.mis_ui_screen.home.components_home.MyFAB
 import com.example.gastosdiariosjetapckcompose.mis_ui_screen.home.components_home.NuevoMes
+import com.example.gastosdiariosjetapckcompose.navigation.Routes
 import kotlin.system.exitProcess
 
 @Composable
@@ -69,7 +70,7 @@ fun HomeScreen(
         ) {
             Header(usuario = "", viewModel = viewModel)
             Spacer(modifier = Modifier.padding(vertical = 10.dp))
-            BodyHeader(navController, viewModel)
+            BodyHeader(onNavigationMovimientos = {navController.navigate(route = Routes.MovimientosScreen.route)}, viewModel)
             Spacer(modifier = Modifier.padding(vertical = 30.dp))
             CountDate(Modifier.fillMaxWidth(), viewModel)
             Spacer(modifier = Modifier.padding(vertical = 4.dp))

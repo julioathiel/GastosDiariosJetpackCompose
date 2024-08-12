@@ -1,5 +1,6 @@
 package com.example.gastosdiariosjetapckcompose.mis_ui_screen.home.components_home
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,8 +32,8 @@ fun CountDate(modifier: Modifier, viewModel: HomeViewModel) {
         modifier = modifier
             .padding(horizontal = 16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
-        )
+            containerColor = MaterialTheme.colorScheme.background
+        ), border = BorderStroke(1.dp, color = MaterialTheme.colorScheme.outlineVariant)
     ) {
         Row(
             modifier = Modifier

@@ -40,10 +40,10 @@ fun CardBotonRegistro(
         modifier = Modifier
             .padding(horizontal = 16.dp),
         colors = CardDefaults.cardColors(
-            MaterialTheme.colorScheme.surfaceContainer
+            MaterialTheme.colorScheme.background
         ),
         shape = RoundedCornerShape(20.dp),
-        border = BorderStroke(0.dp, color = MaterialTheme.colorScheme.surfaceDim)
+        border = BorderStroke(1.dp, color = MaterialTheme.colorScheme.outlineVariant)
     ) {
         Column(
             modifier = Modifier

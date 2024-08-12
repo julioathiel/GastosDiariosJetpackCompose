@@ -15,7 +15,7 @@ data class CategoryDefault(override val name: String, override var icon: Int) : 
 data class CategoryCrear(override val name: String, override var icon: Int) : CategoriesModel
 
 val categoriaDefault = listOf(
-    CategoryDefault("Elige una categoria", R.drawable.ic_empty)
+    CategoryDefault("Elige una categoría", R.drawable.ic_empty)
 )
 
 val categoriesIngresos = mutableListOf(

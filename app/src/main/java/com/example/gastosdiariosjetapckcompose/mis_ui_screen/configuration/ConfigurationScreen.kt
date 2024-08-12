@@ -11,12 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -30,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.gastosdiariosjetapckcompose.R
+import com.example.gastosdiariosjetapckcompose.commons.CommonsToolbar
 import com.example.gastosdiariosjetapckcompose.data.core.GlobalVariables.sharedLogic
 import com.example.gastosdiariosjetapckcompose.domain.model.DialogCustom
 import com.example.gastosdiariosjetapckcompose.mis_ui_screen.configuration.components.ShareSheet
@@ -54,7 +53,12 @@ fun ConfigurationScreen(
     }
 
     Scaffold(
-        topBar = { Toolbar() },
+        topBar = {
+            CommonsToolbar(
+                title = stringResource(id = R.string.toolbar_configuracion),
+                colors = MaterialTheme.colorScheme.background
+            )
+        },
         bottomBar = {
             sharedLogic.TabView(
                 navController = navController,
@@ -69,6 +73,7 @@ fun ConfigurationScreen(
             items = ItemConfiguration.entries,
             onItemClick = { item ->
                 when (item) {
+                    ItemConfiguration.ELIMINAR_EDITAR_PERFIL -> navController.navigate(Routes.UserProfileScreen.route)
                     ItemConfiguration.CATEGORIASNUEVAS -> navController.navigate(Routes.CategoriaGastosScreen.route)
                     ItemConfiguration.UPDATEDATE -> navController.navigate(Routes.ActualizarMaximoFechaScreen.route)
                     ItemConfiguration.RECORDATORIOS -> navController.navigate(Routes.RecordatorioScreen.route)
@@ -77,6 +82,7 @@ fun ConfigurationScreen(
                         viewModel.setBooleanPagerFalse()
                         navController.navigate(Routes.ViewPagerScreen.route)
                     }
+
                     ItemConfiguration.COMPARTIR -> viewModel.setShowShare(true)
                     ItemConfiguration.ACERCADE -> navController.navigate(Routes.AcercaDe.route)
                     ItemConfiguration.AJUSTES_AVANZADOS -> navController.navigate(Routes.AjustesScreen.route)
@@ -97,7 +103,7 @@ fun ConfigurationScreen(
                 opcionesEliminar = viewModel.opcionesEliminar,
                 onConfirm = {
                     //opciones que el usuario eligio a eliminar
-                    selectedOptions ->
+                        selectedOptions ->
                     selectedOptions.forEach { option ->
                         option.action()
                     }
@@ -129,10 +135,10 @@ fun ListConf(
     ) {
         var lastCategory: String? = null
         items.forEach {
-            if(lastCategory != it.category) {
+            if (lastCategory != it.category) {
                 // Agregar línea divisoria
                 if (lastCategory != null) {
-                    HorizontalDivider(modifier =Modifier.padding(start = 70.dp))
+                    HorizontalDivider(modifier = Modifier.padding(start = 70.dp), color = MaterialTheme.colorScheme.surfaceContainerHigh)
                 }
                 // Actualizar la última categoría
                 lastCategory = it.category
@@ -169,18 +175,6 @@ fun ListConf(
         }
 
     }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun Toolbar() {
-    TopAppBar(
-        title = {
-            Text(
-                text = stringResource(R.string.toolbar_configuracion)
-            )
-        }
-    )
 }
 
 

@@ -10,6 +10,7 @@ enum class ItemConfiguration(
     val description: Int,
     val category:String
 ) {
+    ELIMINAR_EDITAR_PERFIL(R.drawable.ic_persona_circle, R.string.perfil_usuario_title, R.string.perfil_usuario_description, "Principal"),
     CATEGORIASNUEVAS(R.drawable.ic_folder, R.string.create_category_title, R.string.create_category_description, "Principal"),
     UPDATEDATE(R.drawable.ic_date_range, R.string.update_date_title, R.string.update_date_description, "Principal"),
     RECORDATORIOS(R.drawable.ic_notifications, R.string.notifications_title, R.string.notifications_description, "Categoría 2"),

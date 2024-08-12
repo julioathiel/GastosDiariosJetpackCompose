@@ -10,11 +10,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,6 +28,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import com.example.gastosdiariosjetapckcompose.data.core.GlobalVariables.sharedLogic
 import com.example.gastosdiariosjetapckcompose.R
+import com.example.gastosdiariosjetapckcompose.commons.CommonsToolbar
 import com.example.gastosdiariosjetapckcompose.domain.model.GastosPorCategoriaModel
 import com.example.gastosdiariosjetapckcompose.domain.uiState.RegistroTransaccionesUiState
 import com.example.gastosdiariosjetapckcompose.mis_ui_screen.registroTransaccionsPorcentaje.components_stadistics.BarGrahpConfigCustom
@@ -45,7 +44,12 @@ fun RegistroTransaccionesScreen(
     // Establecer el estado de la pestaña seleccionada como el índice correspondiente a la pestaña "Stadist"
     val selectedTabIndex by rememberSaveable { mutableIntStateOf(1) }
     Scaffold(
-        topBar = { Toolbar() },
+        topBar = {
+            CommonsToolbar(
+                title = stringResource(id = R.string.toolbar_analisis_de_gastos),
+                colors = MaterialTheme.colorScheme.background
+            )
+        },
         bottomBar = {
             sharedLogic.TabView(
                 navController = navController,
@@ -73,7 +77,7 @@ fun Content(vm: RegistroTransaccionesViewModel, modifier: Modifier) {
         key2 = vm
     ) {
         lifecycle.repeatOnLifecycle(state = Lifecycle.State.STARTED) {
-           vm.uiState.collect { value = it }
+            vm.uiState.collect { value = it }
         }
     }
 
@@ -87,7 +91,8 @@ fun Content(vm: RegistroTransaccionesViewModel, modifier: Modifier) {
 
         is RegistroTransaccionesUiState.Success -> {
             // Obtener la lista de transacciones desde el ViewModel
-            val listGastosPorCat = (uiState as RegistroTransaccionesUiState.Success).listGastosPorCat
+            val listGastosPorCat =
+                (uiState as RegistroTransaccionesUiState.Success).listGastosPorCat
             Column(modifier = modifier.fillMaxSize()) {
                 GastosPorCategoriaList(
                     listTransacciones = listGastosPorCat, vm,
@@ -143,9 +148,11 @@ fun GastosPorCategoriaList(
         // Mostrar mensaje o indicador visual cuando la lista está vacía
         if (transaccionesRevertidas.isEmpty()) {
             item {
-                Box(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 50.dp)){
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 50.dp)
+                ) {
 
                     Text(
                         text = stringResource(R.string.no_hay_transacciones_disponibles),
@@ -166,19 +173,6 @@ fun GastosPorCategoriaList(
         // muestra el ultimo elemento agregado en la parte superior
         listState.scrollToItem(index = 0)
     }
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun Toolbar() {
-    TopAppBar(
-        title = {
-            Text(
-                text = stringResource(id = R.string.toolbar_analisis_de_gastos)
-            )
-        }
-    )
 }
 
 

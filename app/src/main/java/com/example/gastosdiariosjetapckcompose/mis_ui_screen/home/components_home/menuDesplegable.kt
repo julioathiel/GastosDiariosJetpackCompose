@@ -97,7 +97,8 @@ fun menuDesplegable(
                                     180f
                                 else
                                     360f
-                            ), tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            ),
+                          //  tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     //  ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)

@@ -1,6 +1,8 @@
 package com.example.gastosdiariosjetapckcompose.mis_ui_screen.home
 
 
+import android.content.Context
+import android.net.Uri
 import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -10,8 +12,11 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.Ingresosdiariosjetapckcompose.domain.usecase.UsuarioCreaCatIngreso.GetUserCatIngresoUsecase
-import com.example.gastosdiariosjetapckcompose.data.core.GlobalVariables.sharedLogic
+import com.example.gastosdiariosjetapckcompose.eventshandler.EventsHandler
 import com.example.gastosdiariosjetapckcompose.R
+import com.example.gastosdiariosjetapckcompose.data.core.DataStorePreferences
+import com.example.gastosdiariosjetapckcompose.data.core.GlobalVariables.sharedLogic
+import com.example.gastosdiariosjetapckcompose.data.di.repository.AuthFirebaseRepository
 import com.example.gastosdiariosjetapckcompose.data_base_manager.DataBaseManager
 import com.example.gastosdiariosjetapckcompose.domain.model.CategoryGasto
 import com.example.gastosdiariosjetapckcompose.domain.model.CategoryIngreso
@@ -42,7 +47,6 @@ import com.example.gastosdiariosjetapckcompose.domain.usecase.totalesRegistro.In
 import com.example.gastosdiariosjetapckcompose.domain.usecase.totalesRegistro.InsertTotalIngresosUseCase
 import com.example.gastosdiariosjetapckcompose.domain.usecase.totalesRegistro.UpdateTotalGastosUseCase
 import com.example.gastosdiariosjetapckcompose.domain.usecase.totalesRegistro.UpdateTotalIngresosUseCase
-import com.example.gastosdiariosjetapckcompose.data.core.DataStorePreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -54,16 +58,21 @@ import java.math.RoundingMode
 import java.text.DateFormatSymbols
 import java.text.ParseException
 import java.text.SimpleDateFormat
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.time.temporal.ChronoUnit
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
+    private val context: Context,
     private val addCurrentMoneyUseCase: AddCurrentMoneyUseCase,
     private val getCurrentMoneyUseCase: GetCurrentMoneyUseCase,
     private val updateCurrentMoneyUseCase: UpdateCurrentMoneyUseCase,
@@ -93,11 +102,13 @@ class HomeViewModel @Inject constructor(
     //obteniendo lista creada por el usuario
     private val getUserCatGastoUsecase: GetUserCatGastoUsecase,
     private val getUserCatIngresoUsecase: GetUserCatIngresoUsecase,
-    private val dataBaseManager: DataBaseManager
-) : ViewModel() {
 
-    private val _selectedImageUri = MutableLiveData<String>()
-    val selectedImageUri: LiveData<String> = _selectedImageUri
+    private val dataBaseManager: DataBaseManager,
+
+    private val authFirebaseRepository: AuthFirebaseRepository
+) : ViewModel() {
+    private val _selectedImageUri = mutableStateOf<Uri?>(null)
+    val selectedImageUri: State<Uri?> = _selectedImageUri
 
     private var _dineroActual = MutableLiveData<Double>()
     val dineroActual: LiveData<Double> = _dineroActual
@@ -134,7 +145,6 @@ class HomeViewModel @Inject constructor(
     private val _showNuevoMes = mutableStateOf(false)
     val showNuevoMes: State<Boolean> = _showNuevoMes
 
-    private val _fechaElegidaConGuion = MutableLiveData<String?>()
 
     private val _fechaElegidaBarra = MutableStateFlow("")
     val fechaElegidaBarra: StateFlow<String?> = _fechaElegidaBarra
@@ -164,11 +174,17 @@ class HomeViewModel @Inject constructor(
         listCatIngresosNueva()//actualizando la lista de categoria del menu desplegable
         calculandoInit(fechaActual)
     }
-    fun onEventHandler(e:HomeEventHandler){
-        when(e){
-            is HomeEventHandler.GetCurrentMoney -> TODO()
-            is HomeEventHandler.SetCurrentMoney -> sendDateElegida(e.money)
+
+    fun onEventHandler(e: EventsHandler) {
+        when (e) {
+            is EventsHandler.GetCurrentMoney -> TODO()
+            is EventsHandler.SetCurrentMoney -> sendDateElegida(e.money)
         }
+    }
+
+    fun getUserProfile(): String? {
+        val user = authFirebaseRepository.getCurrentUser()
+        return user?.email
     }
 
 
@@ -200,7 +216,7 @@ class HomeViewModel @Inject constructor(
                             dataBaseManager.deleteAllExpenses()
                             crearTransaccion(
                                 cantidad = dineroDisponible.toString(),
-                                categoryName = "Saldo restante",
+                                categoryName = context.getString(R.string.saldo_restante),
                                 description = "",
                                 categoryIcon = R.drawable.ic_sueldo,
                                 isChecked = true
@@ -314,7 +330,6 @@ class HomeViewModel @Inject constructor(
                     _fechaElegidaBarra.value = ""
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
                 Log.e("mostrarDineroTotal", "Error al obtener el dinero total: ${e.message}")
             }
         }
@@ -453,7 +468,6 @@ class HomeViewModel @Inject constructor(
         try {
             val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
             val localDate = LocalDate.parse(date, formatter)
-            Log.d("convertirFechaAGuion", "Fecha ya está en formato con guion: $date")
             return date
         } catch (e: DateTimeParseException) {
             // Si no está en el formato yyyy-MM-dd, intentar convertir desde dd/MM/yyyy
@@ -461,7 +475,6 @@ class HomeViewModel @Inject constructor(
                 val formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy")
                 val localDate = LocalDate.parse(date, formatter)
                 val fechaConGuion = localDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                Log.d("convertirFechaAGuion", "Fecha con guion: $fechaConGuion")
                 return fechaConGuion
             } catch (e: DateTimeParseException) {
                 Log.e("convertirFechaAGuion", "Error al convertir la fecha: $date", e)
@@ -507,7 +520,6 @@ class HomeViewModel @Inject constructor(
         userSelected: Boolean
     ) {
         viewModelScope.launch {
-            // Calcula el nuevo dinero según la opción elegida por el usuario
             val nuevoTotal = when (userSelected) {
                 true -> {
                     addDiner(cantidadIngresada, dataIngresos)
@@ -517,7 +529,7 @@ class HomeViewModel @Inject constructor(
                     addDiner(cantidadIngresada, dataGastos)
                 }
             }
-            val dineroActual = when (userSelected) {
+            val dinerActual = when (userSelected) {
                 true -> {
                     addDiner(cantidadIngresada, data.money ?: 0.0)
                 }
@@ -531,7 +543,7 @@ class HomeViewModel @Inject constructor(
             when (userSelected) {
                 true -> if (data.isChecked) {
                     //data.isChecked es true entonces significa que no hay nadad aun guardado
-                    insertBaseDatos(CurrentMoneyModel(money = dineroActual))
+                    insertBaseDatos(CurrentMoneyModel(money = dinerActual))
                     insertPrimerIngresoProgress(TotalIngresosModel(totalIngresos = nuevoTotal))
                     insertPrimerGastoProgress(TotalGastosModel(totalGastos = 0.0))
                 } else {
@@ -543,7 +555,7 @@ class HomeViewModel @Inject constructor(
                 //Si el usuario eligio Gastos
                 false -> {
                     //si el usuario eligio gastos
-                    if (dineroActual == 0.0 && nuevoTotal > 0.0) {
+                    if (dinerActual == 0.0 && nuevoTotal > 0.0) {
                         //reseteando el progress
                         reseteandoProgress()
                     } else {
@@ -553,27 +565,22 @@ class HomeViewModel @Inject constructor(
                 }
             }
             //actualizando el dinero actual siempre
-            updateCurrentMoney(CurrentMoneyModel(money = dineroActual))
-            sharedLogic._limitePorDia.value = sharedLogic.calcularLimitePorDia(dineroActual)
+            updateCurrentMoney(CurrentMoneyModel(money = dinerActual))
+            sharedLogic._limitePorDia.value = sharedLogic.calcularLimitePorDia(dinerActual)
         }
     }
 
     private fun addDiner(cantidadIngresada: Double, dataTotal: Double): Double {
-        Log.d("miApp", "fun agregarDinero  NUEVO VALOR = : $cantidadIngresada")
-        Log.d("miApp", "fun agregarDinero  dataTotal = : $dataTotal")
-        val resultado =
-            BigDecimal(cantidadIngresada + dataTotal).setScale(2, RoundingMode.HALF_EVEN)
-        Log.d("miApp", "fun agregarDinero = : $resultado")
-        return resultado.toDouble()
+        val result = BigDecimal(cantidadIngresada + dataTotal)
+            .setScale(2, RoundingMode.HALF_EVEN)
+        return result.toDouble()
     }
 
     private fun insertBaseDatos(item: CurrentMoneyModel) {
-        // Agregar el valor a la base de datos
         viewModelScope.launch {
             val newValor = CurrentMoneyModel(money = item.money, isChecked = false)
             addCurrentMoneyUseCase(newValor)
             _dineroActual.value = getCurrentMoneyUseCase().money
-
         }
     }
 
@@ -594,7 +601,6 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun updateCurrentMoney(item: CurrentMoneyModel) {
-        Log.d("miApp", "update dinero actual = ${item.money}")
         viewModelScope.launch {
             val newValor = getCurrentMoneyUseCase()
             newValor.money = item.money
@@ -605,7 +611,6 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun updateIngresoTotal(item: TotalIngresosModel) {
-        Log.d("miApp", "item = fun updateIngresoTotal = ${item.totalIngresos}")
         viewModelScope.launch {
             val totalIngresosActual = getTotalIngresosUseCase()
             // Sumar solo el nuevo ingreso al total actual
@@ -616,7 +621,6 @@ class HomeViewModel @Inject constructor(
             }
             mostrarDineroActual()
             _mostrandoDineroTotalIngresos.value = getTotalIngresosUseCase()?.totalIngresos
-            Log.d("miApp", "actualizandoTotalIngresos: ${_mostrandoDineroTotalIngresos.value}")
         }
     }
 
@@ -630,7 +634,6 @@ class HomeViewModel @Inject constructor(
             }
             // Actualizar el LiveData para reflejar los cambios
             _mostrandoDineroTotalGastos.value = getTotalGastosUseCase()?.totalGastos
-            Log.d("miApp", "actualizandoTotalGastos: ${_mostrandoDineroTotalGastos.value}")
         }
     }
 
@@ -733,7 +736,6 @@ class HomeViewModel @Inject constructor(
         val dateFormat = SimpleDateFormat("$formattedDay MMM yyyy", Locale.getDefault())
         val fechaFormateada = dateFormat.format(Date())
 
-        Log.d("fechaFormateada", fechaFormateada)
         viewModelScope.launch {
             addMovimientosUseCase(
                 MovimientosModel(
@@ -762,41 +764,42 @@ class HomeViewModel @Inject constructor(
 
     fun guardarRutaImagen(uri: ImagenSeleccionadaModel) {
         viewModelScope.launch {
-            val selec = getUriImagenSeleccionadaUseCase()
-            Log.d("miApp", "selec = ${selec.isChecked}")
-            if (selec.isChecked) {
-                val insertandoImagen = ImagenSeleccionadaModel(
-                    uri = uri.uri,
-                    isChecked = false
-                )
-                addUriImagenSeleccionada(insertandoImagen)
-                Log.d(
-                    "miApp",
-                    "insertando imagen: id = ${insertandoImagen.id}," +
-                            " uri = ${insertandoImagen.uri}," +
-                            " isChecked = ${insertandoImagen.isChecked}"
-                )
+            val image = getUriImagenSeleccionadaUseCase()
+            if (image.uri.isEmpty()) {
+                addUriImagenSeleccionada(ImagenSeleccionadaModel(uri = uri.uri, isChecked = false))
             } else {
-                val nuevaImagen = getUriImagenSeleccionadaUseCase()
-                nuevaImagen.uri = uri.uri
-                nuevaImagen.isChecked = false
-                updateUriImagenSeleccionadaUseCase(nuevaImagen)
-
-                Log.d("miApp", "actualizando imagen: $nuevaImagen")
+                image.uri = uri.uri
+                image.isChecked = false
+                updateUriImagenSeleccionadaUseCase(image)
             }
-            // Después de guardar o actualizar la imagen, se actualiza la interfaz de usuario
             mostrarImagenPerfil()
         }
     }
 
     private fun mostrarImagenPerfil() {
         viewModelScope.launch {
-            _selectedImageUri.value = getUriImagenSeleccionadaUseCase().uri
-            val prueba = getUriImagenSeleccionadaUseCase()
+            val uriString = getUriImagenSeleccionadaUseCase().uri
+            _selectedImageUri.value = if (uriString.isEmpty()) null else Uri.parse(uriString)
         }
     }
 
     fun setShowNuevoMes(showNuevoMes: Boolean) {
         _showNuevoMes.value = showNuevoMes
+    }
+
+    fun isDateSelectable(utcTimeMillis: Long, maxDates: Int): Boolean {
+        val now = LocalDate.now().plusDays(1)
+        val diasMaximos = TimeUnit.DAYS.toMillis(maxDates.toLong())
+        val minDate = now.atTime(0, 0, 0, 0).toEpochSecond(ZoneOffset.UTC) * 1000
+        val maxDate = minDate + diasMaximos
+        return utcTimeMillis in minDate..maxDate
+    }
+
+    fun formatSelectedDate(selectedDateMillis: Long?): String {
+        return selectedDateMillis?.let {
+            val zonaHoraria = ZoneId.systemDefault()
+            val localDate = Instant.ofEpochMilli(it).atZone(zonaHoraria).toLocalDate()
+            "${localDate.dayOfMonth}/${localDate.monthValue}/${localDate.year}"
+        } ?: ""
     }
 }

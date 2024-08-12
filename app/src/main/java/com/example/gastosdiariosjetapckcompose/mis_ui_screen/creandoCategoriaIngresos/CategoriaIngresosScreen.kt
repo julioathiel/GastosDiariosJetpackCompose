@@ -1,8 +1,10 @@
 package com.example.gastosdiariosjetapckcompose.mis_ui_screen.creandoCategoriaIngresos
 
+import android.service.autofill.OnClickAction
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -41,6 +43,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -89,7 +92,11 @@ fun CategoriaIngresosScreen(
     }
 
 
-    BottomSheetScaffold(topBar = { Toolbar(categoriaIngresosViewModel) },
+    BottomSheetScaffold(topBar = {
+        Toolbar(categoriaIngresosViewModel) {
+            categoriaIngresosViewModel.borrandoLista()
+        }
+    },
         sheetMaxWidth = 0.dp,
         sheetContent = {
             if (onDismiss) {
@@ -139,7 +146,7 @@ fun CategoriaIngresosScreen(
                     // Si la lista está vacía, mostrar
                     categoriaIngresosViewModel.isActivatedFalse()
                     Column(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         BotonGastosIngresos { tipoClase ->
@@ -154,7 +161,11 @@ fun CategoriaIngresosScreen(
 
                 } else {
                     categoriaIngresosViewModel.isActivatedTrue()
-                    Box(Modifier.fillMaxSize()) {
+                    Box(
+                        Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.background)
+                    ) {
                         Column(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalAlignment = Alignment.CenterHorizontally
@@ -441,11 +452,11 @@ fun BotonGastosIngresos(onTipoSeleccionado: (IngresosGastosEnum) -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Toolbar(categoriaGastosViewModel: CategoriaIngresosViewModel) {
-    val activation = categoriaGastosViewModel.isActivated.value
+fun Toolbar(viewModel: CategoriaIngresosViewModel, onClickAction: () -> Unit) {
+    val activation = viewModel.isActivated.value
     var isBorrarTodo by remember { mutableStateOf(false) }
     TopAppBar(
-        title = { Text(text = "Catagorias nuevas") },
+        title = { Text(text = stringResource(id = R.string.categor_as_nuevas)) },
         actions = {
             if (activation) {
                 IconButton(onClick = { isBorrarTodo = true }) {
@@ -459,12 +470,13 @@ fun Toolbar(categoriaGastosViewModel: CategoriaIngresosViewModel) {
                     onDismissRequest = { isBorrarTodo = !isBorrarTodo }) {
                     DropdownMenuItem(
                         text = { Text(stringResource(id = R.string.eliminar_todo)) },
-                        onClick = { categoriaGastosViewModel.borrandoLista() }
+                        onClick = { onClickAction() }
                     )
 
                 }
             }
-        }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
     )
 }
 

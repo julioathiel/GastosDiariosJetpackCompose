@@ -14,8 +14,8 @@ import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 @HiltViewModel
-class AppNavigationViewModel @Inject constructor(private val dataStorePreferences: DataStorePreferences) :
-    ViewModel() {
+class AppNavigationViewModel @Inject constructor(
+    private val dataStorePreferences: DataStorePreferences) : ViewModel() {
 
     val uiState: StateFlow<AppNavegationUiState> = showViewPager()
         .map(AppNavegationUiState::Success)

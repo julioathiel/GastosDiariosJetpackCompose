@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.gastosdiariosjetapckcompose.R
+import com.example.gastosdiariosjetapckcompose.commons.CommonsToolbar
 import kotlinx.coroutines.launch
 
 @Composable
@@ -50,7 +51,12 @@ fun ActualizarMaximoFechaScreen(
 
     Scaffold(
         scaffoldState = scafoldState,
-        topBar = { Toolbar() },
+        topBar = {
+            CommonsToolbar(
+                title = stringResource(id = R.string.toolbar_cambio_fecha),
+                colors = MaterialTheme.colorScheme.background
+            )
+        },
         content = { padding ->
             Content(padding, actualizarMaximoFechaViewModel, scafoldState)
         }
@@ -169,7 +175,7 @@ fun Content(
 @Composable
 fun SwitchWithText(
     switchText: String,
-    numberSwitch:Int,
+    numberSwitch: Int,
     selectedSwitchNumber: Int?,
     isActivated: (Boolean) -> Unit
 ) {
@@ -192,10 +198,4 @@ fun SwitchWithText(
     Spacer(modifier = Modifier.size(20.dp))
     HorizontalDivider()
     Spacer(modifier = Modifier.size(20.dp))
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun Toolbar() {
-    TopAppBar(title = { Text(text = stringResource(R.string.toolbar_cambio_fecha)) })
 }

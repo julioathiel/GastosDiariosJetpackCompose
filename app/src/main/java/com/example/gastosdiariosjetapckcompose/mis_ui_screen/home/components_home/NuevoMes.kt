@@ -1,10 +1,11 @@
 package com.example.gastosdiariosjetapckcompose.mis_ui_screen.home.components_home
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,23 +29,21 @@ fun NuevoMes(viewModel: HomeViewModel) {
             viewModel.setShowNuevoMes(false)
         }
     }
-
     if (isShowNuevoMes) {
         Column(
             Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .background(
-                    MaterialTheme.colorScheme.primaryContainer,
-                    shape = RoundedCornerShape(8.dp)
-                ),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .height(30.dp)
+                .padding(horizontal = 20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
+            HorizontalDivider(color = MaterialTheme.colorScheme.primary)
             Text(
                 text = "Nuevo mes", textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.primary
             )
+            HorizontalDivider(color = MaterialTheme.colorScheme.primary)
         }
-
     }
 }
