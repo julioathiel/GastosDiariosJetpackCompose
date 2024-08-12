@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "822995863000",
+    "project_id": "gastos-diarios-22e64",
+    "storage_bucket": "gastos-diarios-22e64.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:822995863000:android:4a08119b91d549befa9ead",
+        "android_client_info": {
+          "package_name": "com.example.gastosdiariosjetapckcompose"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "822995863000-hqkln512h7q26g720c92lvbbpbcjlfpv.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-Jb7iT1OoCD-bseU9qycC6_PIhcKvuVw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "822995863000-hqkln512h7q26g720c92lvbbpbcjlfpv.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
